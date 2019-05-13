@@ -9,7 +9,8 @@ class Message {
 public:
 	enum ActionCode {
 		TEXT,
-		HANDSHAKE
+		HANDSHAKE,
+		IMAGE,
 	};
 	
 public:

@@ -10,17 +10,9 @@
 #include <algorithm>
 #include <functional>
 
-/* ---- Constantes OS name ---- */
-#define OPERATING_SYSTEM_MAC 0
-#define OPERATING_SYSTEM_LINUX 1
-#define OPERATING_SYSTEM_WINDOWS 2
-
 /* ---- Platform specifics ---- */
 // Linux
-#ifdef __linux__
-	/* Os */
-	#define USED_OS OPERATING_SYSTEM_LINUX
-	
+#ifdef __linux__	
 	/* Includes */
 	#include <sys/select.h>
 	#include <sys/socket.h>
@@ -45,10 +37,7 @@
 	#endif
 	
 // Windows	
-#elif _WIN32
-	/* Os */
-	#define USED_OS OPERATING_SYSTEM_WINDOWS
-	
+#elif _WIN32	
 	/* Includes */
 	#include <winsock2.h>
 	#include <ws2tcpip.h>
@@ -62,12 +51,6 @@
 		#define ssize_t int
 	#endif
 
-// Crappy
-#else
-	/* Os */
-	#define USED_OS OPERATING_SYSTEM_MAC
-	
-	// .. nothing will work
 #endif
 
 namespace wlc {
