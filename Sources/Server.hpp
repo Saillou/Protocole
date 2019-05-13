@@ -172,26 +172,26 @@ public:
 	}
 	
 	// Setters
-	void onClientConnect(const std::function<void(const ClientInfo& client)>& cbkConnect) {
-		std::lock_guard<std::mutex> lockCbk(_mutCbk);
-		_cbkConnect = cbkConnect;
-	}
-	void onClientDisconnect(const std::function<void(const ClientInfo& client)>& cbkDisconnect) {
-		std::lock_guard<std::mutex> lockCbk(_mutCbk);
-		_cbkDisconnect = cbkDisconnect;
-	}
-	void onInfo(const std::function<void(const ClientInfo& client, const Message& message)>& cbkInfo) {
-		std::lock_guard<std::mutex> lockCbk(_mutCbk);
-		_cbkInfo = cbkInfo;	
-	}
-	void onData(const std::function<void(const ClientInfo& client, const Message& message)>& ckbData) {
-		std::lock_guard<std::mutex> lockCbk(_mutCbk);
-		_cbkData = ckbData;		
-	}
-	void onError(const std::function<void(const Error& error)>& cbkError) {
-		std::lock_guard<std::mutex> lockCbk(_mutCbk);
-		_cbkError = cbkError;		
-	}
+	// void onClientConnect(const std::function<void(const ClientInfo& client)>& cbkConnect) {
+		// std::lock_guard<std::mutex> lockCbk(_mutCbk);
+		// _cbkConnect = cbkConnect;
+	// }
+	// void onClientDisconnect(const std::function<void(const ClientInfo& client)>& cbkDisconnect) {
+		// std::lock_guard<std::mutex> lockCbk(_mutCbk);
+		// _cbkDisconnect = cbkDisconnect;
+	// }
+	// void onInfo(const std::function<void(const ClientInfo& client, const Message& message)>& cbkInfo) {
+		// std::lock_guard<std::mutex> lockCbk(_mutCbk);
+		// _cbkInfo = cbkInfo;	
+	// }
+	// void onData(const std::function<void(const ClientInfo& client, const Message& message)>& ckbData) {
+		// std::lock_guard<std::mutex> lockCbk(_mutCbk);
+		// _cbkData = ckbData;		
+	// }
+	// void onError(const std::function<void(const Error& error)>& cbkError) {
+		// std::lock_guard<std::mutex> lockCbk(_mutCbk);
+		// _cbkError = cbkError;		
+	// }
 	
 	
 private:	
