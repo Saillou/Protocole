@@ -10,20 +10,7 @@
 #include <algorithm>
 #include <functional>
 
-#ifdef __linux__ 
-	#include <sys/select.h>
-	#include <sys/socket.h>
-	#include <sys/types.h>
-	#include <netinet/in.h>	
-	#include <arpa/inet.h>
-	#include <fcntl.h>
-	
-#elif _WIN32
-	#include <winsock2.h>
-	#include <ws2tcpip.h>
-	
-#endif
-
+#include "WinLinConversion.hpp"
 #include "Timer.hpp"
 #include "Message.hpp"
 
@@ -62,7 +49,7 @@ private:
 		}
 		void disconnect() {	
 			info.connected = false;
-			closesocket(info.id);
+			wlc::closeSocket(info.id);
 		}
 		
 		ClientInfo info;
