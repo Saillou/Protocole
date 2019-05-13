@@ -56,21 +56,21 @@ int main() {
 	// -------- Main loop --------
 	Message bigMessage("Hello world!");
 	
-	// for(Timer timer; Globals::signalStatus != SIGINT; timer.wait(1)) {
-		// // /* ... Do stuff ... */
-		// static int i = 0;
-		// if(Globals::beginSend && i <= 0) {
-			// for(auto& client : server.getClients()) {
-				// server.sendData(client, bigMessage);
-			// }
-			// i++;
-		// }
-	// }
+	for(Timer timer; Globals::signalStatus != SIGINT; timer.wait(1)) {
+		// /* ... Do stuff ... */
+		static int i = 0;
+		if(Globals::beginSend && i <= 0) {
+			for(auto& client : server.getClients()) {
+				server.sendData(client, bigMessage);
+			}
+			i++;
+		}
+	}
 		
-	// // -- End
-	// server.disconnect();
+	// -- End
+	server.disconnect();
 	
-	// std::cout << "Clean exit" << std::endl;
+	std::cout << "Clean exit" << std::endl;
 	std::cout << "Press a key to continue..." << std::endl;
 	return std::cin.get();
 }
