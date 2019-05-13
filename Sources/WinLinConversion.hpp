@@ -28,6 +28,7 @@
 	#include <arpa/inet.h>
 	#include <fcntl.h>
 	#include <errno.h>
+	#include <unistd.h>
 	
 	/* Names */
 	#ifndef SOCKET
