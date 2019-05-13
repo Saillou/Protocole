@@ -1,5 +1,6 @@
 #include <iostream>
 #include <csignal>
+#include <conio.h>
 
 #include "Client.hpp"
 #include "Timer.hpp"
@@ -58,5 +59,6 @@ int main() {
 	client.disconnect();
 	
 	std::cout << "Clean exit" << std::endl;
-	return system("pause");
+	std::cout << "Press a key to continue " << std::endl;
+	return getch();
 }
