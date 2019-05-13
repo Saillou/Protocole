@@ -129,7 +129,7 @@ private:
 	void _recvTcp() {
 		const int BUFFER_SIZE = 2048;
 		char buf[BUFFER_SIZE] = {0};
-		int recv_len = 0;
+		ssize_t recv_len = 0;
 		
 		for(Timer timer; _isAlive; ) {
 			// Receive TCP maybe
@@ -194,7 +194,7 @@ private:
 		sockaddr_in serverAddress;
 		const int BUFFER_SIZE	= 64000;
 		char buf[BUFFER_SIZE]	= {0};
-		int recv_len 	= 0;
+		ssize_t recv_len 	= 0;
 		socklen_t slen(sizeof(serverAddress));
 		
 		for(Timer timer; _isAlive; ) {	

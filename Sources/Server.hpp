@@ -239,7 +239,7 @@ private:
 		// Loop Read 
 		const int BUFFER_SIZE = 2048;
 		char buf[BUFFER_SIZE] = {0};
-		int recv_len = 0;
+		ssize_t recv_len = 0;
 		
 		for(Timer timer; _isConnected; ) {
 			// Receive
@@ -300,7 +300,7 @@ private:
 		const int BUFFER_SIZE = 64000;
 		char buf[BUFFER_SIZE] = {0};
 		sockaddr_in clientAddress;
-		int send_len = 0, recv_len = 0;
+		ssize_t recv_len = 0;
 		socklen_t slen(sizeof(clientAddress));
 		
 		for(Timer timer; _isConnected; ) {

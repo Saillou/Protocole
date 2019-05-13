@@ -56,6 +56,10 @@
 		#define socklen_t int
 	#endif
 	
+	#ifndef ssize_t
+		#define ssize_t int
+	#endif
+	
 #endif
 
 namespace wlc {
