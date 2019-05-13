@@ -26,7 +26,7 @@ int main() {
 	std::signal(SIGINT, sigintHandler);
 	
 	//-- Create server
-	// Server server;
+	Server server;
 	// server.connectAt(Globals::PORT);
 	
 	// if(!server.isConnected())
