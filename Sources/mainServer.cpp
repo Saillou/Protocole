@@ -3,7 +3,7 @@
 #include <atomic>
 
 // #include "Server.hpp"
-// #include "Timer.hpp"
+#include "Timer.hpp"
 #include "Message.hpp"
 
 namespace Globals {
