@@ -78,8 +78,8 @@ public:
 		if(_pHandleTcp && _pHandleTcp->joinable())
 			_pHandleTcp->join();
 
-		closesocket(_udpSock);
-		closesocket(_tcpSock);
+		wlc::closeSocket(_udpSock);
+		wlc::closeSocket(_tcpSock);
 		
 		// After tcp has joined : no client will be accepted, and no clients will be deleted.
 		// Therefore, just wait for the threads to finish and then delete it. (Avoid mutex deadlock)
@@ -89,16 +89,15 @@ public:
 		}
 		_clients.clear();
 		
-		WSACleanup();
+		wlc::uninitSockets();
 	}
 	
 	void connectAt(const int port) {
 		if(_isConnected)
 			return;
 		
-		// Init windows sockets
-		WSADATA wsa;
-		if (WSAStartup(MAKEWORD(2,2), &wsa) != 0)
+		// Init sockets
+		if(!wlc::initSockets())
 			return;
 		
 		// Create server address
