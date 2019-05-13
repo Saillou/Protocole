@@ -1,5 +1,6 @@
 #include <iostream>
 #include <csignal>
+#include<conio.h>
 
 // #include "Server.hpp"
 // #include "Timer.hpp"
@@ -71,5 +72,5 @@ int main() {
 	// server.disconnect();
 	
 	// std::cout << "Clean exit" << std::endl;
-	return system("pause");
+	return getch();
 }
