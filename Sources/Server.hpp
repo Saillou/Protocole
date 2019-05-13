@@ -218,9 +218,9 @@ private:
 				std::lock_guard<std::mutex> lockCbk(_mutClients);		
 				_clients.push_back(ConnectedClient(clientInfo)); // Add to list
 				
-				ConnectedClient& client(_clients.back());																	// Need reference to the new client
-				sendInfo(client.info, Message(Message::HANDSHAKE, "udp?"));											// Ask for its udp address
-				// client.pThread = std::make_shared<std::thread>(&Server::_clientTcp, this, client.info); 	// Start its thread
+				ConnectedClient& client(_clients.back());																				// Need reference to the new client
+				sendInfo(client.info, Message(Message::HANDSHAKE, "udp?"));														// Ask for its udp address
+				client.pThread = std::make_shared<std::thread>(&Server::_clientTcp, this, std::ref(client.info)); 	// Start its thread
 			}
 			else {
 				// Use this time to collect garbage
