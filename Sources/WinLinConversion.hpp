@@ -81,7 +81,7 @@ namespace wlc {
 	}
 	
 	// --- Changing sockets mode ---
-	int setNonBlocking(int idSocket, bool nonBlocking) {
+	int setNonBlocking(SOCKET idSocket, bool nonBlocking) {
 #ifdef __linux__ 
 		// Use the standard POSIX 
 		int oldFlags = fcntl(idSocket, F_GETFL, 0);
