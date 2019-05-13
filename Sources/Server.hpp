@@ -140,18 +140,18 @@ public:
 	// Send message with UDP
 	void sendData(const ClientInfo& client, const Message& msg) const {
 		if(sendto(_udpSock, msg.data(), (int)msg.length(), 0, (sockaddr*) &client.udpAddress, sizeof(client.udpAddress)) != (int)msg.length()) {
-			std::lock_guard<std::mutex> lockCbk(_mutCbk);
-			if(_cbkError) 
-				_cbkError(Error(wlc::getError(), "UDP send Error"));
+			// std::lock_guard<std::mutex> lockCbk(_mutCbk);
+			// if(_cbkError) 
+				// _cbkError(Error(wlc::getError(), "UDP send Error"));
 		}
 	}
 	
 	// Send message with TCP
 	void sendInfo(const ClientInfo& client, const Message& msg) const {
 		if(send(client.id, msg.data(), (int)msg.length(), 0) != (int)msg.length()) {
-			std::lock_guard<std::mutex> lockCbk(_mutCbk);
-			if(_cbkError) 
-				_cbkError(Error(wlc::getError(), "TCP send Error"));
+			// std::lock_guard<std::mutex> lockCbk(_mutCbk);
+			// if(_cbkError) 
+				// _cbkError(Error(wlc::getError(), "TCP send Error"));
 		}
 	}
 	
@@ -255,9 +255,9 @@ private:
 					break;
 				}
 				else {					
-					std::lock_guard<std::mutex> lockCbk(_mutCbk);
-					if(_cbkError) 
-						_cbkError(Error(error, "TCP receive Error"));
+					// std::lock_guard<std::mutex> lockCbk(_mutCbk);
+					// if(_cbkError) 
+						// _cbkError(Error(error, "TCP receive Error"));
 					break;
 				}
 			}
@@ -276,16 +276,16 @@ private:
 				continue;
 			
 			for(const Message& message : MessageManager::readMessages(buf, recv_len)) {
-				std::lock_guard<std::mutex> lockCbk(_mutCbk);
-				if(_cbkInfo) 
-					_cbkInfo(client, message);
+				// std::lock_guard<std::mutex> lockCbk(_mutCbk);
+				// if(_cbkInfo) 
+					// _cbkInfo(client, message);
 			}
 		}
 		
 		// End
-		std::lock_guard<std::mutex> lockCbk(_mutCbk);
-		if(_cbkDisconnect) 
-			_cbkDisconnect(client);	
+		// std::lock_guard<std::mutex> lockCbk(_mutCbk);
+		// if(_cbkDisconnect) 
+			// _cbkDisconnect(client);	
 		
 		std::lock_guard<std::mutex> lockClients(_mutClients);
 		std::vector<ConnectedClient>::iterator itClient = _findClientFromAddress(client.tcpAddress);
@@ -319,9 +319,9 @@ private:
 					break;
 				}
 				else {					
-					std::lock_guard<std::mutex> lockCbk(_mutCbk);
-					if(_cbkError) 
-						_cbkError(Error(error, "UDP receive Error"));
+					// std::lock_guard<std::mutex> lockCbk(_mutCbk);
+					// if(_cbkError) 
+						// _cbkError(Error(error, "UDP receive Error"));
 					
 					timer.wait(100);
 					continue;
@@ -350,20 +350,20 @@ private:
 						
 						sendInfo(itClient->info, Message(Message::HANDSHAKE, "ok."));	
 						
-						std::lock_guard<std::mutex> lockCbk(_mutCbk);
-						if(_cbkConnect) 
-							_cbkConnect(itClient->info);
+						// std::lock_guard<std::mutex> lockCbk(_mutCbk);
+						// if(_cbkConnect) 
+							// _cbkConnect(itClient->info);
 					}
 					else { // Shakehand error
-						std::lock_guard<std::mutex> lockCbk(_mutCbk);
-						if(_cbkError) 
-							_cbkError(Error(Error::BAD_CONNECTION, "Handshake Error"));
+						// std::lock_guard<std::mutex> lockCbk(_mutCbk);
+						// if(_cbkError) 
+							// _cbkError(Error(Error::BAD_CONNECTION, "Handshake Error"));
 					}
 				}
 				else { // Read data message
-					std::lock_guard<std::mutex> lockCbk(_mutCbk);
-					if(_cbkData) 
-						_cbkData(itClient->info, message);
+					// std::lock_guard<std::mutex> lockCbk(_mutCbk);
+					// if(_cbkData) 
+						// _cbkData(itClient->info, message);
 				}
 			}			
 			
@@ -388,12 +388,12 @@ private:
 	sockaddr_in _address;
 	
 	// Callbacks
-	mutable std::mutex _mutCbk;
-	std::function<void(const Error& error)> _cbkError;
-	std::function<void(const ClientInfo& client, const Message& message)> _cbkInfo;
-	std::function<void(const ClientInfo& client, const Message& message)> _cbkData;
-	std::function<void(const ClientInfo& client)> _cbkConnect;
-	std::function<void(const ClientInfo& client)> _cbkDisconnect;
+	// mutable std::mutex _mutCbk;
+	// std::function<void(const Error& error)> _cbkError;
+	// std::function<void(const ClientInfo& client, const Message& message)> _cbkInfo;
+	// std::function<void(const ClientInfo& client, const Message& message)> _cbkData;
+	// std::function<void(const ClientInfo& client)> _cbkConnect;
+	// std::function<void(const ClientInfo& client)> _cbkDisconnect;
 	
 	// Threads
 	std::shared_ptr<std::thread> _pHandleTcp;
