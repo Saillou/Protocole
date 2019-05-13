@@ -203,12 +203,10 @@ private:
 		
 		// Accept new clients
 		ClientInfo clientInfo;
-		int slen(0);
 		
 		// Loop accept() until the server is stopped
 		for(Timer timer; _isConnected; timer.wait(100)) {
-			slen = sizeof(clientInfo.tcpAddress);
-			clientInfo.id 	= accept(_tcpSock, (sockaddr*)&clientInfo.tcpAddress, &slen);
+			wlc::accept(_tcpSock, &clientInfo.tcpAddress);
 			
 			if(clientInfo.id != SOCKET_ERROR) {
 				// Update infos
