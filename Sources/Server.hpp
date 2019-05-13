@@ -133,8 +133,8 @@ public:
 		// Create threads
 		_isConnected = true;
 		
-		// _pRecvUdp 	= std::make_shared<std::thread>(&Server::_recvUdp, this);
-		// _pHandleTcp = std::make_shared<std::thread>(&Server::_handleTcp, this);
+		_pRecvUdp 	= std::make_shared<std::thread>(&Server::_recvUdp, this);
+		_pHandleTcp = std::make_shared<std::thread>(&Server::_handleTcp, this);
 	}
 	
 	// Send message with UDP
@@ -220,7 +220,7 @@ private:
 				
 				ConnectedClient& client(_clients.back());																	// Need reference to the new client
 				sendInfo(client.info, Message(Message::HANDSHAKE, "udp?"));											// Ask for its udp address
-				client.pThread = std::make_shared<std::thread>(&Server::_clientTcp, this, client.info); 	// Start its thread
+				// client.pThread = std::make_shared<std::thread>(&Server::_clientTcp, this, client.info); 	// Start its thread
 			}
 			else {
 				// Use this time to collect garbage
