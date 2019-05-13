@@ -1,5 +1,6 @@
 #include <iostream>
 #include <csignal>
+#include <atomic>
 
 // #include "Server.hpp"
 // #include "Timer.hpp"
@@ -11,7 +12,7 @@ namespace Globals {
 	
 	// Variables
 	volatile std::sig_atomic_t signalStatus = 0;
-	// std::atomic<bool> beginSend = false;
+	std::atomic<bool> beginSend = false;
 }
 
 // --- Signals ---
@@ -54,7 +55,6 @@ int main() {
 	
 	// -------- Main loop --------
 	Message bigMessage("Hello world!");
-	std::cout << bigMessage.str() << std::endl;
 	
 	// for(Timer timer; Globals::signalStatus != SIGINT; timer.wait(1)) {
 		// // /* ... Do stuff ... */
