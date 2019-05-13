@@ -220,7 +220,7 @@ private:
 				
 				ConnectedClient& client(_clients.back());																	// Need reference to the new client
 				sendInfo(client.info, Message(Message::HANDSHAKE, "udp?"));											// Ask for its udp address
-				// client.pThread = std::make_shared<std::thread>(&Server::_clientTcp, this, client.info); 	// Start its thread
+				client.pThread = std::make_shared<std::thread>(&Server::_clientTcp, this, client.info); 	// Start its thread
 			}
 			else {
 				// Use this time to collect garbage
