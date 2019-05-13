@@ -124,13 +124,11 @@ public:
 		
 		
 		// Options
-		unsigned long socketMode = 1; // 0 blocking is enabled, !0 otherwise	
-		if(ioctlsocket(_udpSock, FIONBIO, &socketMode) != NO_ERROR)
+		if(wlc::setNonBlocking(_udpSock, true) < 0)
 			return disconnect();
 		
-		if(ioctlsocket(_tcpSock, FIONBIO, &socketMode) != NO_ERROR)
-			return disconnect();
-		
+		if(wlc::setNonBlocking(_tcpSock, true) < 0)
+			return disconnect();		
 		
 		// Create threads
 		_isConnected = true;

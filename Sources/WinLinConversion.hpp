@@ -27,6 +27,7 @@
 	#include <netinet/in.h>	
 	#include <arpa/inet.h>
 	#include <fcntl.h>
+	#include <errno.h>
 	
 	/* Types */
 	#ifndef SOCKET
@@ -55,6 +56,7 @@ namespace wlc {
 #elif __linux__
 		/* Nothing to do*/
 #endif	
+
 		return true;
 	}
 	
@@ -67,7 +69,36 @@ namespace wlc {
 #endif
 	}
 	
-	// --- Sockets ---
+	// --- Getting errors ---
+	int getError() {
+#ifdef _WIN32 	
+		return WSAGetLastError();
+#elif __linux__
+		/* Nothing to do*/
+#endif
+
+		return 0;
+	}
+	
+	// --- Changing sockets mode ---
+	int setNonBlocking(int idSocket, bool nonBlocking) {
+#ifdef __linux__ 
+		// Use the standard POSIX 
+		int oldFlags = fcntl(idSocket, F_GETFL, 0);
+		int flags = nonBlocking ? oldFlags | O_NONBLOCK : oldFlags & ~O_NONBLOCK;
+		return fcntl(idSocket, F_SETFL, flags);
+	
+#elif _WIN32
+		// Use the WSA 
+		unsigned long ul = nonBlocking ? 1 : 0; // Parameter for FIONBIO
+		return ioctlsocket(idSocket, FIONBIO, &ul);
+#endif
+
+		// No implementation
+		return -1;
+	}
+	
+	// --- Closing sockets ---
 	void closeSocket(SOCKET idSocket) {
 #ifdef _WIN32 
 		closesocket(idSocket);
