@@ -24,9 +24,15 @@
 	
 #endif
 
+#ifdef __linux__
+	#ifndef SOCKET
+		#define SOCKET int
+	#endif
+#endif
+
 namespace wlc {
 	
-void closeSocket(int idSocket) {
+void closeSocket(SOCKET idSocket) {
 #ifdef _WIN32 
 	closesocket(idSocket);
 #elif __linux__
