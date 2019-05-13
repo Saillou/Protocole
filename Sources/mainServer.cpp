@@ -76,5 +76,5 @@ int main() {
 	
 	// std::cout << "Clean exit" << std::endl;
 	std::cout << "Press a key to continue..." << std::endl;
-	return _getch();
+	return getch();
 }
