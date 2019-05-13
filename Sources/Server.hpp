@@ -142,7 +142,7 @@ public:
 		if(sendto(_udpSock, msg.data(), (int)msg.length(), 0, (sockaddr*) &client.udpAddress, sizeof(client.udpAddress)) != (int)msg.length()) {
 			std::lock_guard<std::mutex> lockCbk(_mutCbk);
 			if(_cbkError) 
-				_cbkError(Error(WSAGetLastError(), "UDP send Error"));
+				_cbkError(Error(wlc::getError(), "UDP send Error"));
 		}
 	}
 	
@@ -151,7 +151,7 @@ public:
 		if(send(client.id, msg.data(), (int)msg.length(), 0) != (int)msg.length()) {
 			std::lock_guard<std::mutex> lockCbk(_mutCbk);
 			if(_cbkError) 
-				_cbkError(Error(WSAGetLastError(), "TCP send Error"));
+				_cbkError(Error(wlc::getError(), "TCP send Error"));
 		}
 	}
 	
@@ -246,7 +246,7 @@ private:
 			memset(buf, 0, BUFFER_SIZE);
 			if((recv_len = recv(client.id, buf, BUFFER_SIZE, 0)) == SOCKET_ERROR) {
 				// What kind of error ?
-				int error = WSAGetLastError();
+				int error = wlc::getError();
 				if(error == WSAEWOULDBLOCK) { // Temporarily unavailable
 					timer.wait(100);
 					continue;
@@ -257,7 +257,7 @@ private:
 				else {					
 					std::lock_guard<std::mutex> lockCbk(_mutCbk);
 					if(_cbkError) 
-						_cbkError(Error(WSAGetLastError(), "TCP receive Error"));
+						_cbkError(Error(wlc::getError(), "TCP receive Error"));
 					break;
 				}
 			}
@@ -309,7 +309,7 @@ private:
 			clock_t time = clock();
 			if ((recv_len = recvfrom(_udpSock, buf, BUFFER_SIZE, 0, (sockaddr *) &clientAddress, &slen)) == SOCKET_ERROR) {
 				// What kind of error ?
-				int error = WSAGetLastError();
+				int error = wlc::getError();
 				if(error == WSAEWOULDBLOCK || error == WSAENOTCONN) {// Timeout || Waiting for connection
 					timer.wait(100);
 					continue; 
@@ -320,7 +320,7 @@ private:
 				else {					
 					std::lock_guard<std::mutex> lockCbk(_mutCbk);
 					if(_cbkError) 
-						_cbkError(Error(WSAGetLastError(), "UDP receive Error"));
+						_cbkError(Error(wlc::getError(), "UDP receive Error"));
 					
 					timer.wait(100);
 					continue;

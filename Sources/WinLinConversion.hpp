@@ -29,9 +29,17 @@
 	#include <fcntl.h>
 	#include <errno.h>
 	
-	/* Types */
+	/* Names */
 	#ifndef SOCKET
-		#define SOCKET int
+		#define SOCKET unsigned int
+	#endif
+	
+	#ifndef INVALID_SOCKET
+		#define INVALID_SOCKET -1
+	#endif
+	
+	#ifndef SOCKET_ERROR
+		#define SOCKET_ERROR -1
 	#endif
 	
 #elif _WIN32
@@ -42,7 +50,7 @@
 	#include <winsock2.h>
 	#include <ws2tcpip.h>
 	
-	/* Types */
+	/* Names */
 	
 #endif
 
@@ -74,7 +82,9 @@ namespace wlc {
 #ifdef _WIN32 	
 		return WSAGetLastError();
 #elif __linux__
-		/* Nothing to do*/
+		int error = errno;
+		errno = 0;
+		return error;
 #endif
 
 		return 0;
