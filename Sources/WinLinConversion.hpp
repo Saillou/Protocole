@@ -82,10 +82,10 @@ namespace wlc {
 	SOCKET accept(SOCKET serverTcpSock, sockaddr_in* clientTcpAddress) {
 #ifdef _WIN32 	
 		int slen(sizeof(sockaddr_in));
-		return ::accept(serverTcpSock, (sockaddr*)clientTcpAddress, &slen);
+		return ::accept(serverTcpSock, reinterpret_cast<sockaddr*>(clientTcpAddress), &slen);
 #elif __linux__
 		socklen_t slen(0);
-		return ::accept(serverTcpSock, (sockaddr*)clientTcpAddress, &slen);
+		return ::accept(serverTcpSock, reinterpret_cast<sockaddr*>(clientTcpAddress), &slen);
 #endif		
 
 		return INVALID_SOCKET;
