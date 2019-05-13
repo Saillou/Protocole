@@ -1,6 +1,9 @@
 #include <iostream>
 #include <csignal>
-#include <conio.h>
+
+#ifdef _WIN32
+	#include <conio.h>
+#endif
 
 // #include "Server.hpp"
 // #include "Timer.hpp"
