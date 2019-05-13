@@ -27,30 +27,30 @@ int main() {
 	
 	//-- Create server
 	Server server;
-	// server.connectAt(Globals::PORT);
+	server.connectAt(Globals::PORT);
 	
-	// if(!server.isConnected())
-		// return 1;
+	if(!server.isConnected())
+		return 1;
 	
-	// // -------- Callbacks --------	
-	// server.onClientConnect([&](const Server::ClientInfo& client) {
-		// std::cout << "New client, client_" << client.id << std::endl;
-	// });
-	// server.onClientDisconnect([&](const Server::ClientInfo& client) {
-		// std::cout << "Client quit, client_" << client.id << std::endl;
-	// });
-	// server.onError([&](const Error& error) {
-		// std::cout << "Error : " << error.msg() << std::endl;
-	// });
+	// -------- Callbacks --------	
+	server.onClientConnect([&](const Server::ClientInfo& client) {
+		std::cout << "New client, client_" << client.id << std::endl;
+	});
+	server.onClientDisconnect([&](const Server::ClientInfo& client) {
+		std::cout << "Client quit, client_" << client.id << std::endl;
+	});
+	server.onError([&](const Error& error) {
+		std::cout << "Error : " << error.msg() << std::endl;
+	});
 	
-	// server.onInfo([&](const Server::ClientInfo& client, const Message& message) {
-		// std::cout << "Info received from client_" << client.id << ": [Code:" << message.code() << "] " << message.str() << std::endl;
-		// if(message.str() == "begin")
-			// Globals::beginSend = true;
-	// });
-	// server.onData([&](const Server::ClientInfo& client, const Message& message) {
-		// std::cout << "Data received from client_" << client.id << ": [Code:" << message.code() << "] " << message.str() << std::endl;
-	// });
+	server.onInfo([&](const Server::ClientInfo& client, const Message& message) {
+		std::cout << "Info received from client_" << client.id << ": [Code:" << message.code() << "] " << message.str() << std::endl;
+		if(message.str() == "begin")
+			Globals::beginSend = true;
+	});
+	server.onData([&](const Server::ClientInfo& client, const Message& message) {
+		std::cout << "Data received from client_" << client.id << ": [Code:" << message.code() << "] " << message.str() << std::endl;
+	});
 	
 	
 	// -------- Main loop --------
