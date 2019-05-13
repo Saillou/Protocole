@@ -10,12 +10,13 @@
 #include <algorithm>
 #include <functional>
 
-/* Constantes OS name */
+/* ---- Constantes OS name ---- */
 #define OPERATING_SYSTEM_MAC 0
 #define OPERATING_SYSTEM_LINUX 1
 #define OPERATING_SYSTEM_WINDOWS 2
 
-/* Platform specifics */
+/* ---- Platform specifics ---- */
+// Linux
 #ifdef __linux__
 	/* Os */
 	#define USED_OS OPERATING_SYSTEM_LINUX
@@ -43,6 +44,7 @@
 		#define SOCKET_ERROR -1
 	#endif
 	
+// Windows	
 #elif _WIN32
 	/* Os */
 	#define USED_OS OPERATING_SYSTEM_WINDOWS
@@ -59,7 +61,13 @@
 	#ifndef ssize_t
 		#define ssize_t int
 	#endif
+
+// Crappy
+#else
+	/* Os */
+	#define USED_OS OPERATING_SYSTEM_MAC
 	
+	// .. nothing will work
 #endif
 
 namespace wlc {
@@ -69,8 +77,6 @@ namespace wlc {
 		WSADATA wsa;
 		if (WSAStartup(MAKEWORD(2,2), &wsa) != 0)
 			return false;
-#elif __linux__
-		/* Nothing to do*/
 #endif	
 
 		return true;
@@ -80,8 +86,6 @@ namespace wlc {
 	void uninitSockets() {
 #ifdef _WIN32 	
 		WSACleanup();
-#elif __linux__
-		/* Nothing to do*/
 #endif
 	}
 	
@@ -153,19 +157,17 @@ namespace wlc {
 	
 	// --- Changing sockets mode ---
 	int setNonBlocking(SOCKET idSocket, bool nonBlocking) {
-#ifdef __linux__ 
-		// Use the standard POSIX 
-		int oldFlags = fcntl(idSocket, F_GETFL, 0);
-		int flags = nonBlocking ? oldFlags | O_NONBLOCK : oldFlags & ~O_NONBLOCK;
-		return fcntl(idSocket, F_SETFL, flags);
-	
-#elif _WIN32
+#ifdef _WIN32
 		// Use the WSA 
 		unsigned long ul = nonBlocking ? 1 : 0; // Parameter for FIONBIO
 		return ioctlsocket(idSocket, FIONBIO, &ul);
+#elif __linux__ 
+		// Use the standard POSIX 
+		int oldFlags = fcntl(idSocket, F_GETFL, 0);
+		int flags = nonBlocking ? oldFlags | O_NONBLOCK : oldFlags & ~O_NONBLOCK;
+		return fcntl(idSocket, F_SETFL, flags);	
 #endif
 
-		// No implementation
 		return -1;
 	}
 	
