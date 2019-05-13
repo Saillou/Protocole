@@ -53,7 +53,7 @@ int main() {
 	
 	
 	// -------- Main loop --------
-	Message bigMessage = "Hello world!";
+	Message bigMessage("Hello world!");
 	std::cout << bigMessage.str() << std::endl;
 	
 	// for(Timer timer; Globals::signalStatus != SIGINT; timer.wait(1)) {
