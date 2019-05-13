@@ -84,7 +84,7 @@ namespace wlc {
 		int slen(sizeof(sockaddr_in));
 		return ::accept(serverTcpSock, reinterpret_cast<sockaddr*>(clientTcpAddress), &slen);
 #elif __linux__
-		socklen_t slen(0);
+		socklen_t slen(sizeof(sockaddr_in));
 		return ::accept(serverTcpSock, reinterpret_cast<sockaddr*>(clientTcpAddress), &slen);
 #endif		
 
