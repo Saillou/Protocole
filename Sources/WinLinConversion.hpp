@@ -52,6 +52,9 @@
 	#include <ws2tcpip.h>
 	
 	/* Names */
+	#ifndef socklen_t
+		#define socklen_t int
+	#endif
 	
 #endif
 
@@ -76,19 +79,6 @@ namespace wlc {
 #elif __linux__
 		/* Nothing to do*/
 #endif
-	}
-	
-	// --- Accept TCP connection ---
-	SOCKET accept(SOCKET serverTcpSock, sockaddr_in* clientTcpAddress) {
-#ifdef _WIN32 	
-		int slen(sizeof(sockaddr_in));
-		return ::accept(serverTcpSock, reinterpret_cast<sockaddr*>(clientTcpAddress), &slen);
-#elif __linux__
-		socklen_t slen(sizeof(sockaddr_in));
-		return ::accept(serverTcpSock, reinterpret_cast<sockaddr*>(clientTcpAddress), &slen);
-#endif		
-
-		return INVALID_SOCKET;
 	}
 	
 	// --- Getting errors ---

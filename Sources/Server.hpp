@@ -203,10 +203,12 @@ private:
 		
 		// Accept new clients
 		ClientInfo clientInfo;
+		socklen_t slen(0);
 		
 		// Loop accept() until the server is stopped
 		for(Timer timer; _isConnected; timer.wait(100)) {
-			wlc::accept(_tcpSock, &clientInfo.tcpAddress);
+			slen = sizeof(clientInfo.tcpAddress);
+			clientInfo.id 	= accept(_tcpSock, (sockaddr*)&clientInfo.tcpAddress, &slen);
 			
 			if(clientInfo.id != SOCKET_ERROR) {
 				// Update infos
@@ -298,7 +300,8 @@ private:
 		const int BUFFER_SIZE = 64000;
 		char buf[BUFFER_SIZE] = {0};
 		sockaddr_in clientAddress;
-		int send_len = 0, recv_len = 0, slen = sizeof(clientAddress);
+		int send_len = 0, recv_len = 0;
+		socklen_t slen(sizeof(clientAddress));
 		
 		for(Timer timer; _isConnected; ) {
 			memset(buf, 0, BUFFER_SIZE);

@@ -195,7 +195,7 @@ private:
 		const int BUFFER_SIZE	= 64000;
 		char buf[BUFFER_SIZE]	= {0};
 		int recv_len 	= 0;
-		int slen 		= (int)sizeof(serverAddress);
+		socklen_t slen(sizeof(serverAddress));
 		
 		for(Timer timer; _isAlive; ) {	
 			// UDP - Receive
