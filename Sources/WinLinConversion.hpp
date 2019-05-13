@@ -82,12 +82,65 @@ namespace wlc {
 #ifdef _WIN32 	
 		return WSAGetLastError();
 #elif __linux__
-		int error = errno;
-		errno = 0;
-		return error;
+		return errno;
 #endif
 
 		return 0;
+	}
+	
+	// --- Error Code Translation ---
+	enum ErrorCode {
+		WOULD_BLOCK, 
+		INVALID_ARG, 
+		NOT_CONNECT, 
+		REFUSED_CONNECT, 
+		MSG_SIZE
+	};
+	
+	bool errorIs(const ErrorCode& eCode, const int error) {
+		switch(eCode) {
+		case WOULD_BLOCK:
+#ifdef _WIN32 	
+			return (error == WSAEWOULDBLOCK);
+#elif __linux__	
+			return (error == EWOULDBLOCK);
+#endif
+		break;
+		
+		case INVALID_ARG:
+#ifdef _WIN32 	
+			return (error == WSAEINVAL);
+#elif __linux__		
+			return (error == EINVAL);
+#endif
+		break;
+		
+		case NOT_CONNECT:
+#ifdef _WIN32 	
+			return (error == WSAENOTCONN);
+#elif __linux__		
+			return (error == ENOTCONN);
+#endif
+		break;
+		
+		case REFUSED_CONNECT:
+#ifdef _WIN32 	
+			return (error == WSAECONNRESET);
+#elif __linux__		
+			return (error == ECONNREFUSED);
+#endif
+		break;
+		
+		case MSG_SIZE:
+#ifdef _WIN32 	
+			return (error == WSAEMSGSIZE);
+#elif __linux__		
+			return (error == EMSGSIZE);
+#endif
+		break;
+		
+		}
+		return false;
 	}
 	
 	// --- Changing sockets mode ---

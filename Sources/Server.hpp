@@ -247,17 +247,17 @@ private:
 			if((recv_len = recv(client.id, buf, BUFFER_SIZE, 0)) == SOCKET_ERROR) {
 				// What kind of error ?
 				int error = wlc::getError();
-				if(error == WSAEWOULDBLOCK) { // Temporarily unavailable
+				if(wlc::errorIs(wlc::WOULD_BLOCK, error)) { // Temporarily unavailable
 					timer.wait(100);
 					continue;
 				}
-				else if(error == WSAECONNRESET) { // Forcibly close
+				else if(wlc::errorIs(wlc::REFUSED_CONNECT, error)) { // Forcibly close
 					break;
 				}
 				else {					
 					std::lock_guard<std::mutex> lockCbk(_mutCbk);
 					if(_cbkError) 
-						_cbkError(Error(wlc::getError(), "TCP receive Error"));
+						_cbkError(Error(error, "TCP receive Error"));
 					break;
 				}
 			}
@@ -310,17 +310,17 @@ private:
 			if ((recv_len = recvfrom(_udpSock, buf, BUFFER_SIZE, 0, (sockaddr *) &clientAddress, &slen)) == SOCKET_ERROR) {
 				// What kind of error ?
 				int error = wlc::getError();
-				if(error == WSAEWOULDBLOCK || error == WSAENOTCONN) {// Timeout || Waiting for connection
+				if(wlc::errorIs(wlc::WOULD_BLOCK, error) || wlc::errorIs(wlc::NOT_CONNECT, error)) { // Timeout || Waiting for connection
 					timer.wait(100);
 					continue; 
 				}
-				else if(error == WSAECONNRESET) { // Forcibly close
+				else if(wlc::errorIs(wlc::REFUSED_CONNECT, error)) { // Forcibly close
 					break;
 				}
 				else {					
 					std::lock_guard<std::mutex> lockCbk(_mutCbk);
 					if(_cbkError) 
-						_cbkError(Error(wlc::getError(), "UDP receive Error"));
+						_cbkError(Error(error, "UDP receive Error"));
 					
 					timer.wait(100);
 					continue;

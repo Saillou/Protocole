@@ -138,17 +138,17 @@ private:
 			if((recv_len = recv(_tcpSock, buf, BUFFER_SIZE, 0)) == SOCKET_ERROR) {
 				// What kind of error ?
 				int error = wlc::getError();
-				if(error == WSAEWOULDBLOCK) { // Temporary unavailable
+				if(wlc::errorIs(wlc::WOULD_BLOCK, error)) { // Temporary unavailable
 					timer.wait(100);
 					continue;
 				}
-				else if(error == WSAECONNRESET) { // Server connection forcibly closed
+				else if(wlc::errorIs(wlc::REFUSED_CONNECT, error)) { // Server connection forcibly closed
 					break;
 				}
 				else {
 					std::lock_guard<std::mutex> lockCbk(_mutCbk);
 					if(_cbkError) 
-						_cbkError(Error(wlc::getError(), "TCP receive Error"));
+						_cbkError(Error(error, "TCP receive Error"));
 					break;
 				}
 			}
@@ -156,7 +156,7 @@ private:
 			if(recv_len == 0) {
 				std::lock_guard<std::mutex> lockCbk(_mutCbk);
 				if(_cbkError) 
-					_cbkError(Error(wlc::getError(), "Server disconnected"));
+					_cbkError(Error(wlc::REFUSED_CONNECT, "Server disconnected"));
 				break;
 			}
 			
@@ -192,8 +192,8 @@ private:
 	
 	void _recvUdp() {
 		sockaddr_in serverAddress;
-		const int BUFFER_SIZE = 64000;
-		char buf[BUFFER_SIZE] = {0};
+		const int BUFFER_SIZE	= 64000;
+		char buf[BUFFER_SIZE]	= {0};
 		int recv_len 	= 0;
 		int slen 		= (int)sizeof(serverAddress);
 		
@@ -204,20 +204,20 @@ private:
 			if ((recv_len = recvfrom(_udpSock, buf, BUFFER_SIZE, 0, (sockaddr *)&serverAddress, &slen)) == SOCKET_ERROR) {			
 				// What kind of error ?
 				int error = wlc::getError();
-				if(error == WSAEWOULDBLOCK || error == WSAEINVAL) {
+				if(wlc::errorIs(wlc::WOULD_BLOCK, error) || wlc::errorIs(wlc::INVALID_ARG, error)) {
 					timer.wait(100);
 					continue;
 				}
-				else if(error == WSAECONNRESET) {
+				else if(wlc::errorIs(wlc::REFUSED_CONNECT, error)) { // Forcibly disconnected
 					break;
 				}
-				else if(error == WSAEMSGSIZE) { // Message too big
+				else if(wlc::errorIs(wlc::MSG_SIZE, error)) { // Message too big
 					continue;
 				}
 				else {
 					std::lock_guard<std::mutex> lockCbk(_mutCbk);
 					if(_cbkError) 
-						_cbkError(Error(wlc::getError(), "UDP receive Error"));
+						_cbkError(Error(error, "UDP receive Error"));
 					break;
 				}
 			}
