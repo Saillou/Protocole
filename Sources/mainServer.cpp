@@ -12,7 +12,7 @@ namespace Globals {
 	
 	// Variables
 	volatile std::sig_atomic_t signalStatus = 0;
-	std::atomic<bool> beginSend = false;
+	std::atomic<bool> beginSend = {false};
 }
 
 // --- Signals ---
