@@ -8,10 +8,12 @@
 #include "Timer.hpp"
 
 #ifdef __linux__
-	#define PATH_CAMERA "/dev/video0"
+	#define PATH_CAMERA_0 "/dev/video0"
+	#define PATH_CAMERA_1 "/dev/video1"
 
 #elif _WIN32
-	#define PATH_CAMERA "0"
+	#define PATH_CAMERA_0 "0"
+	#define PATH_CAMERA_1 "1"
 	
 #endif
 
@@ -38,16 +40,28 @@ int main() {
 	server.connectAt(Globals::PORT);
 	
 	DeviceMt device0;
-	device0.open(PATH_CAMERA);
-	
-	// Events
-	device0.onFrame([&](const Gb::Frame& frame){
-		for(auto& client: server.getClients()) {
-			if(client.connected) {
-				server.sendData(client, Message(Message::DEVICE_0, reinterpret_cast<const char*>(frame.start()), frame.length()));
+	if(device0.open(PATH_CAMERA_0)) {
+		// Events
+		device0.onFrame([&](const Gb::Frame& frame){
+			for(auto& client: server.getClients()) {
+				if(client.connected) {
+					server.sendData(client, Message(Message::DEVICE_0, reinterpret_cast<const char*>(frame.start()), frame.length()));
+				}
 			}
-		}
-	});
+		});
+	}
+	
+	DeviceMt device1;
+	if(device1.open(PATH_CAMERA_1)) {
+		// Events
+		device1.onFrame([&](const Gb::Frame& frame){
+			for(auto& client: server.getClients()) {
+				if(client.connected) {
+					server.sendData(client, Message(Message::DEVICE_1, reinterpret_cast<const char*>(frame.start()), frame.length()));
+				}
+			}
+		});
+	}
 	
 	
 	// -------- Main loop --------	
@@ -57,6 +71,7 @@ int main() {
 		
 	// -- End
 	device0.release();
+	device1.release();
 	server.disconnect();
 	
 	std::cout << "Clean exit" << std::endl;

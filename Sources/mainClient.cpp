@@ -19,8 +19,8 @@
 
 namespace Globals {
 	// Constantes
-	// const std::string IP_ADDRESS = "127.0.0.1";
-	const std::string IP_ADDRESS = "192.168.11.24";
+	const std::string IP_ADDRESS = "127.0.0.1";
+	// const std::string IP_ADDRESS = "192.168.11.24";
 	const int PORT = 8888;
 	
 	// Variables
