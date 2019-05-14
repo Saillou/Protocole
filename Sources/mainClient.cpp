@@ -50,7 +50,7 @@ int main() {
 	});
 	
 	client.onData([&](const Message& message) {
-		std::cout << "Data received: [Code:" << message.code() << "] " << message.size() << std::endl;
+		// std::cout << "Data received: [Code:" << message.code() << "] " << message.size() << std::endl;
 		
 		if(message.code() == Message::DEVICE_0 || message.code() == Message::DEVICE_1) {
 			cv::Mat f = cv::imdecode(cv::Mat(1, message.size(), CV_8UC1, (void*)message.content()), cv::IMREAD_COLOR);

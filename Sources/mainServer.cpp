@@ -81,17 +81,17 @@ int main() {
 		});
 	}
 	
-	// DeviceMt device1;
-	// if(device1.open(PATH_CAMERA_1)) {
-		// // Events
-		// device1.onFrame([&](const Gb::Frame& frame){
-			// for(auto& client: server.getClients()) {
-				// if(client.connected) {
-					// server.sendData(client, Message(Message::DEVICE_1, reinterpret_cast<const char*>(frame.start()), frame.length()));
-				// }
-			// }
-		// });
-	// }
+	DeviceMt device1;
+	if(device1.open(PATH_CAMERA_1)) {
+		// Events
+		device1.onFrame([&](const Gb::Frame& frame){
+			for(auto& client: server.getClients()) {
+				if(client.connected) {
+					server.sendData(client, Message(Message::DEVICE_1, reinterpret_cast<const char*>(frame.start()), frame.length()));
+				}
+			}
+		});
+	}
 	
 	
 	// -------- Main loop --------	
@@ -101,7 +101,7 @@ int main() {
 		
 	// -- End
 	device0.release();
-	// device1.release();
+	device1.release();
 	server.disconnect();
 	
 	std::cout << "Clean exit" << std::endl;
