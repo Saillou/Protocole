@@ -15,6 +15,7 @@
 	#include <opencv2/videoio.hpp>	
 	#include <opencv2/highgui.hpp>
 	#include <opencv2/imgproc.hpp>
+	#include <opencv2/imgcodecs.hpp>
 #endif
 
 namespace Globals {
@@ -51,7 +52,8 @@ int main() {
 		// std::cout << "Data received: [Code:" << message.code() << "] " << message.size() << std::endl;
 		
 		if(message.code() == Message::DEVICE_0 || message.code() == Message::DEVICE_1) {
-			cv::Mat f = cv::imdecode(cv::Mat(1, message.size(), CV_8UC1, (void*)message.content()), -1);
+			cv::Mat f = cv::imdecode(cv::Mat(1, message.size(), CV_8UC1, (void*)message.content()), cv::IMREAD_COLOR);
+			
 			if(!f.empty()) {
 				if(message.code() == Message::DEVICE_0)
 					cv::imshow("frame device 0", f);

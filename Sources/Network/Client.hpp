@@ -231,13 +231,13 @@ private:
 				continue;
 			
 			// Get only header (14bytes)
-			if(!buffering && recv_len == 14) {
+			if(recv_len == 14) {
 				Message message(buf, recv_len); // Will only read the header
 				
-				sizeWaited 				= (size_t)message.size();
+				sizeWaited 				= (size_t)message.length();
 				msgSerializedBuffer	= std::vector<char>(buf, buf+14);
 				buffering = true;
-				std::cout << "begin buffering, waiting " << sizeWaited << "bytes" << std::endl;
+
 				continue;
 			}
 			
@@ -255,7 +255,6 @@ private:
 				if(sizeWaited <= msgSerializedBuffer.size()) {
 					Message message(msgSerializedBuffer.data(), msgSerializedBuffer.size());
 					buffering = false;
-					std::cout << "end buffering, received " << msgSerializedBuffer.size() << "bytes" << std::endl;
 					
 					std::lock_guard<std::mutex> lockCbk(_mutCbk);
 					if(_cbkData) 

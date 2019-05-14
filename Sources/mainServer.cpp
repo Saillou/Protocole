@@ -75,7 +75,7 @@ int main() {
 			for(auto& client: server.getClients()) {
 				if(client.connected && clientsOrder[client.id]) {
 					server.sendData(client, Message(Message::DEVICE_0, reinterpret_cast<const char*>(frame.start()), frame.length()));
-					clientsOrder[client.id] = false;
+					// clientsOrder[client.id] = false;
 				}
 			}
 		});
