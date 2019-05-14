@@ -10,7 +10,8 @@ public:
 	enum ActionCode {
 		TEXT,
 		HANDSHAKE,
-		IMAGE,
+		DEVICE_0,
+		DEVICE_1,
 	};
 	
 public:

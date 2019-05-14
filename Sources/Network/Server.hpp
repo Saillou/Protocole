@@ -11,8 +11,8 @@
 #include <functional>
 
 #include "WinLinConversion.hpp"
-#include "Timer.hpp"
 #include "Message.hpp"
+#include "../Timer.hpp"
 
 class Server {
 	// -------------- Nested struct --------------

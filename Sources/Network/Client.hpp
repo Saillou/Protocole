@@ -11,8 +11,8 @@
 #include <functional>
 
 #include "WinLinConversion.hpp"
-#include "Timer.hpp"
 #include "Message.hpp"
+#include "../Timer.hpp"
 
 class Client {
 	// -------------- Main class --------------
@@ -127,7 +127,7 @@ public:
 private:	
 	// Methods in threads
 	void _recvTcp() {
-		const int BUFFER_SIZE = 2048;
+		const int BUFFER_SIZE = 64000;
 		char buf[BUFFER_SIZE] = {0};
 		ssize_t recv_len = 0;
 		

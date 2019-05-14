@@ -2,7 +2,9 @@
 #include <csignal>
 #include <atomic>
 
-#include "SharedDevice.hpp"
+#include "Device/DeviceMt.hpp"
+#include "Network/Server.hpp"
+#include "Network/Message.hpp"
 #include "Timer.hpp"
 
 namespace Globals {
@@ -11,7 +13,6 @@ namespace Globals {
 	
 	// Variables
 	volatile std::sig_atomic_t signalStatus = 0;
-	std::atomic<bool> beginSend = {false};
 }
 
 // --- Signals ---
@@ -24,13 +25,20 @@ int main() {
 	// -- Install signal handler
 	std::signal(SIGINT, sigintHandler);
 	
-	// -- Create a SharedDevice --
-	SharedDevice device;
-	device.open(0);
-	device.run(SharedDevice::EMITTER, "192.168.1.1", 8888);
+	// -- Create --
+	Server server;
+	server.connectAt(Globals::PORT);
 	
-	device.onFrame([&](const Device::Frame& frame){
-		device.show(frame);
+	DeviceMt device0;
+	device0.open("0");
+	
+	// Events
+	device0.onFrame([&](const Gb::Frame& frame){
+		for(auto& client: server.getClients()) {
+			if(client.connected) {
+				server.sendData(client, Message(Message::DEVICE_0, reinterpret_cast<const char*>(frame.start()), frame.length()));
+			}
+		}
 	});
 	
 	
@@ -40,7 +48,8 @@ int main() {
 	}
 		
 	// -- End
-	device.release();
+	device0.release();
+	server.disconnect();
 	
 	std::cout << "Clean exit" << std::endl;
 	std::cout << "Press a key to continue..." << std::endl;

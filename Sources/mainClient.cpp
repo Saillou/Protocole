@@ -1,9 +1,21 @@
 #include <iostream>
 #include <csignal>
 
-#include "Client.hpp"
 #include "Timer.hpp"
-#include "Message.hpp"
+#include "Network/Client.hpp"
+#include "Network/Message.hpp"
+
+// Linux
+#ifdef __linux__
+	// Die
+// Windows	
+#elif _WIN32
+	// Based on Opencv
+	#include <opencv2/core.hpp>	
+	#include <opencv2/videoio.hpp>	
+	#include <opencv2/highgui.hpp>
+	#include <opencv2/imgproc.hpp>
+#endif
 
 namespace Globals {
 	// Constantes
@@ -32,13 +44,21 @@ int main() {
 	// -------- Callbacks --------
 	client.onConnect([&]() {
 		std::cout << "Connection to server success" << std::endl;
-		
-		Message message("begin");
-		client.sendInfo(message);
 	});
 	
 	client.onData([&](const Message& message) {
-		std::cout << "Data received: [Code:" << message.code() << "] " << message.str() << std::endl;
+		// std::cout << "Data received: [Code:" << message.code() << "] " << message.str() << std::endl;
+		if(message.code() == Message::DEVICE_0 || message.code() == Message::DEVICE_1) {
+			cv::Mat f = cv::imdecode(cv::Mat(1, message.size(), CV_8UC1, (void*)message.content()), -1);
+			
+			if(message.code() == Message::DEVICE_0)
+				cv::imshow("frame device 0", f);
+			
+			if(message.code() == Message::DEVICE_1)
+				cv::imshow("frame device 1", f);
+			
+			cv::waitKey(1);
+		}
 	});
 	
 	client.onInfo([&](const Message& message) {
