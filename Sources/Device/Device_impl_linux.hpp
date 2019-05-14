@@ -198,8 +198,8 @@ private:
 		
 		struct v4l2_format fmt = {0};
 		fmt.type 				= V4L2_BUF_TYPE_VIDEO_CAPTURE;
-		fmt.fmt.pix.width 		= 640;
-		fmt.fmt.pix.height 		= 480;
+		fmt.fmt.pix.width 		= 1280;
+		fmt.fmt.pix.height 		= 720;
 		//fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV; // Doesn't work for 2 cameras 640*480. (320*200 is ok)
 		fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
 		fmt.fmt.pix.field 		= V4L2_FIELD_ANY;
