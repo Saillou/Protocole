@@ -19,8 +19,8 @@
 
 namespace Globals {
 	// Constantes
-	// const std::string IP_ADDRESS = "127.0.0.1";
-	const std::string IP_ADDRESS = "192.168.11.24";
+	const std::string IP_ADDRESS = "127.0.0.1";
+	// const std::string IP_ADDRESS = "192.168.11.24";
 	const int PORT = 8888;
 	
 	// Variables
@@ -47,7 +47,7 @@ int main() {
 	});
 	
 	client.onData([&](const Message& message) {
-		// std::cout << "Data received: [Code:" << message.code() << "] " << message.str() << std::endl;
+		std::cout << "Data received: [Code:" << message.code() << "] " << message.size() << "bytes" << std::endl;
 		if(message.code() == Message::DEVICE_0 || message.code() == Message::DEVICE_1) {
 			cv::Mat f = cv::imdecode(cv::Mat(1, message.size(), CV_8UC1, (void*)message.content()), -1);
 			

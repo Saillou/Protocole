@@ -139,10 +139,39 @@ public:
 	
 	// Send message with UDP
 	void sendData(const ClientInfo& client, const Message& msg) const {
-		if(sendto(_udpSock, msg.data(), (int)msg.length(), 0, (sockaddr*) &client.udpAddress, sizeof(client.udpAddress)) != (int)msg.length()) {
-			std::lock_guard<std::mutex> lockCbk(_mutCbk);
-			if(_cbkError) 
-				_cbkError(Error(wlc::getError(), "UDP send Error"));
+		if(msg.length() < 64000) {
+			if(sendto(_udpSock, msg.data(), (int)msg.length(), 0, (sockaddr*) &client.udpAddress, sizeof(client.udpAddress)) != (int)msg.length()) {
+				std::lock_guard<std::mutex> lockCbk(_mutCbk);
+				if(_cbkError) 
+					_cbkError(Error(wlc::getError(), "UDP send Error"));
+			}
+		}
+		else {
+			unsigned int totalLengthSend = msg.length();
+			unsigned int offset = 0;
+			
+			// Send header
+			if(sendto(_udpSock, msg.data(), 14, 0, (sockaddr*) &client.udpAddress, sizeof(client.udpAddress)) != 14) {
+				std::lock_guard<std::mutex> lockCbk(_mutCbk);
+				if(_cbkError) 
+					_cbkError(Error(wlc::getError(), "UDP send Error"));
+				return;
+			}
+			totalLengthSend -= 14;
+			
+			// Send content
+			while(totalLengthSend > 0) {
+				unsigned int sizeToSend = totalLengthSend > 64000 ? 64000 : totalLengthSend;
+				
+				if(sendto(_udpSock, msg.data()+offset, sizeToSend, 0, (sockaddr*) &client.udpAddress, sizeof(client.udpAddress)) != sizeToSend) {
+					std::lock_guard<std::mutex> lockCbk(_mutCbk);
+					if(_cbkError) 
+						_cbkError(Error(wlc::getError(), "UDP send Error"));
+					return;
+				}
+				totalLengthSend -= sizeToSend;
+				offset += sizeToSend;
+			}
 		}
 	}
 	
@@ -272,7 +301,7 @@ private:
 			_mutClients.unlock();
 			
 			// Read messages
-			if(recv_len < 8) // Bad message
+			if(recv_len < 14) // Bad message
 				continue;
 			
 			for(const Message& message : MessageManager::readMessages(buf, recv_len)) {
@@ -297,7 +326,7 @@ private:
 	}
 	
 	void _recvUdp() {
-		const int BUFFER_SIZE = 64000;
+		const int BUFFER_SIZE = 2048;
 		char buf[BUFFER_SIZE] = {0};
 		sockaddr_in clientAddress;
 		ssize_t recv_len = 0;
@@ -331,7 +360,7 @@ private:
 				continue;
 			
 			// Read message
-			if(recv_len < 8) // Bad message
+			if(recv_len < 14) // Bad message
 				continue;
 			Message message(buf, recv_len);
 			

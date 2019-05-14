@@ -38,6 +38,10 @@ public:
 	}
 	
 	// Static methods
+	static uint64_t timestampMs() {
+		return static_cast<uint64_t>(std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch().count());
+	}
+
 	static void wait(int ms) {
 		if(ms > 0)
 			std::this_thread::sleep_for(std::chrono::milliseconds(ms));

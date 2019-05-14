@@ -127,7 +127,7 @@ public:
 private:	
 	// Methods in threads
 	void _recvTcp() {
-		const int BUFFER_SIZE = 64000;
+		const int BUFFER_SIZE = 64000; 
 		char buf[BUFFER_SIZE] = {0};
 		ssize_t recv_len = 0;
 		
@@ -161,7 +161,7 @@ private:
 			}
 			
 			// Read messages
-			if(recv_len < 8) // Bad message
+			if(recv_len < 14) // Bad message
 				continue;
 			
 			for(const Message& message :  MessageManager::readMessages(buf, recv_len)) {
@@ -223,7 +223,7 @@ private:
 			}
 			
 			// Read message
-			if(recv_len < 8) // Bad message
+			if(recv_len < 14) // Bad message
 				continue;
 			
 			Message message(buf, recv_len);

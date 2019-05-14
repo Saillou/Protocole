@@ -35,17 +35,34 @@ int main() {
 	// -- Install signal handler
 	std::signal(SIGINT, sigintHandler);
 	
-	// -- Create --
+	// -- Create server --
 	Server server;
 	server.connectAt(Globals::PORT);
 	
+	server.onClientConnect([&](const Server::ClientInfo& client) {
+		std::cout << "New client, client_" << client.id << std::endl;
+	});
+	server.onClientDisconnect([&](const Server::ClientInfo& client) {
+		std::cout << "Client quit, client_" << client.id << std::endl;
+	});
+	server.onError([&](const Error& error) {
+		std::cout << "Error : " << error.msg() << std::endl;
+	});
+	
+	server.onInfo([&](const Server::ClientInfo& client, const Message& message) {
+		std::cout << "Info received from client_" << client.id << ": [Code:" << message.code() << "] " << message.str() << std::endl;
+	});
+	server.onData([&](const Server::ClientInfo& client, const Message& message) {
+		std::cout << "Data received from client_" << client.id << ": [Code:" << message.code() << "] " << message.str() << std::endl;
+	});
+	
+	// -- Open device --
 	DeviceMt device0;
 	if(device0.open(PATH_CAMERA_0)) {
 		// Events
 		device0.onFrame([&](const Gb::Frame& frame){
 			for(auto& client: server.getClients()) {
 				if(client.connected) {
-					std::cout << frame.length() << std::endl;
 					server.sendData(client, Message(Message::DEVICE_0, reinterpret_cast<const char*>(frame.start()), frame.length()));
 				}
 			}
