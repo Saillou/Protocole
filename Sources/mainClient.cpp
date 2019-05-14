@@ -1,5 +1,6 @@
 #include <iostream>
 #include <csignal>
+#include <fstream>
 
 #include "Timer.hpp"
 #include "Network/Client.hpp"
@@ -49,7 +50,7 @@ int main() {
 	});
 	
 	client.onData([&](const Message& message) {
-		// std::cout << "Data received: [Code:" << message.code() << "] " << message.size() << std::endl;
+		std::cout << "Data received: [Code:" << message.code() << "] " << message.size() << std::endl;
 		
 		if(message.code() == Message::DEVICE_0 || message.code() == Message::DEVICE_1) {
 			cv::Mat f = cv::imdecode(cv::Mat(1, message.size(), CV_8UC1, (void*)message.content()), cv::IMREAD_COLOR);
@@ -62,6 +63,16 @@ int main() {
 					cv::imshow("frame device 1", f);
 				
 				cv::waitKey(1);
+			}
+			else {
+				std::ofstream fileJpg("img.jpg", std::ios::trunc | std::ios::binary);
+				if(fileJpg.is_open()) {
+					fileJpg.write(message.content(), message.size());
+					fileJpg.close();
+				}
+				else {
+					std::cout << "Couldn't write file jpg" << std::endl;
+				}
 			}
 		}
 		

@@ -148,7 +148,6 @@ public:
 		}
 		else {
 			unsigned int totalLengthSend = msg.length();
-			unsigned int offset = 0;
 			
 			// Send header
 			if(sendto(_udpSock, msg.data(), 14, 0, (sockaddr*) &client.udpAddress, sizeof(client.udpAddress)) != 14) {
@@ -160,6 +159,7 @@ public:
 			totalLengthSend -= 14;
 			
 			// Send content
+			unsigned int offset = 14;
 			while(totalLengthSend > 0) {
 				unsigned int sizeToSend = totalLengthSend > 64000 ? 64000 : totalLengthSend;
 				
