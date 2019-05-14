@@ -147,7 +147,7 @@ public:
 			}
 		}
 		else {
-			clock_t beg = clock();
+			uint64_t t0 = Timer::timestampMs();
 			
 			unsigned int totalLengthSend = msg.length();
 			unsigned int offset = 0;
@@ -175,8 +175,8 @@ public:
 				offset += sizeToSend;
 			}
 			
-			clock_t end = clock();
-			std::cout << (end-beg) << "ms for " << totalLengthSend << "bytes" << std::endl;
+			uint64_t t1 = Timer::timestampMs();
+			std::cout << (t0-t1) << "ms for " <<  msg.length() << "bytes" << std::endl;
 		}
 	}
 	
