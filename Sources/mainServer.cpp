@@ -45,6 +45,7 @@ int main() {
 		device0.onFrame([&](const Gb::Frame& frame){
 			for(auto& client: server.getClients()) {
 				if(client.connected) {
+					std::cout << frame.length() << std::endl;
 					server.sendData(client, Message(Message::DEVICE_0, reinterpret_cast<const char*>(frame.start()), frame.length()));
 				}
 			}
