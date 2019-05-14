@@ -11,7 +11,6 @@
 #include <opencv2/imgcodecs.hpp>
 
 
-
 struct Device::_Impl {
 public:
 	// Constructors

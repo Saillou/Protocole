@@ -7,6 +7,14 @@
 #include "Network/Message.hpp"
 #include "Timer.hpp"
 
+#ifdef __linux__
+	#define PATH_CAMERA "/dev/video0"
+
+#elif _WIN32
+	#define PATH_CAMERA "0"
+	
+#endif
+
 namespace Globals {
 	// Constantes
 	const int PORT = 8888;
@@ -30,7 +38,7 @@ int main() {
 	server.connectAt(Globals::PORT);
 	
 	DeviceMt device0;
-	device0.open("0");
+	device0.open(PATH_CAMERA);
 	
 	// Events
 	device0.onFrame([&](const Gb::Frame& frame){
