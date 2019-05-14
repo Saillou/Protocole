@@ -146,12 +146,12 @@ private:
 	// Methods
 	bool _initDevice() {
 		// Format
-		int support_grbg10 = 0;
-
 		struct v4l2_fmtdesc fmtdesc = {0};
 		fmtdesc.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+		
 		char fourcc[5] = {0};
 		char c, e;
+		int support_grbg10 = 0;
 		printf("  FMT : CE Desc\n--------------------\n");
 		while (_xioctl(_fd, VIDIOC_ENUM_FMT, &fmtdesc) == 0) {
 			strncpy(fourcc, (char *)&fmtdesc.pixelformat, 4);
@@ -166,8 +166,8 @@ private:
 		
 		struct v4l2_format fmt = {0};
 		fmt.type 					= V4L2_BUF_TYPE_VIDEO_CAPTURE;
-		fmt.fmt.pix.width 		= 640;
-		fmt.fmt.pix.height 		= 480;
+		fmt.fmt.pix.width 		= 1280;
+		fmt.fmt.pix.height 		= 720;
 		//fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV; // Doesn't work for 2 cameras 640*480. (320*200 is ok)
 		fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
 		fmt.fmt.pix.field 		= V4L2_FIELD_ANY;
