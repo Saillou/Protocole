@@ -237,6 +237,7 @@ private:
 				sizeWaited 				= (size_t)message.size();
 				msgSerializedBuffer	= std::vector<char>(buf, buf+14);
 				buffering = true;
+				std::cout << "begin buffering, waiting " << sizeWaited << "bytes" << std::endl;
 				continue;
 			}
 			
@@ -254,6 +255,7 @@ private:
 				if(sizeWaited <= msgSerializedBuffer.size()) {
 					Message message(msgSerializedBuffer.data(), msgSerializedBuffer.size());
 					buffering = false;
+					std::cout << "end buffering, received " << msgSerializedBuffer.size() << "bytes" << std::endl;
 					
 					std::lock_guard<std::mutex> lockCbk(_mutCbk);
 					if(_cbkData) 

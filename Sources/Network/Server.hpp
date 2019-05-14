@@ -176,7 +176,7 @@ public:
 			}
 			
 			uint64_t t1 = Timer::timestampMs();
-			std::cout << (t0-t1) << "ms for " <<  msg.length() << "bytes" << std::endl;
+			std::cout << (t1-t0) << "ms for " <<  msg.length() << "bytes" << std::endl;
 		}
 	}
 	
