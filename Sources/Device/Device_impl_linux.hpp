@@ -145,38 +145,6 @@ private:
 	
 	// Methods
 	bool _initDevice() {
-		// Capabilities : v4l2, capture, streaming
-		struct v4l2_capability cap = {0};
-		if (_xioctl(_fd, VIDIOC_QUERYCAP, &cap) == -1) {
-			_perror("Querying Capabilities");
-			return false;
-		}
-	 
-		printf( "Driver Caps:\n Driver: \"%s\"\n Card: \"%s\"\n Bus: \"%s\"\n Version: %d.%d\n Capabilities: %08x\n",
-					cap.driver, cap.card, cap.bus_info, (cap.version>>16)&&0xff, (cap.version>>24)&&0xff, cap.capabilities);
-	 
-		if (!(cap.capabilities & V4L2_CAP_VIDEO_CAPTURE)) {
-			_perror("Video capture device");
-			return false;
-		}
-		if (!(cap.capabilities & V4L2_CAP_STREAMING)) {
-			_perror("Video capture streaming");
-			return false;
-		}
-	 
-		// Cropping 
-		struct v4l2_cropcap cropcap = {0};
-		cropcap.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-		if (_xioctl (_fd, VIDIOC_CROPCAP, &cropcap) == -1) {
-			_perror("Querying Cropping Capabilities");
-			return false;
-		}
-	 
-		printf( "Camera Cropping:\n   Bounds: %dx%d+%d+%d\n Default: %dx%d+%d+%d\n Aspect: %d/%d\n",
-				cropcap.bounds.width, cropcap.bounds.height, cropcap.bounds.left, cropcap.bounds.top,
-				cropcap.defrect.width, cropcap.defrect.height, cropcap.defrect.left, cropcap.defrect.top,
-				cropcap.pixelaspect.numerator, cropcap.pixelaspect.denominator);
-	 
 		// Format
 		int support_grbg10 = 0;
 
@@ -198,8 +166,8 @@ private:
 		
 		struct v4l2_format fmt = {0};
 		fmt.type 					= V4L2_BUF_TYPE_VIDEO_CAPTURE;
-		fmt.fmt.pix.width 		= 1280;
-		fmt.fmt.pix.height 		= 720;
+		fmt.fmt.pix.width 		= 640;
+		fmt.fmt.pix.height 		= 480;
 		//fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV; // Doesn't work for 2 cameras 640*480. (320*200 is ok)
 		fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
 		fmt.fmt.pix.field 		= V4L2_FIELD_ANY;
@@ -279,7 +247,7 @@ private:
 		return !frame.empty();
 	}
 	void _perror(const std::string& message) const {
-		std::string mes = " [" + _path + ", " + std::to_string(_fd) + "] " + message + "Errno: " +  std::to_string(errno);
+		std::string mes = " [" + _path + ", " + std::to_string(_fd) + "] " + message + " - Errno: " +  std::to_string(errno);
 		perror(mes.c_str());	
 	}
 	
