@@ -71,11 +71,10 @@ int main() {
 	DeviceMt device0;
 	if(device0.open(PATH_CAMERA_0)) {
 		// Events
-		device0.onFrame([&](const Gb::Frame& frame){
+		device0.onFrame([&](const Gb::Frame& frame) {
 			for(auto& client: server.getClients()) {
 				if(client.connected && clientsOrder[client.id]) {
 					server.sendData(client, Message(Message::DEVICE_0, reinterpret_cast<const char*>(frame.start()), frame.length()));
-					// clientsOrder[client.id] = false;
 				}
 			}
 		});
@@ -86,7 +85,7 @@ int main() {
 		// Events
 		device1.onFrame([&](const Gb::Frame& frame){
 			for(auto& client: server.getClients()) {
-				if(client.connected) {
+				if(client.connected  && clientsOrder[client.id]) {
 					server.sendData(client, Message(Message::DEVICE_1, reinterpret_cast<const char*>(frame.start()), frame.length()));
 				}
 			}
