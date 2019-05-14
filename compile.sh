@@ -1,3 +1,5 @@
 git pull
-g++ -o test -std=gnu++11 Sources/mainServer.cpp -lpthread
-./test
+g++ -o Server -std=gnu++17 Sources/mainServer.cpp Sources/Device/Device.cpp -lpthread
+# g++ -o Client -std=gnu++17 Sources/mainClient.cpp -lpthread
+
+./Server

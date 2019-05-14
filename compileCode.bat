@@ -55,24 +55,24 @@ set LIBRARIES_PATH_DEP=^
 	D:\Dev\Opencv4\build_vc15_x64\install\x64\vc15\lib
  
 set LIBRARIES_NAME_DEP=^
-	ws2_32.lib 
-	REM opencv_core400.lib ^
-	REM opencv_imgproc400.lib ^
-	REM opencv_highgui400.lib ^
-	REM opencv_imgcodecs400.lib ^
-	REM opencv_dnn400.lib ^
-	REM opencv_videoio400.lib
+	ws2_32.lib ^
+	opencv_core400.lib ^
+	opencv_imgproc400.lib ^
+	opencv_highgui400.lib ^
+	opencv_imgcodecs400.lib ^
+	opencv_dnn400.lib ^
+	opencv_videoio400.lib
  
 set COMMAND_LAUNCH=
 
 :: Dependencies externes
-REM echo.
-REM call :needFile D:\Dev\Opencv4\build_vc15_x64\install\x64\vc15\bin opencv_core400.dll !fRelease!
-REM call :needFile D:\Dev\Opencv4\build_vc15_x64\install\x64\vc15\bin opencv_highgui400.dll !fRelease!
-REM call :needFile D:\Dev\Opencv4\build_vc15_x64\install\x64\vc15\bin opencv_imgcodecs400.dll !fRelease!
-REM call :needFile D:\Dev\Opencv4\build_vc15_x64\install\x64\vc15\bin opencv_imgproc400.dll !fRelease!
-REM call :needFile D:\Dev\Opencv4\build_vc15_x64\install\x64\vc15\bin opencv_videoio400.dll !fRelease!
-REM call :needFile D:\Dev\Opencv4\build_vc15_x64\install\x64\vc15\bin opencv_ffmpeg400_64.dll !fRelease!
+echo.
+call :needFile D:\Dev\Opencv4\build_vc15_x64\install\x64\vc15\bin opencv_core400.dll !fRelease!
+call :needFile D:\Dev\Opencv4\build_vc15_x64\install\x64\vc15\bin opencv_highgui400.dll !fRelease!
+call :needFile D:\Dev\Opencv4\build_vc15_x64\install\x64\vc15\bin opencv_imgcodecs400.dll !fRelease!
+call :needFile D:\Dev\Opencv4\build_vc15_x64\install\x64\vc15\bin opencv_imgproc400.dll !fRelease!
+call :needFile D:\Dev\Opencv4\build_vc15_x64\install\x64\vc15\bin opencv_videoio400.dll !fRelease!
+call :needFile D:\Dev\Opencv4\build_vc15_x64\install\x64\vc15\bin opencv_ffmpeg400_64.dll !fRelease!
 echo.
 
 ::--------------------------------------------------------
