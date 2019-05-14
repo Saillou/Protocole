@@ -197,6 +197,10 @@ private:
 		ssize_t recv_len 	= 0;
 		socklen_t slen(sizeof(serverAddress));
 		
+		bool buffering = false;
+		size_t sizeWaited = 0;
+		std::vector<char> msgSerializedBuffer;
+		
 		for(Timer timer; _isAlive; ) {	
 			// UDP - Receive
 			memset(buf, 0, BUFFER_SIZE);
@@ -205,7 +209,7 @@ private:
 				// What kind of error ?
 				int error = wlc::getError();
 				if(wlc::errorIs(wlc::WOULD_BLOCK, error) || wlc::errorIs(wlc::INVALID_ARG, error)) {
-					timer.wait(100);
+					timer.wait(buffering ? 1 : 100);
 					continue;
 				}
 				else if(wlc::errorIs(wlc::REFUSED_CONNECT, error)) { // Forcibly disconnected
@@ -223,14 +227,38 @@ private:
 			}
 			
 			// Read message
-			if(recv_len < 14) // Bad message
+			if(!buffering && recv_len < 14) // Bad message
 				continue;
 			
-			Message message(buf, recv_len);
+			// Get only header (14bytes)
+			if(!buffering && recv_len == 14) {
+				Message message(buf, recv_len); // Will only read the header
+				
+				sizeWaited 				= (size_t)message.size();
+				msgSerializedBuffer	= std::vector<char>(buf, buf+14);
+				buffering = true;
+				continue;
+			}
 			
-			std::lock_guard<std::mutex> lockCbk(_mutCbk);
-			if(_cbkData) 
-				_cbkData(message);
+			if(!buffering) { // Already full message : send it
+				Message message(buf, recv_len);
+				
+				std::lock_guard<std::mutex> lockCbk(_mutCbk);
+				if(_cbkData) 
+					_cbkData(message);
+			}
+			else { // Buffering
+				msgSerializedBuffer.insert(msgSerializedBuffer.end(), buf, buf+recv_len);
+				
+				// Finally get the full message : send it
+				if(sizeWaited <= msgSerializedBuffer.size()) {
+					Message message(msgSerializedBuffer.data(), msgSerializedBuffer.size());
+					
+					std::lock_guard<std::mutex> lockCbk(_mutCbk);
+					if(_cbkData) 
+						_cbkData(message);
+				}
+			}
 		}
 		
 		// Forcibly disconnected

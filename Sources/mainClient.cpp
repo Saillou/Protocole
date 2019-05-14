@@ -44,10 +44,11 @@ int main() {
 	// -------- Callbacks --------
 	client.onConnect([&]() {
 		std::cout << "Connection to server success" << std::endl;
+		// client.sendInfo(Message("Send"));
 	});
 	
 	client.onData([&](const Message& message) {
-		std::cout << "Data received: [Code:" << message.code() << "] " << message.size() << "bytes" << std::endl;
+		// std::cout << "Data received: [Code:" << message.code() << "] " << message.str() << std::endl;
 		if(message.code() == Message::DEVICE_0 || message.code() == Message::DEVICE_1) {
 			cv::Mat f = cv::imdecode(cv::Mat(1, message.size(), CV_8UC1, (void*)message.content()), -1);
 			
@@ -59,6 +60,17 @@ int main() {
 			
 			cv::waitKey(1);
 		}
+		
+		// if(message.code() == Message::TEXT) {
+			// std::cout << "Timestamp: " << message.timestamp() << std::endl;
+			
+			// if(message.size() < 50) {
+				// std::cout << "Message size exepected: " << message.str() << std::endl;
+			// }
+			// else {
+				// std::cout << "Receive: " << message.size()  << "bytes" << std::endl;
+			// }
+		// }
 	});
 	
 	client.onInfo([&](const Message& message) {

@@ -35,7 +35,10 @@ int main() {
 	// -- Install signal handler
 	std::signal(SIGINT, sigintHandler);
 	
-	// -- Create server --
+	// std::vector<char> buffer((int)(1e5), 'A');
+	// Message bigMessage(Message::TEXT, buffer.data(), buffer.size());
+	
+	// -- Create --
 	Server server;
 	server.connectAt(Globals::PORT);
 	
@@ -51,12 +54,15 @@ int main() {
 	
 	server.onInfo([&](const Server::ClientInfo& client, const Message& message) {
 		std::cout << "Info received from client_" << client.id << ": [Code:" << message.code() << "] " << message.str() << std::endl;
+		// if(message.str() == "Send") {
+			// std::cout << "Send: " << bigMessage.size()  << "bytes" << std::endl;
+			// server.sendData(client, bigMessage);
+		// }
 	});
 	server.onData([&](const Server::ClientInfo& client, const Message& message) {
 		std::cout << "Data received from client_" << client.id << ": [Code:" << message.code() << "] " << message.str() << std::endl;
 	});
 	
-	// -- Open device --
 	DeviceMt device0;
 	if(device0.open(PATH_CAMERA_0)) {
 		// Events
