@@ -48,18 +48,18 @@ int main() {
 	});
 	
 	client.onData([&](const Message& message) {
-		// std::cout << "Data received: [Code:" << message.code() << "] " << message.str() << std::endl;
-		if(message.code() == Message::DEVICE_0 || message.code() == Message::DEVICE_1) {
-			cv::Mat f = cv::imdecode(cv::Mat(1, message.size(), CV_8UC1, (void*)message.content()), -1);
+		std::cout << "Data received: [Code:" << message.code() << "] " << message.size() << std::endl;
+		// if(message.code() == Message::DEVICE_0 || message.code() == Message::DEVICE_1) {
+			// cv::Mat f = cv::imdecode(cv::Mat(1, message.size(), CV_8UC1, (void*)message.content()), -1);
 			
-			if(message.code() == Message::DEVICE_0)
-				cv::imshow("frame device 0", f);
+			// if(message.code() == Message::DEVICE_0)
+				// cv::imshow("frame device 0", f);
 			
-			if(message.code() == Message::DEVICE_1)
-				cv::imshow("frame device 1", f);
+			// if(message.code() == Message::DEVICE_1)
+				// cv::imshow("frame device 1", f);
 			
-			cv::waitKey(1);
-		}
+			// cv::waitKey(1);
+		// }
 		
 		// if(message.code() == Message::TEXT) {
 			// std::cout << "Timestamp: " << message.timestamp() << std::endl;
