@@ -147,6 +147,8 @@ public:
 			}
 		}
 		else {
+			clock_t beg = clock();
+			
 			unsigned int totalLengthSend = msg.length();
 			unsigned int offset = 0;
 			
@@ -172,6 +174,9 @@ public:
 				totalLengthSend -= sizeToSend;
 				offset += sizeToSend;
 			}
+			
+			clock_t end = clock();
+			std::cout << (end-beg) << "ms for " << totalLengthSend << "bytes" << std::endl;
 		}
 	}
 	

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <csignal>
 #include <atomic>
+#include <map>
 
 #include "Device/DeviceMt.hpp"
 #include "Network/Server.hpp"
@@ -37,6 +38,7 @@ int main() {
 	
 	// std::vector<char> buffer((int)(1e5), 'A');
 	// Message bigMessage(Message::TEXT, buffer.data(), buffer.size());
+	std::map<SOCKET, bool> clientsOrder;
 	
 	// -- Create --
 	Server server;
@@ -44,9 +46,11 @@ int main() {
 	
 	server.onClientConnect([&](const Server::ClientInfo& client) {
 		std::cout << "New client, client_" << client.id << std::endl;
+		clientsOrder[client.id] = false;
 	});
 	server.onClientDisconnect([&](const Server::ClientInfo& client) {
 		std::cout << "Client quit, client_" << client.id << std::endl;
+		clientsOrder[client.id] = false;
 	});
 	server.onError([&](const Error& error) {
 		std::cout << "Error : " << error.msg() << std::endl;
@@ -54,10 +58,11 @@ int main() {
 	
 	server.onInfo([&](const Server::ClientInfo& client, const Message& message) {
 		std::cout << "Info received from client_" << client.id << ": [Code:" << message.code() << "] " << message.str() << std::endl;
-		// if(message.str() == "Send") {
+		if(message.str() == "Send") {
+			clientsOrder[client.id] = true;
 			// std::cout << "Send: " << bigMessage.size()  << "bytes" << std::endl;
 			// server.sendData(client, bigMessage);
-		// }
+		}
 	});
 	server.onData([&](const Server::ClientInfo& client, const Message& message) {
 		std::cout << "Data received from client_" << client.id << ": [Code:" << message.code() << "] " << message.str() << std::endl;
@@ -68,9 +73,9 @@ int main() {
 		// Events
 		device0.onFrame([&](const Gb::Frame& frame){
 			for(auto& client: server.getClients()) {
-				if(client.connected) {
-					std::cout << "send: " << frame.length()+14 << std::endl;
+				if(client.connected && clientsOrder[client.id]) {
 					server.sendData(client, Message(Message::DEVICE_0, reinterpret_cast<const char*>(frame.start()), frame.length()));
+					clientsOrder[client.id] = false;
 				}
 			}
 		});

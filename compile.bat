@@ -4,9 +4,9 @@ setlocal EnableDelayedExpansion
 cd /d %~dp0
 set fRelease=%~dp0Release\
 set gitPush=1
-set launch=0
+set launch=1
 
-REM call compileCode.bat Server mainServer
+call compileCode.bat Server mainServer
 call compileCode.bat Client mainClient
 
 :: Launch on success
@@ -44,8 +44,8 @@ if %gitPush%==0 (
 
 :: Launch
 if %launch%==1 (
-	REM start "Server" Server.exe
-	REM timeout 1
+	start "Server" Server.exe
+	timeout 1
 	start "Client" Client.exe
 )
 

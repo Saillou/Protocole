@@ -253,10 +253,12 @@ private:
 				// Finally get the full message : send it
 				if(sizeWaited <= msgSerializedBuffer.size()) {
 					Message message(msgSerializedBuffer.data(), msgSerializedBuffer.size());
+					buffering = false;
 					
 					std::lock_guard<std::mutex> lockCbk(_mutCbk);
 					if(_cbkData) 
 						_cbkData(message);
+					
 				}
 			}
 		}
