@@ -50,12 +50,12 @@ public:
 	bool close() {
 		// Stop capture
 		enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-		if(-1 == _xioctl(_fd, VIDIOC_STREAMOFF, &type)) {
+		if(_xioctl(_fd, VIDIOC_STREAMOFF, &type) == -1) {
 			_perror("Stop Capture");
 			return false;
 		}
 		
-		if(-1 == munmap(_buffer.start, _buffer.length)) {
+		if(munmap(_buffer.start, _buffer.length) == -1) {
 			_perror("Memory unmap");
 			return false;
 		}
@@ -98,7 +98,7 @@ public:
 			}
 		
 			// Grab frame
-			if(-1 == _xioctl(_fd, VIDIOC_DQBUF, &buf)) {
+			if(_xioctl(_fd, VIDIOC_DQBUF, &buf) == -1) {
 				if(EAGAIN == errno)
 					continue;
 					
@@ -185,7 +185,7 @@ private:
 		char fourcc[5] = {0};
 		char c, e;
 		printf("  FMT : CE Desc\n--------------------\n");
-		while (0 == _xioctl(_fd, VIDIOC_ENUM_FMT, &fmtdesc)) {
+		while (_xioctl(_fd, VIDIOC_ENUM_FMT, &fmtdesc) == 0) {
 			strncpy(fourcc, (char *)&fmtdesc.pixelformat, 4);
 			if (fmtdesc.pixelformat == V4L2_PIX_FMT_SGRBG10)
 				support_grbg10 = 1;
@@ -197,9 +197,9 @@ private:
 		}
 		
 		struct v4l2_format fmt = {0};
-		fmt.type 				= V4L2_BUF_TYPE_VIDEO_CAPTURE;
-		fmt.fmt.pix.width 		= 1280;
-		fmt.fmt.pix.height 		= 720;
+		fmt.type 					= V4L2_BUF_TYPE_VIDEO_CAPTURE;
+		fmt.fmt.pix.width 		= 640;
+		fmt.fmt.pix.height 		= 480;
 		//fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV; // Doesn't work for 2 cameras 640*480. (320*200 is ok)
 		fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
 		fmt.fmt.pix.field 		= V4L2_FIELD_ANY;
@@ -208,7 +208,7 @@ private:
 		_format.height = fmt.fmt.pix.height;
 		_format.format = fmt.fmt.pix.pixelformat;
 		
-		if (-1 == _xioctl(_fd, VIDIOC_S_FMT, &fmt)) {
+		if (_xioctl(_fd, VIDIOC_S_FMT, &fmt) == -1) {
 			_perror("Setting Pixel Format");
 			return false;
 		}
@@ -267,7 +267,7 @@ private:
 		buf.type 	= V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		buf.memory 	= V4L2_MEMORY_MMAP;
 		
-		if(-1 == _xioctl(_fd, VIDIOC_QBUF, &buf)) {
+		if(_xioctl(_fd, VIDIOC_QBUF, &buf) == -1) {
 			_perror("Query Buffer");
 			return false;
 		}
