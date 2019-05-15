@@ -88,7 +88,7 @@ int main() {
 		// device0.setFormat(320, 240, Device::MJPG);	
 		auto def = device0.get(Device::DefaultSaturation);
 		std::cout << "default: " << def << std::endl;
-		device0.set(Device::Saturation, device0.get(def));
+		device0.set(Device::Saturation, def);
 		
 		// Events		
 		device0.onFrame([&](const Gb::Frame& frame) {
