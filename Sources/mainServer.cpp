@@ -89,6 +89,7 @@ int main() {
 		std::cout << device0.get(Device::Saturation) 	 << std::endl;
 		std::cout << device0.get(Device::MaxSaturation) << std::endl;
 		std::cout << device0.get(Device::MinSaturation) << std::endl;
+		device0.set(Device::Saturation, device0.get(Device::MaxSaturation));
 		
 		// Events		
 		device0.onFrame([&](const Gb::Frame& frame) {
