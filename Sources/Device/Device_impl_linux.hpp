@@ -18,22 +18,6 @@
 #include <unistd.h>
 
 struct Device::_Impl {	
-private:
-	int _isControl(int control, struct v4l2_queryctrl* queryctrl) {
-		int err = 0;
-		queryctrl->id = control;
-		if ((err = ioctl(_fd, VIDIOC_QUERYCTRL, queryctrl)) < 0)
-			printf("ioctl querycontrol error %d \n", errno);
-		else if (queryctrl->flags & V4L2_CTRL_FLAG_DISABLED)
-			printf("control %s disabled \n", (char*) queryctrl->name);
-		else if (queryctrl->flags & V4L2_CTRL_TYPE_BOOLEAN)
-			return 1;
-		else if (queryctrl->type & V4L2_CTRL_TYPE_INTEGER)
-			return 0;
-		else
-			printf("contol %s unsupported  \n", (char*) queryctrl->name);
-		return -1;
-	}
 public:
 	// Constructors
 	explicit _Impl(const std::string& pathVideo) :
@@ -161,9 +145,9 @@ public:
 		switch(code) {
 			case Saturation: 	control.id = V4L2_CID_SATURATION; break;
 			
-			default return false;
+			default: return false;
 		}
-		if (_isControl(control, &queryctrl) < 0) {
+		if (_isControl(control.id, &queryctrl) < 0) {
 			_perror("Setting Control");
 			return false;
 		}
@@ -196,7 +180,7 @@ public:
 			default: return 0.0;
 		}
 		
-		if (_isControl(control, &queryctrl) < 0) {
+		if (_isControl(control.id, &queryctrl) < 0) {
 			_perror("Getting Control");
 			return 0.0;
 		}
@@ -347,6 +331,21 @@ private:
 		return !frame.empty();
 	}
 	
+	int _isControl(int control, struct v4l2_queryctrl* queryctrl) {
+		int err = 0;
+		queryctrl->id = control;
+		if ((err = ioctl(_fd, VIDIOC_QUERYCTRL, queryctrl)) < 0)
+			printf("ioctl querycontrol error %d \n", errno);
+		else if (queryctrl->flags & V4L2_CTRL_FLAG_DISABLED)
+			printf("control %s disabled \n", (char*) queryctrl->name);
+		else if (queryctrl->flags & V4L2_CTRL_TYPE_BOOLEAN)
+			return 1;
+		else if (queryctrl->type & V4L2_CTRL_TYPE_INTEGER)
+			return 0;
+		else
+			printf("contol %s unsupported  \n", (char*) queryctrl->name);
+		return -1;
+	}
 	
 	void _perror(const std::string& message) const {
 		std::string mes = " [" + _path + ", " + std::to_string(_fd) + "] " + message + " - Errno: " +  std::to_string(errno);
