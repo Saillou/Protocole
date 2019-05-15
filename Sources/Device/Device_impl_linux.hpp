@@ -18,6 +18,22 @@
 #include <unistd.h>
 
 struct Device::_Impl {	
+private:
+	int _isControl(int control, struct v4l2_queryctrl* queryctrl) {
+		int err = 0;
+		queryctrl->id = control;
+		if ((err = ioctl(_fd, VIDIOC_QUERYCTRL, queryctrl)) < 0)
+			printf("ioctl querycontrol error %d \n", errno);
+		else if (queryctrl->flags & V4L2_CTRL_FLAG_DISABLED)
+			printf("control %s disabled \n", (char*) queryctrl->name);
+		else if (queryctrl->flags & V4L2_CTRL_TYPE_BOOLEAN)
+			return 1;
+		else if (queryctrl->type & V4L2_CTRL_TYPE_INTEGER)
+			return 0;
+		else
+			printf("contol %s unsupported  \n", (char*) queryctrl->name);
+		return -1;
+	}
 public:
 	// Constructors
 	explicit _Impl(const std::string& pathVideo) :
@@ -177,7 +193,7 @@ public:
 			case MinSaturation: 			control.id = V4L2_CID_SATURATION; break;
 			case DefaultSaturation: 	control.id = V4L2_CID_SATURATION; break;
 			
-			default return 0.0;
+			default: return 0.0;
 		}
 		
 		if (_isControl(control, &queryctrl) < 0) {
@@ -307,7 +323,7 @@ private:
 		if(!_askFrame())
 			return false;
 	 
-		if(_xioctl(_fd, VIDIOC_STREAMON, &buf.type) = -1) {
+		if(_xioctl(_fd, VIDIOC_STREAMON, &buf.type) == -1) {
 			_perror("Start Capture");
 			return false;
 		}
@@ -329,22 +345,6 @@ private:
 	bool _treat(Gb::Frame& frame) {
 		frame = _rawData.clone();
 		return !frame.empty();
-	}
-	
-	int _isControl(int control, struct v4l2_queryctrl* queryctrl) {
-		int err = 0;
-		queryctrl->id = control;
-		if ((err = ioctl(fd, VIDIOC_QUERYCTRL, queryctrl)) < 0)
-			printf("ioctl querycontrol error %d \n", errno);
-		else if (queryctrl->flags & V4L2_CTRL_FLAG_DISABLED)
-			printf("control %s disabled \n", (char*) queryctrl->name);
-		else if (queryctrl->flags & V4L2_CTRL_TYPE_BOOLEAN)
-			return 1;
-		else if (queryctrl->type & V4L2_CTRL_TYPE_INTEGER)
-			return 0;
-		else
-			printf("contol %s unsupported  \n", (char*) queryctrl->name);
-		return -1;
 	}
 	
 	
