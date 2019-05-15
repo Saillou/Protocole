@@ -6,8 +6,8 @@ set fRelease=%~dp0Release\
 set gitPush=1
 set launch=0
 
-call compileCode.bat Server mainServer
-call compileCode.bat Client mainClient
+REM call compileCode.bat Server mainServer
+REM call compileCode.bat Client mainClient
 
 :: Launch on success
 cd /d %fRelease%/
