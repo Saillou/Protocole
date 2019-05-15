@@ -9,11 +9,17 @@
 
 class Message {
 public:
-	enum ActionCode {
+	enum ActionCode {		
 		TEXT 			= (1<<1),
 		HANDSHAKE	= (1<<2),
-		DEVICE_0		= (1<<3),
-		DEVICE_1		= (1<<4),
+		
+		DEVICE_0						= (1<<3),
+		DEVICE_0_FORMAT			= DEVICE_0 | (1<<1),
+		DEVICE_0_PROPERTIES		= DEVICE_0 | (1<<2),
+		
+		DEVICE_1						= (1<<4),
+		DEVICE_1_FORMAT			= DEVICE_0 | (1<<1),
+		DEVICE_1_PROPERTIES		= DEVICE_0 | (1<<2),
 	};
 	
 public:
@@ -189,10 +195,10 @@ public:
 		while(offset + 14 <= limit) {
 			// Read size
 			unsigned int size = 
-				(static_cast<unsigned int>(static_cast<unsigned char>(buffer[4])) << 0)  +
-				(static_cast<unsigned int>(static_cast<unsigned char>(buffer[5])) << 8)  +
-				(static_cast<unsigned int>(static_cast<unsigned char>(buffer[6])) << 16)	+
-				(static_cast<unsigned int>(static_cast<unsigned char>(buffer[7])) << 24);
+				(static_cast<unsigned int>(static_cast<unsigned char>(buffer[offset+4])) << 0)  +
+				(static_cast<unsigned int>(static_cast<unsigned char>(buffer[offset+5])) << 8)  +
+				(static_cast<unsigned int>(static_cast<unsigned char>(buffer[offset+6])) << 16) +
+				(static_cast<unsigned int>(static_cast<unsigned char>(buffer[offset+7])) << 24);
 				
 			// Create message
 			if(offset + size + 14 <= limit)

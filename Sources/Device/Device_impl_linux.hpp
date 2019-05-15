@@ -127,6 +127,27 @@ public:
 		return (grab() && retrieve(frame));
 	}
 	
+	// Setters
+	bool setFormat(int width, int height, PixelFormat formatPix) {
+		struct v4l2_format fmt = {0};
+		fmt.type 					= V4L2_BUF_TYPE_VIDEO_CAPTURE;
+		fmt.fmt.pix.width 		= width;
+		fmt.fmt.pix.height 		= height;
+		fmt.fmt.pix.pixelformat = formatPix == Device::MJPG ? V4L2_PIX_FMT_MJPEG : V4L2_PIX_FMT_YUYV;
+		fmt.fmt.pix.field 		= V4L2_FIELD_ANY;
+		
+		_format.width  = fmt.fmt.pix.width;
+		_format.height = fmt.fmt.pix.height;
+		_format.format = fmt.fmt.pix.pixelformat;
+		
+		if (_xioctl(_fd, VIDIOC_S_FMT, &fmt) == -1) {
+			_perror("Setting Pixel Format");
+			return false;
+		}
+		
+		return true;
+	}
+	
 	// Getters
 	const Gb::Size getSize() const {
 		return Gb::Size(_format.width, _format.height);

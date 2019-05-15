@@ -1,6 +1,6 @@
 #include <iostream>
 #include <csignal>
-#include <fstream>
+#include <deque>
 
 #include "Timer.hpp"
 #include "Network/Client.hpp"
@@ -21,12 +21,20 @@
 
 namespace Globals {
 	// Constantes
-	// const std::string IP_ADDRESS = "127.0.0.1";
-	const std::string IP_ADDRESS = "192.168.11.24";
+	const std::string IP_ADDRESS = "127.0.0.1";
+	// const std::string IP_ADDRESS = "192.168.11.24";
 	const int PORT = 8888;
 	
 	// Variables
 	volatile std::sig_atomic_t signalStatus = 0;
+	
+	// Frames
+	std::mutex mutFrame0;
+	std::deque<cv::Mat> frames0;
+	std::deque<uint64_t> timesFrames0;
+	
+	std::mutex mutFrame1;
+	cv::Mat frame1;
 }
 
 // --- Signals ---
@@ -46,6 +54,8 @@ int main() {
 	// -------- Callbacks --------
 	client.onConnect([&]() {
 		std::cout << "Connection to server success" << std::endl;
+		client.sendInfo(Message(Message::DEVICE_0_FORMAT, "?"));
+		client.sendInfo(Message(Message::DEVICE_0_PROPERTIES, "?"));
 		client.sendInfo(Message("Send"));
 	});
 	
@@ -56,36 +66,28 @@ int main() {
 			cv::Mat f = cv::imdecode(cv::Mat(1, message.size(), CV_8UC1, (void*)message.content()), cv::IMREAD_COLOR);
 			
 			if(!f.empty()) {
-				if(message.code() == Message::DEVICE_0)
-					cv::imshow("frame device 0", f);
-				
-				if(message.code() == Message::DEVICE_1)
-					cv::imshow("frame device 1", f);
-				
-				cv::waitKey(1);
-			}
-			else {
-				std::ofstream fileJpg("img.jpg", std::ios::trunc | std::ios::binary);
-				if(fileJpg.is_open()) {
-					fileJpg.write(message.content(), message.size());
-					fileJpg.close();
+				if(message.code() == Message::DEVICE_0) {
+					Globals::mutFrame0.lock();
+					
+					Globals::frames0.push_back(f.clone());
+					Globals::timesFrames0.push_back(message.timestamp());
+					
+					Globals::mutFrame0.unlock();
+					
+					// cv::imshow("frame device 0", f);
 				}
-				else {
-					std::cout << "Couldn't write file jpg" << std::endl;
-				}
+				
+				// if(message.code() == Message::DEVICE_0) {
+					// Globals::mutFrame1.lock();
+					// f.copyTo(Globals::frame1);
+					// Globals::mutFrame1.unlock();
+
+					// cv::imshow("frame device 1", f);
+				// }
+				
+				// cv::waitKey(1);
 			}
 		}
-		
-		// if(message.code() == Message::TEXT) {
-			// std::cout << "Timestamp: " << message.timestamp() << std::endl;
-			
-			// if(message.size() < 50) {
-				// std::cout << "Message size exepected: " << message.str() << std::endl;
-			// }
-			// else {
-				// std::cout << "Receive: " << message.size()  << "bytes" << std::endl;
-			// }
-		// }
 	});
 	
 	client.onInfo([&](const Message& message) {
@@ -98,8 +100,36 @@ int main() {
 	
 	
 	// -------- Main loop --------
-	for(Timer timer; Globals::signalStatus != SIGINT; timer.wait(100)) {
+	Timer t;
+	cv::Mat frameDisp;
+	int64_t timeToWait = 0;
+	
+	for(; Globals::signalStatus != SIGINT && cv::waitKey(1) != 27; ) {
 		/* ... Do stuff ... */
+		Globals::mutFrame0.lock();
+		
+		if(Globals::frames0.size() > 1) {			
+			if(t.elapsed_mus() >= timeToWait ) {
+				t.beg();
+				
+				// Change frame disp
+				Globals::frames0.front().copyTo(frameDisp);
+				
+				timeToWait = 1000*((int64_t)Globals::timesFrames0[1] - (int64_t)Globals::timesFrames0[0])/2;
+				
+				// Change buffer
+				Globals::frames0.pop_front();
+				Globals::timesFrames0.pop_front();
+			}
+		}		
+		
+		Globals::mutFrame0.unlock();
+		
+		// Display
+		if(!frameDisp.empty()) {
+			cv::imshow("frame device 0", frameDisp);
+		}
+		
 	}
 		
 	// -- End

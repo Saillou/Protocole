@@ -9,7 +9,7 @@
 #include <mutex>
 #include <functional>
 
-// ---------- Implementation ubuntu ----------
+// ----------  Implementation linux ----------
 #ifdef __linux__
 
 	#include "Device_impl_linux.hpp"
@@ -47,6 +47,11 @@ bool Device::retrieve(Gb::Frame& frame) {
 }
 bool Device::read(Gb::Frame& frame) {
 	return _impl->read(frame);
+}
+
+// Setters
+bool Device::setFormat(int width, int height, PixelFormat formatPix) {
+	return _impl->setFormat(width, height, formatPix);
 }
 
 // Getters

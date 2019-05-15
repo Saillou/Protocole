@@ -2,6 +2,7 @@
 #include <csignal>
 #include <atomic>
 #include <map>
+#include <deque>
 
 #include "Device/DeviceMt.hpp"
 #include "Network/Server.hpp"
@@ -9,103 +10,141 @@
 #include "Timer.hpp"
 
 #ifdef __linux__
-    #define PATH_CAMERA_0 "/dev/video0"
-    #define PATH_CAMERA_1 "/dev/video1"
+	#define PATH_CAMERA_0 "/dev/video0"
+	#define PATH_CAMERA_1 "/dev/video1"
 
 #elif _WIN32
-    #define PATH_CAMERA_0 "0"
-    #define PATH_CAMERA_1 "1"
-    
+	#define PATH_CAMERA_0 "0"
+	#define PATH_CAMERA_1 "1"
+	
+	// Based on Opencv
+	#include <opencv2/core.hpp>	
+	#include <opencv2/videoio.hpp>	
+	#include <opencv2/highgui.hpp>
+	#include <opencv2/imgproc.hpp>
+	#include <opencv2/imgcodecs.hpp>
+
 #endif
 
 namespace Globals {
-    // Constantes
-    const int PORT = 8888;
-    
-    // Variables
-    volatile std::sig_atomic_t signalStatus = 0;
+	// Constantes
+	const int PORT = 8888;
+	
+	// Variables
+	volatile std::sig_atomic_t signalStatus = 0;
 }
+
+// --- Structures ---
+struct ClientRequest {
+	bool play;
+};
 
 // --- Signals ---
 static void sigintHandler(int signal) {
-    Globals::signalStatus = signal;
+	Globals::signalStatus = signal;
 }
 
 // --- Entry point ---
 int main() {
-    // -- Install signal handler
-    std::signal(SIGINT, sigintHandler);
-    
-    // std::vector<char> buffer((int)(1e5), 'A');
-    // Message bigMessage(Message::TEXT, buffer.data(), buffer.size());
-    std::map<SOCKET, bool> clientsOrder;
-    
-    // -- Create server --
-    Server server;
-    server.connectAt(Globals::PORT);
-    
-    server.onClientConnect([&](const Server::ClientInfo& client) {
-        std::cout << "New client, client_" << client.id << std::endl;
-        clientsOrder[client.id] = false;
-    });
-    server.onClientDisconnect([&](const Server::ClientInfo& client) {
-        std::cout << "Client quit, client_" << client.id << std::endl;
-        clientsOrder[client.id] = false;
-    });
-    server.onError([&](const Error& error) {
-        std::cout << "Error : " << error.msg() << std::endl;
-    });
-    
-    server.onInfo([&](const Server::ClientInfo& client, const Message& message) {
-        std::cout << "Info received from client_" << client.id << ": [Code:" << message.code() << "] " << message.str() << std::endl;
-        if(message.str() == "Send") {
-            clientsOrder[client.id] = true;
-            // std::cout << "Send: " << bigMessage.size()  << "bytes" << std::endl;
-            // server.sendData(client, bigMessage);
-        }
-    });
-    server.onData([&](const Server::ClientInfo& client, const Message& message) {
-        std::cout << "Data received from client_" << client.id << ": [Code:" << message.code() << "] " << message.str() << std::endl;
-    });
-    
-    
-    // -- Open devices --
-    DeviceMt device0;
-    if(device0.open(PATH_CAMERA_0)) {
-        // Events
-        device0.onFrame([&](const Gb::Frame& frame) {
-            for(auto& client: server.getClients()) {
-                if(client.connected && clientsOrder[client.id]) {
-                    server.sendData(client, Message(Message::DEVICE_0, reinterpret_cast<const char*>(frame.start()), frame.length()));
-                }
-            }
-        });
-    }
-    
-    DeviceMt device1;
-    if(device1.open(PATH_CAMERA_1)) {
-        // Events
-        device1.onFrame([&](const Gb::Frame& frame){
-            for(auto& client: server.getClients()) {
-                if(client.connected  && clientsOrder[client.id]) {
-                    server.sendData(client, Message(Message::DEVICE_1, reinterpret_cast<const char*>(frame.start()), frame.length()));
-                }
-            }
-        });
-    }
-    
-    
-    // -------- Main loop --------  
-    for(Timer timer; Globals::signalStatus != SIGINT; timer.wait(100)) {
-        /* ... Do other stuff ... */
-    }
-        
-    // -- End
-    device0.release();
-    device1.release();
-    server.disconnect();
-    
-    std::cout << "Clean exit" << std::endl;
-    std::cout << "Press a key to continue..." << std::endl;
-    return std::cin.get();
+	// -- Install signal handler
+	std::signal(SIGINT, sigintHandler);
+	
+	// Variables
+	Server server;
+	DeviceMt device0;
+	std::map<SOCKET, ClientRequest> mapRequests;
+	
+	// -- Connect server --
+	server.connectAt(Globals::PORT);
+	
+	server.onClientConnect([&](const Server::ClientInfo& client) {
+		std::cout << "New client, client_" << client.id << std::endl;
+		mapRequests[client.id].play = false;
+	});
+	server.onClientDisconnect([&](const Server::ClientInfo& client) {
+		std::cout << "Client quit, client_" << client.id << std::endl;
+		mapRequests[client.id].play = false;
+	});
+	server.onError([&](const Error& error) {
+		std::cout << "Error : " << error.msg() << std::endl;
+	});
+	
+	server.onInfo([&](const Server::ClientInfo& client, const Message& message) {
+		std::cout << "Info received from client_" << client.id << ": [Code:" << message.code() << "] " << message.str() << std::endl;
+		if(message.str() == "Send")
+			mapRequests[client.id].play = true;
+	});
+	server.onData([&](const Server::ClientInfo& client, const Message& message) {
+		std::cout << "Data received from client_" << client.id << ": [Code:" << message.code() << "] " << message.str() << std::endl;
+	});
+	
+	
+	Timer t;
+	std::deque<double> freq(100, 0.0);
+	
+	// -- Open devices --	
+	if(device0.open(PATH_CAMERA_0)) {
+		// Params
+		device0.setFormat(320, 240, Device::MJPG);	
+		
+		// Events		
+		device0.onFrame([&](const Gb::Frame& frame) {
+			// Show frame and fps
+			t.end();
+			freq.push_back(1000000.0/t.mus());
+			freq.pop_front();
+			t.beg();
+			
+#ifdef _WIN32				
+			cv::Mat f = cv::imdecode(cv::Mat(1, frame.length(), CV_8UC1, (void*)(frame.start())), cv::IMREAD_COLOR);
+			if(!f.empty()) {
+				cv::line(f, cv::Point(0, 100),  cv::Point(100, 100), cv::Scalar(0,0,255), 1, 16);
+				cv::line(f, cv::Point(0, 70),  cv::Point(100, 70), cv::Scalar(255,0,0), 1, 16);
+				for(int i = 1; i < 100; i++) {
+					int y0 = freq[i-1] > 100 ? 100 : (int)(freq[i-1]);
+					int y1 = freq[i] > 100 ? 100 : (int)(freq[i]);
+	
+					cv::line(f, cv::Point(i, 100-y0),  cv::Point(i+1, 100-y1), cv::Scalar(0,255,0), 1, 16);
+				}
+				
+				cv::imshow("frame0", f);
+				cv::waitKey(1);
+			}
+#endif
+		
+			// Send
+			for(auto& client: server.getClients()) {
+				if(client.connected && mapRequests[client.id].play) {
+					server.sendData(client, Message(Message::DEVICE_0, reinterpret_cast<const char*>(frame.start()), frame.length()));
+				}
+			}
+		});
+	}
+	
+	// DeviceMt device1;
+	// if(device1.open(PATH_CAMERA_1)) {
+		// // Events
+		// device1.onFrame([&](const Gb::Frame& frame){
+			// for(auto& client: server.getClients()) {
+				// if(client.connected  && mapRequests[client.id].play) {
+					// server.sendData(client, Message(Message::DEVICE_1, reinterpret_cast<const char*>(frame.start()), frame.length()));
+				// }
+			// }
+		// });
+	// }
+	
+	
+	// -------- Main loop --------  
+	for(Timer timer; Globals::signalStatus != SIGINT; timer.wait(100)) {
+		/* ... Do other stuff ... */
+	}
+		
+	// -- End
+	device0.release();
+	// device1.release();
+	server.disconnect();
+	
+	std::cout << "Clean exit" << std::endl;
+	std::cout << "Press a key to continue..." << std::endl;
+	return std::cin.get();
 }

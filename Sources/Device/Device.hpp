@@ -15,6 +15,11 @@ public:
 		int format;	
 	};
 	
+	// Enums
+	enum PixelFormat {
+		YUYV, MJPG
+	};
+	
 	// Constructors
 	explicit Device(const std::string& pathVideo);
 	~Device();
@@ -26,6 +31,9 @@ public:
 	bool grab();
 	bool retrieve(Gb::Frame& frame);
 	bool read(Gb::Frame& frame);
+	
+	// Setters
+	bool setFormat(int width, int height, PixelFormat formatPix);
 	
 	// Getters
 	const Gb::Size getSize() const;

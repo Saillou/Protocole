@@ -61,6 +61,15 @@ public:
 		return (grab() && retrieve(frame));
 	}
 	
+	// Setters
+	bool setFormat(int width, int height, PixelFormat formatPix) {
+		_cap.set(cv::CAP_PROP_FRAME_WIDTH, width);
+		_cap.set(cv::CAP_PROP_FRAME_HEIGHT, height);
+		
+		return true;
+	}
+	
+	// Getters
 	const Gb::Size getSize() const {
 		return _size;
 	}

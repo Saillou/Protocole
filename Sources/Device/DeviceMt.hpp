@@ -33,6 +33,7 @@ public:
 		deviceName = path;
 		
 		// Start device
+		std::lock_guard<std::mutex> lockDevice(_mutDevice);
 		_pDevice = std::make_shared<Device>(path);
 		if(!_pDevice->open()) {
 			_pDevice.reset();
@@ -70,10 +71,17 @@ public:
 		_pThread.reset();
 		
 		// Close device
+		std::lock_guard<std::mutex> lockDevice(_mutDevice);
 		if(_pDevice)
 			_pDevice->close();
 		
 		_pDevice.reset();
+	}
+	
+	// Setters
+	bool setFormat(int width, int height, Device::PixelFormat formatPix) {
+		std::lock_guard<std::mutex> lockDevice(_mutDevice);
+		return _pDevice->setFormat(width, height, formatPix);
 	}
 	
 	// Getters
@@ -100,6 +108,7 @@ private:
 	// Threaded function : grab and retrieve frame
 	void _pullCapture() {
 		while(_running && _pDevice) {
+			std::lock_guard<std::mutex> lockDevice(_mutDevice);
 			_pDevice->grab(); 				// Will wait until the camera is available
 			
 			_mutFrame.lock();
@@ -115,6 +124,7 @@ private:
 	std::shared_ptr<std::thread> _pThread;
 	
 	std::mutex _mutFrame;
+	std::mutex _mutDevice;
 	std::shared_ptr<Device> _pDevice;
 	
 	std::mutex _mutCbk;
