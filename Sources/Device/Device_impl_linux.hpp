@@ -138,27 +138,70 @@ public:
 		return open();
 	}
 	bool set(Device::Param code, double value) {
+		struct v4l2_control control = {0};
+		struct v4l2_queryctrl queryctrl = {0};
+		
+		// -- Check control		
 		switch(code) {
-			case Saturation:
-				return false;
+			case Saturation: 	control.id = V4L2_CID_SATURATION; break;
+			
+			default return false;
+		}
+		if (_isControl(control, &queryctrl) < 0) {
+			_perror("Setting Control");
+			return false;
 		}
 		
-		return false;
+		if (value > queryctrl.maximum || value < queryctrl.minimum) {
+			_perror("Set value out of range");
+			return false;			
+		}
+		
+		control.value = value;
+		if (_xioctl(_fd, VIDIOC_S_CTRL, &control) == -1) {
+			_perror("Setting Control");
+			return false;
+		}
+		return true;
 	}
 	
 	// Getters
 	double get(Device::Param code) {
+		struct v4l2_control control = {0};
+		struct v4l2_queryctrl queryctrl = {0};
+		
+		// -- Check control		
 		switch(code) {
-			case Saturation:
-				return 0.0;
-			case MaxSaturation:
-				return 0.0;
-			case MinSaturation:
-				return 0.0;
-			case DefaultSaturation:
-				return 0.0;
+			case Saturation: 				control.id = V4L2_CID_SATURATION; break;
+			case MaxSaturation: 			control.id = V4L2_CID_SATURATION; break;
+			case MinSaturation: 			control.id = V4L2_CID_SATURATION; break;
+			case DefaultSaturation: 	control.id = V4L2_CID_SATURATION; break;
+			
+			default return 0.0;
 		}
 		
+		if (_isControl(control, &queryctrl) < 0) {
+			_perror("Getting Control");
+			return 0.0;
+		}
+		
+		switch(code) {
+			case MaxSaturation: 			return queryctrl.maximum;
+			case MinSaturation: 			return queryctrl.minimum;
+			case DefaultSaturation: 	return queryctrl.default_value;
+		}
+		
+		// -- Return value if not a limit	
+		if (_xioctl(_fd, VIDIOC_G_CTRL, &control) == -1) {
+			_perror("Getting Control");
+			return 0.0;
+		}
+		
+		switch(code) {
+			case Saturation: 	return control.value;
+		}		
+		
+		// -- Default
 		return 0.0;
 	}
 	const Gb::Size getSize() const {
@@ -235,7 +278,7 @@ private:
 		req.type 	= V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		req.memory 	= V4L2_MEMORY_MMAP;
 	 
-		if (-1 == _xioctl(_fd, VIDIOC_REQBUFS, &req)) {
+		if (_xioctl(_fd, VIDIOC_REQBUFS, &req) == -1) {
 			_perror("Requesting Buffer");
 			return false;
 		}
@@ -264,7 +307,7 @@ private:
 		if(!_askFrame())
 			return false;
 	 
-		if(-1 == _xioctl(_fd, VIDIOC_STREAMON, &buf.type)) {
+		if(_xioctl(_fd, VIDIOC_STREAMON, &buf.type) = -1) {
 			_perror("Start Capture");
 			return false;
 		}
@@ -287,6 +330,24 @@ private:
 		frame = _rawData.clone();
 		return !frame.empty();
 	}
+	
+	int _isControl(int control, struct v4l2_queryctrl* queryctrl) {
+		int err = 0;
+		queryctrl->id = control;
+		if ((err = ioctl(fd, VIDIOC_QUERYCTRL, queryctrl)) < 0)
+			printf("ioctl querycontrol error %d \n", errno);
+		else if (queryctrl->flags & V4L2_CTRL_FLAG_DISABLED)
+			printf("control %s disabled \n", (char*) queryctrl->name);
+		else if (queryctrl->flags & V4L2_CTRL_TYPE_BOOLEAN)
+			return 1;
+		else if (queryctrl->type & V4L2_CTRL_TYPE_INTEGER)
+			return 0;
+		else
+			printf("contol %s unsupported  \n", (char*) queryctrl->name);
+		return -1;
+	}
+	
+	
 	void _perror(const std::string& message) const {
 		std::string mes = " [" + _path + ", " + std::to_string(_fd) + "] " + message + " - Errno: " +  std::to_string(errno);
 		perror(mes.c_str());	
