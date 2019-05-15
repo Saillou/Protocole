@@ -131,8 +131,8 @@ public:
 	bool setFormat(int width, int height, PixelFormat formatPix) {
 		close();
 		
-		_format.width  = fmt.fmt.pix.width;
-		_format.height = fmt.fmt.pix.height;
+		_format.width  = width;
+		_format.height = height;
 		_format.format = formatPix == Device::MJPG ? V4L2_PIX_FMT_MJPEG : V4L2_PIX_FMT_YUYV;
 		
 		return open();
