@@ -129,23 +129,13 @@ public:
 	
 	// Setters
 	bool setFormat(int width, int height, PixelFormat formatPix) {
-		struct v4l2_format fmt = {0};
-		fmt.type 					= V4L2_BUF_TYPE_VIDEO_CAPTURE;
-		fmt.fmt.pix.width 		= width;
-		fmt.fmt.pix.height 		= height;
-		fmt.fmt.pix.pixelformat = formatPix == Device::MJPG ? V4L2_PIX_FMT_MJPEG : V4L2_PIX_FMT_YUYV;
-		fmt.fmt.pix.field 		= V4L2_FIELD_ANY;
+		close();
 		
 		_format.width  = fmt.fmt.pix.width;
 		_format.height = fmt.fmt.pix.height;
-		_format.format = fmt.fmt.pix.pixelformat;
+		_format.format = formatPix == Device::MJPG ? V4L2_PIX_FMT_MJPEG : V4L2_PIX_FMT_YUYV;
 		
-		if (_xioctl(_fd, VIDIOC_S_FMT, &fmt) == -1) {
-			_perror("Setting Pixel Format");
-			return false;
-		}
-		
-		return true;
+		return open();
 	}
 	
 	// Getters
@@ -186,16 +176,24 @@ private:
 		}
 		
 		struct v4l2_format fmt = {0};
-		fmt.type 					= V4L2_BUF_TYPE_VIDEO_CAPTURE;
-		fmt.fmt.pix.width 		= 1280; 	// 640
-		fmt.fmt.pix.height 		= 720;	// 480
-		//fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV; // Doesn't work for 2 cameras 640*480. (320*200 is ok)
-		fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
-		fmt.fmt.pix.field 		= V4L2_FIELD_ANY;
-		
-		_format.width  = fmt.fmt.pix.width;
-		_format.height = fmt.fmt.pix.height;
-		_format.format = fmt.fmt.pix.pixelformat;
+		if(_format.width == 0 || _format.height == 0) {
+			fmt.type 					= V4L2_BUF_TYPE_VIDEO_CAPTURE;
+			fmt.fmt.pix.width 		= 640;
+			fmt.fmt.pix.height 		= 480;
+			fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
+			fmt.fmt.pix.field 		= V4L2_FIELD_ANY;
+			
+			_format.width  = fmt.fmt.pix.width;
+			_format.height = fmt.fmt.pix.height;
+			_format.format = fmt.fmt.pix.pixelformat;
+		}
+		else {
+			fmt.type 					= V4L2_BUF_TYPE_VIDEO_CAPTURE;
+			fmt.fmt.pix.width 		= _format.width;
+			fmt.fmt.pix.height 		= _format.height;
+			fmt.fmt.pix.pixelformat = _format.format;
+			fmt.fmt.pix.field 		 = V4L2_FIELD_ANY;			
+		}
 		
 		if (_xioctl(_fd, VIDIOC_S_FMT, &fmt) == -1) {
 			_perror("Setting Pixel Format");
