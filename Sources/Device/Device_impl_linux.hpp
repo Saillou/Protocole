@@ -137,8 +137,30 @@ public:
 		
 		return open();
 	}
+	bool set(Device::Param code, double value) {
+		switch(code) {
+			case Saturation:
+				return false;
+		}
+		
+		return false;
+	}
 	
 	// Getters
+	double get(Device::Param code) {
+		switch(code) {
+			case Saturation:
+				return 0.0;
+			case MaxSaturation:
+				return 0.0;
+			case MinSaturation:
+				return 0.0;
+			case DefaultSaturation:
+				return 0.0;
+		}
+		
+		return 0.0;
+	}
 	const Gb::Size getSize() const {
 		return Gb::Size(_format.width, _format.height);
 	}

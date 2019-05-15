@@ -19,6 +19,12 @@ public:
 	enum PixelFormat {
 		YUYV, MJPG
 	};
+	enum Param {
+		Saturation,
+		MinSaturation,
+		MaxSaturation,
+		DefaultSaturation,
+	};
 	
 	// Constructors
 	explicit Device(const std::string& pathVideo);
@@ -34,8 +40,10 @@ public:
 	
 	// Setters
 	bool setFormat(int width, int height, PixelFormat formatPix);
+	bool set(Param code, double value);
 	
 	// Getters
+	double get(Param code);
 	const Gb::Size getSize() const;
 	
 

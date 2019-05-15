@@ -66,10 +66,35 @@ public:
 		_cap.set(cv::CAP_PROP_FRAME_WIDTH, width);
 		_cap.set(cv::CAP_PROP_FRAME_HEIGHT, height);
 		
+		_size = Gb::Size(width, height);
+		
 		return true;
+	}
+	bool set(Device::Param code, double value) {
+		switch(code) {
+			case Saturation:
+				return _cap.set(cv::CAP_PROP_SATURATION, value);
+		}
+		
+		return false;
 	}
 	
 	// Getters
+	double get(Device::Param code) {
+		switch(code) {
+			case Saturation:
+				return _cap.get(cv::CAP_PROP_SATURATION);
+			case MaxSaturation:
+				return 100.0;
+			case MinSaturation:
+				return 0.0;
+			case DefaultSaturation:
+				return 64.0;
+		}
+		
+		return 0.0;
+	}
+	
 	const Gb::Size getSize() const {
 		return _size;
 	}

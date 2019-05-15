@@ -53,8 +53,14 @@ bool Device::read(Gb::Frame& frame) {
 bool Device::setFormat(int width, int height, PixelFormat formatPix) {
 	return _impl->setFormat(width, height, formatPix);
 }
+bool Device::set(Param code, double value) {
+	return _impl->set(code, value);
+}
 
 // Getters
+double Device::get(Param code) {
+	return _impl->get(code);
+}
 const Gb::Size Device::getSize() const {
 	return _impl->getSize();
 }

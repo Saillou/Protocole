@@ -85,7 +85,10 @@ int main() {
 	// -- Open devices --	
 	if(device0.open(PATH_CAMERA_0)) {
 		// Params
-		device0.setFormat(320, 240, Device::MJPG);	
+		// device0.setFormat(320, 240, Device::MJPG);	
+		std::cout << device0.get(Device::Saturation) 	 << std::endl;
+		std::cout << device0.get(Device::MaxSaturation) << std::endl;
+		std::cout << device0.get(Device::MinSaturation) << std::endl;
 		
 		// Events		
 		device0.onFrame([&](const Gb::Frame& frame) {

@@ -80,13 +80,26 @@ public:
 	
 	// Setters
 	bool setFormat(int width, int height, Device::PixelFormat formatPix) {
-		std::lock_guard<std::mutex> lockDevice(_mutDevice);
-		return _pDevice->setFormat(width, height, formatPix);
+		if(_pDevice) {
+			std::lock_guard<std::mutex> lockDevice(_mutDevice);
+			return _pDevice->setFormat(width, height, formatPix);
+		}
+		return false;
+	}
+	bool set(Device::Param code, double value) {
+		if(_pDevice)
+			return _pDevice->set(code, value);
+		return false;
 	}
 	
 	// Getters
 	bool isOpened() {
 		return _running;
+	}
+	double get(Device::Param code) {
+		if(_pDevice)
+			return _pDevice->get(code);
+		return false;
 	}
 	
 protected:
@@ -123,10 +136,10 @@ private:
 	std::atomic<bool> _running = {false};
 	std::shared_ptr<std::thread> _pThread;
 	
-	std::mutex _mutFrame;
-	std::mutex _mutDevice;
-	std::shared_ptr<Device> _pDevice;
+	mutable std::mutex _mutFrame;
+	mutable std::mutex _mutDevice;
+	mutable std::mutex _mutCbk;
 	
-	std::mutex _mutCbk;
+	std::shared_ptr<Device> _pDevice;
 	std::function<void(const Gb::Frame&)> _cbkFrame;
 };
