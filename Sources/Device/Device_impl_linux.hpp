@@ -188,7 +188,7 @@ public:
 		switch(code) {
 			case MaxSaturation: 			return queryctrl.maximum;
 			case MinSaturation: 			return queryctrl.minimum;
-			case DefaultSaturation: 	return queryctrl.default_value;
+			case DefaultSaturation: 	return queryctrl.default_value > queryctrl.maximum ? (queryctrl.maximum+queryctrl.minimum)/2 : queryctrl.default_value;
 		}
 		
 		// -- Return value if not a limit	
