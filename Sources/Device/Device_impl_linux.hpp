@@ -168,7 +168,7 @@ public:
 			else 
 				autoControl.value = V4L2_EXPOSURE_MANUAL;
 
-			if (_xioctl(_fd, VIDIOC_S_CTRL, &control) == -1) {
+			if (_xioctl(_fd, VIDIOC_S_CTRL, &autoControl) == -1) {
 				_perror("Changing Mode");
 				return false;
 			}				
