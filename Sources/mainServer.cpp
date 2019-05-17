@@ -86,12 +86,18 @@ int main() {
 	if(device0.open(PATH_CAMERA_0)) {
 		// Params
 		// device0.setFormat(320, 240, Device::MJPG);	
-		// device0.set(Device::AutoExposure, 1);
-		std::cout << "exposure "<< device0.get(Device::Exposure) << std::endl;
-		std::cout << "Min exp " << device0.get(Device::MinExposure) << std::endl;
-		std::cout << "Max exp "<< device0.get(Device::MaxExposure) << std::endl;
-		std::cout << "Def exp "<< device0.get(Device::DefaultExposure) << std::endl;
-		std::cout << "Auto "<< device0.get(Device::AutoExposure) << std::endl;
+		std::cout << "Saturaton "	<< device0.get(Device::Saturation) 			<< std::endl;
+		std::cout << "Min sata " 	<< device0.get(Device::MinSaturation) 		<< std::endl;
+		std::cout << "Max satu "	<< device0.get(Device::MaxSaturation) 		<< std::endl;
+		std::cout << "Def satu "	<< device0.get(Device::DefaultSaturation) 	<< std::endl;
+		
+		std::cout << "----------" << std::endl;
+		
+		std::cout << "Exposure "	<< device0.get(Device::Exposure) 			<< std::endl;
+		std::cout << "Min exp " 	<< device0.get(Device::MinExposure) 		<< std::endl;
+		std::cout << "Max exp "		<< device0.get(Device::MaxExposure) 		<< std::endl;
+		std::cout << "Def exp "		<< device0.get(Device::DefaultExposure) 	<< std::endl;
+		std::cout << "Auto "			<< device0.get(Device::AutoExposure) 		<< std::endl;
 		
 		// Events		
 		device0.onFrame([&](const Gb::Frame& frame) {
