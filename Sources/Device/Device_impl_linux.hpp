@@ -201,7 +201,7 @@ public:
 			return 0.0;
 		}
 		
-		return control.value
+		return control.value;
 	}
 	const Gb::Size getSize() const {
 		return Gb::Size(_format.width, _format.height);
