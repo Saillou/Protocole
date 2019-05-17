@@ -33,6 +33,10 @@ public:
 		else 
 			_cap.open(_path);
 		
+		if(_format.width > 0 && _format.height > 0) {
+			setFormat(_format.width, _format.height, (PixelFormat)_format.format);
+		}
+		
 		return _cap.isOpened();
 	}
 	bool close() {
@@ -67,8 +71,10 @@ public:
 	
 	// Setters
 	bool setFormat(int width, int height, PixelFormat formatPix) {
-		_cap.set(cv::CAP_PROP_FRAME_WIDTH, width);
-		_cap.set(cv::CAP_PROP_FRAME_HEIGHT, height);
+		if(_cap.isOpened()) {
+			_cap.set(cv::CAP_PROP_FRAME_WIDTH, width);
+			_cap.set(cv::CAP_PROP_FRAME_HEIGHT, height);
+		}
 		
 		_format.width		= width;
 		_format.height	= height;

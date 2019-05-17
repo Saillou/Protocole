@@ -73,8 +73,8 @@ private:
 // -- Globals space --
 namespace Globals {
 	// Constantes
-	const std::string IP_ADDRESS = "127.0.0.1";
-	// const std::string IP_ADDRESS = "192.168.11.24";
+	// const std::string IP_ADDRESS = "127.0.0.1";
+	const std::string IP_ADDRESS = "192.168.11.24";
 	const int PORT = 8888;
 	
 	// Variables
@@ -102,14 +102,9 @@ int main() {
 	// -------- Callbacks --------
 	client.onConnect([&]() {
 		std::cout << "Connection to server success" << std::endl;
-		client.sendInfo(Message(Message::DEVICE_0_FORMAT, "?"));
-		client.sendInfo(Message(Message::DEVICE_0_PROPERTIES, "?"));
-		client.sendInfo(Message("Send"));
 	});
 	
-	client.onData([&](const Message& message) {
-		// std::cout << "Data received: [Code:" << message.code() << "] " << message.size() << std::endl;
-		
+	client.onData([&](const Message& message) {		
 		if(message.code() == Message::DEVICE_0 || message.code() == Message::DEVICE_1) {
 			cv::Mat f = cv::imdecode(cv::Mat(1, message.size(), CV_8UC1, (void*)message.content()), cv::IMREAD_COLOR);
 			
@@ -130,6 +125,10 @@ int main() {
 	
 	client.onInfo([&](const Message& message) {
 		std::cout << "Info received: [Code:" << message.code() << "] " << message.str() << std::endl;
+		if(message.code() == Message::DEVICE_0 && message.str() == "Started.") {
+			client.sendInfo(Message(Message::DEVICE_0_FORMAT, "?"));
+			client.sendInfo(Message("Send"));
+		}
 	});
 	
 	client.onError([&](const Error& error) {

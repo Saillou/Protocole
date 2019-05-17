@@ -2,8 +2,10 @@
 
 #include <cstring>
 #include <string>
+#include <sstream>
 #include <vector>
 #include <iostream>
+#include <map>
 
 #include "../Timer.hpp"
 
@@ -186,24 +188,117 @@ private:
 // --------- MessageFormat ------
 class MessageFormat {
 public:
-	MessageFormat(const std::string& message) {
-		
+	MessageFormat(const std::string& message = "") : _msg(message), _endCached(0) {
+		if(!_msg.empty())
+			_updateCache();
 	}
 	
 	template<typename T>
 	bool add(const std::string& name, T value) {
-		return false;
+		// This name is already inside ?
+		if(_exists(name))
+			return false;
+		
+		// Add
+		std::stringstream ss;
+		ss << name << "=" << value << "|";
+		_msg = _msg + ss.str();
+		
+		_updateCache();
+		return true;
 	}
 	
 	template<typename T>
-	T valueOf(const std::string& name, bool* error = nullptr) const {
-		return T();
+	T valueOf(const std::string& name, bool* pExist = nullptr)	{
+		bool exist = _exists(name);
+		if(pExist != nullptr) 
+			*pExist = exist;
+		
+		std::string paramValue = exist ? _cache[name] : "0";
+		return _return<T>(paramValue);
+	}
+	
+	void clear() {
+		_msg.clear();
+		_cache.clear();
+		_endCached = 0;
+	}
+	
+	const std::string& str() const {
+		return _msg;
 	}
 	
 	
-	
 private:
+	// Methods
+	bool _exists(const std::string& name) {
+		if(_endCached != _msg.size())
+			_updateCache();
+		
+		return _cache.find(name) != _cache.end();
+	}
+	
+	void _updateCache() {
+		size_t total =  _msg.size();
+		
+		std::string propName, propValue;
+		bool value = false;
+		for(size_t i = _endCached; i < total; i++) {
+			const char c = _msg[i];
+			if(c == '=') {
+				value = true;
+				continue;
+			}
+			
+			if(c == '|') {
+				value = false;
+				if(!propValue.empty()) {
+					_cache[propName] = propValue;
+				}
+				propName.clear();
+				propValue.clear();
+				continue;
+			}
+			
+			if(!value)
+				propName += c;
+			else
+				propValue += c;
+		}
+		
+		_endCached = total;
+	}
 
+	template <typename T>
+	T _return(const std::string& param) {
+		T value;
+		_cast(param, value);
+		return value;
+	}
+	
+	template <typename T> 
+	void _cast(const std::string& in, T& out) {
+		int iOut;
+		_cast(in, iOut);
+		out = (T)iOut;
+	}
+	void _cast(const std::string& in, std::string& out) {
+		out = in;
+	}
+	void _cast(const std::string& in, int &out) {
+		out = std::stoi(in);
+	}
+	void _cast(const std::string& in, float &out) {
+		out = std::stof(in);
+	}
+	void _cast(const std::string& in, double &out) {
+		out = std::stod(in);
+	}
+
+	// Members
+	std::string _msg;
+	size_t _endCached;	
+	std::map<std::string, std::string> _cache;
 };
 
 // --------- Manager ------------

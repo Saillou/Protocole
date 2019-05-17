@@ -59,6 +59,8 @@ int main() {
 	
 	server.onClientConnect([&](const Server::ClientInfo& client) {
 		std::cout << "New client, client_" << client.id << std::endl;
+		
+		server.sendInfo(client, Message(Message::DEVICE_0, device0.isOpened() ? "Started." : "Not Started."));
 		mapRequests[client.id].play = false;
 	});
 	server.onClientDisconnect([&](const Server::ClientInfo& client) {
@@ -80,12 +82,18 @@ int main() {
 				// --- get ---
 				if(msg == "?") {
 					if(message.code() == Message::DEVICE_0_FORMAT) {
-						// device0.getFormat();
+						Device::FrameFormat fmt = device0.getFormat();
+						
+						MessageFormat command;
+						command.add("width", fmt.width);
+						command.add("height", fmt.height);
+						command.add("pixel", fmt.format);
+						server.sendInfo(client, Message(Message::DEVICE_0_FORMAT, command.str()));
 					}
 					if(message.code() == Message::DEVICE_0_PROPERTIES) {
-						// device0.get(/* .. */);
-						// device0.get(/* .. */);
-						// device0.get(/* .. */);
+						MessageFormat command;
+						command.add("saturation", device0.get(Device::Saturation));
+						server.sendInfo(client, Message(Message::DEVICE_0_FORMAT, command.str()));
 					}
 				}
 				else {
@@ -131,7 +139,14 @@ int main() {
 	// -- Open devices --	
 	if(device0.open(PATH_CAMERA_0)) {
 		// Params
-		device0.setFormat(320, 240, Device::MJPG);	
+		device0.setFormat(1280, 720, Device::MJPG);	
+		// device0.setFormat(320, 240, Device::MJPG);	
+		
+		for(auto& client: server.getClients()) {
+			if(client.connected) {
+				server.sendInfo(client, Message(Message::DEVICE_0, "Started."));
+			}
+		}
 		
 		// Events		
 		device0.onFrame([&](const Gb::Frame& frame) {
@@ -182,7 +197,7 @@ int main() {
 	
 	// -------- Main loop --------  
 	for(Timer timer; Globals::signalStatus != SIGINT; timer.wait(100)) {
-		/* ... Do other stuff ... */
+		// ... Do other stuff ...
 	}
 		
 	// -- End
@@ -194,3 +209,4 @@ int main() {
 	std::cout << "Press a key to continue..." << std::endl;
 	return std::cin.get();
 }
+
