@@ -141,10 +141,12 @@ public:
 		struct v4l2_control control = {0};
 		struct v4l2_queryctrl queryctrl = {0};
 		
-		// -- Check control		
+		// -- Check control	
+		// Id
 		switch(code) {
 			case Saturation: 		control.id = V4L2_CID_SATURATION; 				break;
-			case Exposure: 		control.id = code & Automatic ? V4L2_CID_EXPOSURE_AUTO : V4L2_CID_EXPOSURE_ABSOLUTE; 	break;
+			case Exposure: 		control.id = V4L2_CID_EXPOSURE_ABSOLUTE; 	break;
+			case AutoExposure: 	control.id = V4L2_CID_EXPOSURE_AUTO; 			break;
 			
 			default: return false;
 		}
@@ -153,6 +155,7 @@ public:
 			return false;
 		}
 		
+		// Value
 		if(code == AutoExposure)
 			control.value = value != 0 ? V4L2_EXPOSURE_AUTO : V4L2_EXPOSURE_MANUAL;
 		else
