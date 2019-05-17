@@ -96,8 +96,8 @@ int main() {
 		
 		std::cout << "----------" << std::endl;
 		
-		device0.set(Device::AutoExposure, 0);
-		device0.set(Device::Exposure, 777);
+		device0.set(Device::Exposure, 333);
+		// device0.set(Device::AutoExposure, 0);
 		
 		std::cout << "Exposure "	<< device0.get(Device::Exposure) 			<< std::endl;
 		std::cout << "Min exp " 	<< device0.get(Device::MinExposure) 		<< std::endl;
