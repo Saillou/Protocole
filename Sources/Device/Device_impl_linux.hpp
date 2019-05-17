@@ -153,33 +153,29 @@ public:
 			return false;
 		}
 		
-		if (value > queryctrl.maximum || value < queryctrl.minimum) {
+		if(code == AutoExposure)
+			control.value = value != 0 ? V4L2_EXPOSURE_AUTO : V4L2_EXPOSURE_MANUAL;
+		else
+			control.value = value;
+		
+		if (control.value > queryctrl.maximum || control.value < queryctrl.minimum) {
 			_perror("Set value out of range");
 			return false;			
 		}
 		
 		// Need change mode ?
-		if(code & Exposure) {
+		if((code & Exposure) && !(code & Automatic)) {
 			struct v4l2_control autoControl = {0};
-			autoControl.id = V4L2_CID_EXPOSURE_AUTO;
-			
-			if((code & Automatic) && value != 0)
-				autoControl.value = V4L2_EXPOSURE_AUTO;
-			else 
-				autoControl.value = V4L2_EXPOSURE_MANUAL;
+			autoControl.id 	 = V4L2_CID_EXPOSURE_AUTO;
+			autoControl.value = V4L2_EXPOSURE_MANUAL;
 
 			if (_xioctl(_fd, VIDIOC_S_CTRL, &autoControl) == -1) {
 				_perror("Changing Mode");
 				return false;
 			}	
-			
-			// No need for more
-			if(code & Automatic)
-				return true;
 		}
 		
 		// Change value
-		control.value = value;
 		if (_xioctl(_fd, VIDIOC_S_CTRL, &control) == -1) {
 			_perror("Setting Control");
 			return false;
@@ -222,7 +218,7 @@ public:
 		
 		// Special case
 		if(code == AutoExposure)
-			return control.value != 0 ? 1 : 0;
+			return control.value == V4L2_EXPOSURE_MANUAL ? 0 : 1;
 		
 		return control.value;
 	}
