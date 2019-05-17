@@ -96,6 +96,8 @@ int main() {
 		
 		std::cout << "----------" << std::endl;
 		
+		device0.set(Device::Exposure, 666);		
+		
 		std::cout << "Exposure "	<< device0.get(Device::Exposure) 			<< std::endl;
 		std::cout << "Min exp " 	<< device0.get(Device::MinExposure) 		<< std::endl;
 		std::cout << "Max exp "		<< device0.get(Device::MaxExposure) 		<< std::endl;
