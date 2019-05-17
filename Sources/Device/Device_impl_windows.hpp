@@ -70,10 +70,14 @@ public:
 		
 		return true;
 	}
-	bool set(Device::Param code, double value) {
+	bool set(Device::Param code, double value) {		
 		switch(code) {
 			case Saturation:
 				return _cap.set(cv::CAP_PROP_SATURATION, value);
+			case Exposure:
+				return _cap.set(cv::CAP_PROP_EXPOSURE, value);
+			case AutoExposure:
+				return _cap.set(cv::CAP_PROP_AUTO_EXPOSURE, value != 0 ? 1 : 0);
 		}
 		
 		return false;
@@ -82,6 +86,7 @@ public:
 	// Getters
 	double get(Device::Param code) {
 		switch(code) {
+			// Saturation
 			case Saturation:
 				return _cap.get(cv::CAP_PROP_SATURATION);
 			case MaxSaturation:
@@ -90,6 +95,20 @@ public:
 				return 0.0;
 			case DefaultSaturation:
 				return 64.0;
+				
+			// Exposure
+			case Exposure:
+				return _cap.get(cv::CAP_PROP_EXPOSURE);
+			case MaxExposure:
+				return 0.0;
+			case MinExposure:
+				return -12.0;
+			case DefaultExposure:
+				return -6.0;
+				
+			// Auto
+			case AutoExposure:
+				return _cap.get(cv::CAP_PROP_AUTO_EXPOSURE);
 		}
 		
 		return 0.0;

@@ -143,7 +143,8 @@ public:
 		
 		// -- Check control		
 		switch(code) {
-			case Saturation: 	control.id = V4L2_CID_SATURATION; break;
+			case Saturation: 		control.id = V4L2_CID_SATURATION; 	break;
+			case Exposure: 		control.id = V4L2_CID_EXPOSURE; 	break;
 			
 			default: return false;
 		}
@@ -170,26 +171,29 @@ public:
 		struct v4l2_control control = {0};
 		struct v4l2_queryctrl queryctrl = {0};
 		
-		// -- Check control		
-		switch(code) {
-			case Saturation: 				control.id = V4L2_CID_SATURATION; break;
-			case MaxSaturation: 			control.id = V4L2_CID_SATURATION; break;
-			case MinSaturation: 			control.id = V4L2_CID_SATURATION; break;
-			case DefaultSaturation: 	control.id = V4L2_CID_SATURATION; break;
-			
-			default: return 0.0;
-		}
+		// Define id
+		if(code & Saturation)
+			control.id = V4L2_CID_SATURATION;
+		else if(code & Exposure)
+			control.id = V4L2_CID_EXPOSURE;
+		else 
+			return 0.0;
 		
+		// Check control
 		if (_isControl(control.id, &queryctrl) < 0) {
 			_perror("Getting Control");
 			return 0.0;
 		}
 		
-		switch(code) {
-			case MaxSaturation: 			return queryctrl.maximum;
-			case MinSaturation: 			return queryctrl.minimum;
-			case DefaultSaturation: 	return queryctrl.default_value > queryctrl.maximum ? (queryctrl.maximum+queryctrl.minimum)/2 : queryctrl.default_value;
-		}
+		// Return value if asked about a limit
+		if(code & Minimum)
+			return queryctrl.minimum;
+		else if(code & Maximum)
+			return queryctrl.maximum;
+		else if(code & Default)
+			return queryctrl.default_value > queryctrl.maximum ? (queryctrl.maximum+queryctrl.minimum)/2 : queryctrl.default_value;
+		else if(code & Automatic)
+			return 0.0;
 		
 		// -- Return value if not a limit	
 		if (_xioctl(_fd, VIDIOC_G_CTRL, &control) == -1) {
@@ -197,12 +201,7 @@ public:
 			return 0.0;
 		}
 		
-		switch(code) {
-			case Saturation: 	return control.value;
-		}		
-		
-		// -- Default
-		return 0.0;
+		return control.value
 	}
 	const Gb::Size getSize() const {
 		return Gb::Size(_format.width, _format.height);

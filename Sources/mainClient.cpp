@@ -19,22 +19,67 @@
 	#include <opencv2/imgcodecs.hpp>
 #endif
 
+struct FrameBuffer {	
+	void lock() const {
+		mut.lock();
+	}
+	void unlock() const {
+		mut.unlock();
+	}
+	size_t size() const {
+		return frames.size();
+	}
+	
+	bool update(cv::Mat& frame) {
+		if(size() > 1) {			
+			if(timer.elapsed_mus() >= timeToWait ) {
+				timer.beg();
+				
+				// Change frame disp
+				frames.front().copyTo(frame);
+				timeToWait = 1000*((int64_t)times[1] - (int64_t)times[0])/2;
+				
+				// Change buffer
+				pop();
+				
+				return !frame.empty();
+			}
+		}	
+		return false;
+	}
+	
+	
+	void pop() {
+		frames.pop_front();
+		times.pop_front();	
+	}
+	
+	void push(const cv::Mat& f, const uint64_t& t) {
+		frames.push_back(f.clone());
+		times.push_back(t);
+	}
+	
+private:
+	mutable std::mutex mut;
+	std::deque<cv::Mat> frames;
+	std::deque<uint64_t> times;
+	
+	Timer timer;
+	int64_t timeToWait = 0;
+};
+
 namespace Globals {
 	// Constantes
-	// const std::string IP_ADDRESS = "127.0.0.1";
-	const std::string IP_ADDRESS = "192.168.11.24";
+	const std::string IP_ADDRESS = "127.0.0.1";
+	// const std::string IP_ADDRESS = "192.168.11.24";
 	const int PORT = 8888;
 	
 	// Variables
 	volatile std::sig_atomic_t signalStatus = 0;
 	
 	// Frames
-	std::mutex mutFrame0;
-	std::deque<cv::Mat> frames0;
-	std::deque<uint64_t> timesFrames0;
-	
-	std::mutex mutFrame1;
-	cv::Mat frame1;
+	FrameBuffer buffer0;
+	FrameBuffer buffer1;
 }
 
 // --- Signals ---
@@ -67,25 +112,15 @@ int main() {
 			
 			if(!f.empty()) {
 				if(message.code() == Message::DEVICE_0) {
-					Globals::mutFrame0.lock();
-					
-					Globals::frames0.push_back(f.clone());
-					Globals::timesFrames0.push_back(message.timestamp());
-					
-					Globals::mutFrame0.unlock();
-					
-					// cv::imshow("frame device 0", f);
+					Globals::buffer0.lock();
+					Globals::buffer0.push(f, message.timestamp());
+					Globals::buffer0.unlock();
 				}
-				
-				// if(message.code() == Message::DEVICE_0) {
-					// Globals::mutFrame1.lock();
-					// f.copyTo(Globals::frame1);
-					// Globals::mutFrame1.unlock();
-
-					// cv::imshow("frame device 1", f);
-				// }
-				
-				// cv::waitKey(1);
+				if(message.code() == Message::DEVICE_1) {
+					Globals::buffer1.lock();
+					Globals::buffer1.push(f, message.timestamp());
+					Globals::buffer1.unlock();
+				}
 			}
 		}
 	});
@@ -100,39 +135,28 @@ int main() {
 	
 	
 	// -------- Main loop --------
-	Timer t;
-	cv::Mat frameDisp;
-	int64_t timeToWait = 0;
+	cv::Mat frameDisp_0, frameDisp_1;
 	
 	for(; Globals::signalStatus != SIGINT && cv::waitKey(1) != 27; ) {
-		/* ... Do stuff ... */
-		Globals::mutFrame0.lock();
+		// Update buffers
+		Globals::buffer0.lock();
+		bool updated_0 = Globals::buffer0.update(frameDisp_0);
+		Globals::buffer0.unlock();
 		
-		if(Globals::frames0.size() > 1) {			
-			if(t.elapsed_mus() >= timeToWait ) {
-				t.beg();
-				
-				// Change frame disp
-				Globals::frames0.front().copyTo(frameDisp);
-				
-				timeToWait = 1000*((int64_t)Globals::timesFrames0[1] - (int64_t)Globals::timesFrames0[0])/2;
-				
-				// Change buffer
-				Globals::frames0.pop_front();
-				Globals::timesFrames0.pop_front();
-			}
-		}		
+		Globals::buffer1.lock();
+		bool updated_1 = Globals::buffer1.update(frameDisp_1);
+		Globals::buffer1.unlock();
 		
-		Globals::mutFrame0.unlock();
+		// Display frames
+		if(updated_0)
+			cv::imshow("frame device 0", frameDisp_0);
 		
-		// Display
-		if(!frameDisp.empty()) {
-			cv::imshow("frame device 0", frameDisp);
-		}
-		
+		if(updated_1)
+			cv::imshow("frame device 1", frameDisp_1);
 	}
 		
 	// -- End
+	cv::destroyAllWindows();
 	client.disconnect();
 	
 	std::cout << "Clean exit" << std::endl;

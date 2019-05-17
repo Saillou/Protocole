@@ -19,11 +19,23 @@ public:
 	enum PixelFormat {
 		YUYV, MJPG
 	};
+	
 	enum Param {
-		Saturation,
-		MinSaturation,
-		MaxSaturation,
-		DefaultSaturation,
+		Maximum		= (1 << 1),
+		Minimum		= (1 << 2),
+		Default		= (1 << 3),
+		Automatic	= (1 << 4),
+		
+		Saturation 	= (1 << 5),
+		MinSaturation 			= Saturation | Minimum,
+		MaxSaturation 			= Saturation | Maximum,
+		DefaultSaturation	= Saturation | Default,
+		
+		Exposure		= (1 << 6),
+		MinExposure 		= Exposure | Minimum,
+		MaxExposure 		= Exposure | Maximum,
+		DefaultExposure 	= Exposure | Default,
+		AutoExposure 		= Exposure | Automatic,
 	};
 	
 	// Constructors

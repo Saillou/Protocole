@@ -86,9 +86,12 @@ int main() {
 	if(device0.open(PATH_CAMERA_0)) {
 		// Params
 		// device0.setFormat(320, 240, Device::MJPG);	
-		auto def = device0.get(Device::DefaultSaturation);
-		std::cout << "default: " << def << std::endl;
-		device0.set(Device::Saturation, def);
+		// device0.set(Device::AutoExposure, 1);
+		std::cout << "exposure "<< device0.get(Device::Exposure) << std::endl;
+		std::cout << "Min exp " << device0.get(Device::MinExposure) << std::endl;
+		std::cout << "Max exp "<< device0.get(Device::MaxExposure) << std::endl;
+		std::cout << "Def exp "<< device0.get(Device::DefaultExposure) << std::endl;
+		std::cout << "Auto "<< device0.get(Device::AutoExposure) << std::endl;
 		
 		// Events		
 		device0.onFrame([&](const Gb::Frame& frame) {
@@ -124,17 +127,17 @@ int main() {
 		});
 	}
 	
-	// DeviceMt device1;
-	// if(device1.open(PATH_CAMERA_1)) {
-		// // Events
-		// device1.onFrame([&](const Gb::Frame& frame){
-			// for(auto& client: server.getClients()) {
-				// if(client.connected  && mapRequests[client.id].play) {
-					// server.sendData(client, Message(Message::DEVICE_1, reinterpret_cast<const char*>(frame.start()), frame.length()));
-				// }
-			// }
-		// });
-	// }
+	DeviceMt device1;
+	if(device1.open(PATH_CAMERA_1)) {
+		// Events
+		device1.onFrame([&](const Gb::Frame& frame){
+			for(auto& client: server.getClients()) {
+				if(client.connected  && mapRequests[client.id].play) {
+					server.sendData(client, Message(Message::DEVICE_1, reinterpret_cast<const char*>(frame.start()), frame.length()));
+				}
+			}
+		});
+	}
 	
 	
 	// -------- Main loop --------  
@@ -144,7 +147,7 @@ int main() {
 		
 	// -- End
 	device0.release();
-	// device1.release();
+	device1.release();
 	server.disconnect();
 	
 	std::cout << "Clean exit" << std::endl;
