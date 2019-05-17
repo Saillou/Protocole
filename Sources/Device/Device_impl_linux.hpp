@@ -143,8 +143,8 @@ public:
 		
 		// -- Check control		
 		switch(code) {
-			case Saturation: 		control.id = V4L2_CID_SATURATION; 	break;
-			case Exposure: 		control.id = V4L2_CID_EXPOSURE; 	break;
+			case Saturation: 		control.id = V4L2_CID_SATURATION; 				break;
+			case Exposure: 		control.id = V4L2_CID_EXPOSURE_ABSOLUTE; 	break;
 			
 			default: return false;
 		}
@@ -175,7 +175,7 @@ public:
 		if(code & Saturation)
 			control.id = V4L2_CID_SATURATION;
 		else if(code & Exposure)
-			control.id = V4L2_CID_EXPOSURE;
+			control.id = V4L2_CID_EXPOSURE_ABSOLUTE;
 		else 
 			return 0.0;
 		
@@ -227,7 +227,7 @@ private:
 		char fourcc[5] = {0};
 		char c, e;
 		int support_grbg10 = 0;
-		printf("  FMT : CE Desc\n--------------------\n");
+		printf("  Format \n--------------------\n");
 		while (_xioctl(_fd, VIDIOC_ENUM_FMT, &fmtdesc) == 0) {
 			strncpy(fourcc, (char *)&fmtdesc.pixelformat, 4);
 			if (fmtdesc.pixelformat == V4L2_PIX_FMT_SGRBG10)
@@ -265,7 +265,7 @@ private:
 		}
 	 
 		strncpy(fourcc, (char *)&fmt.fmt.pix.pixelformat, 4);
-		printf( "Selected Camera Mode:\n   Width: %d\n  Height: %d\n PixFmt: %s\n  Field: %d\n",
+		printf( "Selected Camera Mode:\n--------------------\n   Width: %d\n  Height: %d\n PixFmt: %s\n  Field: %d\n",
 					fmt.fmt.pix.width, fmt.fmt.pix.height, fourcc, fmt.fmt.pix.field);
 
 		return true;		
