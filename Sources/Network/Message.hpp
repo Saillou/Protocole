@@ -183,6 +183,29 @@ private:
 	std::string _msg;
 };
 
+// --------- MessageFormat ------
+class MessageFormat {
+public:
+	MessageFormat(const std::string& message) {
+		
+	}
+	
+	template<typename T>
+	bool add(const std::string& name, T value) {
+		return false;
+	}
+	
+	template<typename T>
+	T valueOf(const std::string& name, bool* error = nullptr) const {
+		return T();
+	}
+	
+	
+	
+private:
+
+};
+
 // --------- Manager ------------
 class MessageManager {
 public:

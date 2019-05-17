@@ -133,7 +133,7 @@ public:
 		
 		_format.width  = width;
 		_format.height = height;
-		_format.format = formatPix == Device::MJPG ? V4L2_PIX_FMT_MJPEG : V4L2_PIX_FMT_YUYV;
+		_format.format = formatPix == MJPG ? V4L2_PIX_FMT_MJPEG : V4L2_PIX_FMT_YUYV;
 		
 		return open();
 	}
@@ -225,8 +225,8 @@ public:
 		
 		return control.value;
 	}
-	const Gb::Size getSize() const {
-		return Gb::Size(_format.width, _format.height);
+	const FrameFormat getFormat() const {
+		return _format;
 	}
 	
 private:		

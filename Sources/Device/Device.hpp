@@ -55,8 +55,8 @@ public:
 	bool set(Param code, double value);
 	
 	// Getters
+	const FrameFormat getFormat() const;
 	double get(Param code);
-	const Gb::Size getSize() const;
 	
 
 	

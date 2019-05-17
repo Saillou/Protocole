@@ -96,9 +96,17 @@ public:
 	bool isOpened() {
 		return _running;
 	}
+	
+	const Device::FrameFormat getFormat() const {
+		if(_pDevice)
+			return _pDevice->getFormat();
+		
+		return Device::FrameFormat {0,0,0};
+	}
 	double get(Device::Param code) {
 		if(_pDevice)
 			return _pDevice->get(code);
+		
 		return false;
 	}
 	

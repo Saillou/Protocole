@@ -58,11 +58,11 @@ bool Device::set(Param code, double value) {
 }
 
 // Getters
+const Device::FrameFormat Device::getFormat() const {
+	return _impl->getFormat();
+}
 double Device::get(Param code) {
 	return _impl->get(code);
-}
-const Gb::Size Device::getSize() const {
-	return _impl->getSize();
 }
 
 

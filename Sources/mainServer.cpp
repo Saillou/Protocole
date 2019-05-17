@@ -71,8 +71,54 @@ int main() {
 	
 	server.onInfo([&](const Server::ClientInfo& client, const Message& message) {
 		std::cout << "Info received from client_" << client.id << ": [Code:" << message.code() << "] " << message.str() << std::endl;
-		if(message.str() == "Send")
+		if(message.code() == Message::TEXT && message.str() == "Send") {
 			mapRequests[client.id].play = true;
+		}
+		else {
+			if(message.code() & Message::DEVICE_0) {
+				std::string msg = message.str();
+				// --- get ---
+				if(msg == "?") {
+					if(message.code() == Message::DEVICE_0_FORMAT) {
+						// device0.getFormat();
+					}
+					if(message.code() == Message::DEVICE_0_PROPERTIES) {
+						// device0.get(/* .. */);
+						// device0.get(/* .. */);
+						// device0.get(/* .. */);
+					}
+				}
+				else {
+					// --- set ---
+					bool exist = false;
+					MessageFormat command(msg);
+					
+					if(message.code() == Message::DEVICE_0_FORMAT) {
+						int width 	= command.valueOf<int>("width");
+						int height 	= command.valueOf<int>("height");
+						Device::PixelFormat pixFmt = command.valueOf<Device::PixelFormat>("pixel", &exist);
+						
+						if(exist && width > 0 && height > 0) {
+							device0.setFormat(width, height, pixFmt);
+						}					
+					}
+					if(message.code() == Message::DEVICE_0_PROPERTIES) {
+						double saturation	= command.valueOf<double>("saturation", &exist);
+						if(exist)
+							device0.set(Device::Saturation, saturation);
+						
+						double exposure = command.valueOf<double>("exposure", &exist);
+						if(exist)
+							device0.set(Device::Exposure, exposure);
+						
+						double autoExposure = command.valueOf<double>("auto_exposure", &exist);
+						if(exist)
+							device0.set(Device::AutoExposure, autoExposure);
+						
+					}
+				}
+			}
+		}
 	});
 	server.onData([&](const Server::ClientInfo& client, const Message& message) {
 		std::cout << "Data received from client_" << client.id << ": [Code:" << message.code() << "] " << message.str() << std::endl;
@@ -86,23 +132,6 @@ int main() {
 	if(device0.open(PATH_CAMERA_0)) {
 		// Params
 		device0.setFormat(320, 240, Device::MJPG);	
-		
-		std::cout << "----------" << std::endl;
-		
-		std::cout << "Saturation "	<< device0.get(Device::Saturation) 		<< std::endl;
-		std::cout << "Min sata " 	<< device0.get(Device::MinSaturation) 		<< std::endl;
-		std::cout << "Max satu "	<< device0.get(Device::MaxSaturation) 		<< std::endl;
-		std::cout << "Def satu "	<< device0.get(Device::DefaultSaturation) 	<< std::endl;
-		
-		std::cout << "----------" << std::endl;
-		
-		device0.set(Device::AutoExposure, 3);
-		
-		std::cout << "Exposure "	<< device0.get(Device::Exposure) 			<< std::endl;
-		std::cout << "Min exp " 	<< device0.get(Device::MinExposure) 		<< std::endl;
-		std::cout << "Max exp "		<< device0.get(Device::MaxExposure) 		<< std::endl;
-		std::cout << "Def exp "		<< device0.get(Device::DefaultExposure) 	<< std::endl;
-		std::cout << "Auto "			<< device0.get(Device::AutoExposure) 		<< std::endl;
 		
 		// Events		
 		device0.onFrame([&](const Gb::Frame& frame) {

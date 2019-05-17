@@ -14,7 +14,10 @@
 struct Device::_Impl {
 public:
 	// Constructors
-	explicit _Impl(const std::string& pathVideo) : _path(pathVideo), _PARAMS{(int)cv::IMWRITE_JPEG_QUALITY, 40} {
+	explicit _Impl(const std::string& pathVideo) : 
+		_path(pathVideo), 
+		_format({0, 0, MJPG}),
+		_PARAMS({(int)cv::IMWRITE_JPEG_QUALITY, 40}) {
 		// Wait for open
 	}
 	~_Impl() {
@@ -47,14 +50,15 @@ public:
 		if(!_cap.retrieve(cvFrame))
 			return false;
 		
-		_size = Gb::Size(cvFrame.cols, cvFrame.rows);
+		_format.width		= cvFrame.cols;
+		_format.height	= cvFrame.rows;
 		
 		// Compress to jpg
 		if(!cv::imencode(".jpg", cvFrame, frame.buffer, _PARAMS))
 			return false;
 		
 		// Complete
-		frame.size = _size;
+		frame.size = Gb::Size(_format.width, _format.height);
 		return frame.size.area() > 0;
 	}
 	bool read(Gb::Frame& frame) {
@@ -66,7 +70,8 @@ public:
 		_cap.set(cv::CAP_PROP_FRAME_WIDTH, width);
 		_cap.set(cv::CAP_PROP_FRAME_HEIGHT, height);
 		
-		_size = Gb::Size(width, height);
+		_format.width		= width;
+		_format.height	= height;
 		
 		return true;
 	}
@@ -114,15 +119,15 @@ public:
 		return 0.0;
 	}
 	
-	const Gb::Size getSize() const {
-		return _size;
+	const FrameFormat getFormat() const {
+		return _format;
 	}
 	
 private:
 	// Members
 	std::string _path;
 	cv::VideoCapture _cap;
-	Gb::Size _size;
+	FrameFormat	_format;
 	
 	// Constantes
 	const std::vector<int> _PARAMS;
