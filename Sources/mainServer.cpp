@@ -85,10 +85,11 @@ int main() {
 	// -- Open devices --	
 	if(device0.open(PATH_CAMERA_0)) {
 		// Params
-		// device0.setFormat(320, 240, Device::MJPG);	
+		device0.setFormat(320, 240, Device::MJPG);	
+		
 		std::cout << "----------" << std::endl;
 		
-		std::cout << "Saturation "	<< device0.get(Device::Saturation) 			<< std::endl;
+		std::cout << "Saturation "	<< device0.get(Device::Saturation) 		<< std::endl;
 		std::cout << "Min sata " 	<< device0.get(Device::MinSaturation) 		<< std::endl;
 		std::cout << "Max satu "	<< device0.get(Device::MaxSaturation) 		<< std::endl;
 		std::cout << "Def satu "	<< device0.get(Device::DefaultSaturation) 	<< std::endl;
