@@ -158,6 +158,22 @@ public:
 			return false;			
 		}
 		
+		// Need change mode ?
+		if(code & Exposure) {
+			struct v4l2_control autoControl = {0};
+			autoControl.id = V4L2_CID_EXPOSURE_AUTO;
+			
+			if(code & Automatic)
+				autoControl.value = V4L2_EXPOSURE_AUTO;
+			else 
+				autoControl.value = V4L2_EXPOSURE_MANUAL;
+
+			if (_xioctl(_fd, VIDIOC_S_CTRL, &control) == -1) {
+				_perror("Changing Mode");
+				return false;
+			}				
+		}
+		
 		control.value = value;
 		if (_xioctl(_fd, VIDIOC_S_CTRL, &control) == -1) {
 			_perror("Setting Control");
