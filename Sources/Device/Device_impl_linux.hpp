@@ -144,7 +144,7 @@ public:
 		// -- Check control		
 		switch(code) {
 			case Saturation: 		control.id = V4L2_CID_SATURATION; 				break;
-			case Exposure: 		control.id = V4L2_CID_EXPOSURE_ABSOLUTE; 	break;
+			case Exposure: 		control.id = code & Automatic ? V4L2_CID_EXPOSURE_AUTO : V4L2_CID_EXPOSURE_ABSOLUTE; 	break;
 			
 			default: return false;
 		}
@@ -163,7 +163,7 @@ public:
 			struct v4l2_control autoControl = {0};
 			autoControl.id = V4L2_CID_EXPOSURE_AUTO;
 			
-			if(code & Automatic)
+			if((code & Automatic) && value != 0)
 				autoControl.value = V4L2_EXPOSURE_AUTO;
 			else 
 				autoControl.value = V4L2_EXPOSURE_MANUAL;
@@ -171,9 +171,14 @@ public:
 			if (_xioctl(_fd, VIDIOC_S_CTRL, &autoControl) == -1) {
 				_perror("Changing Mode");
 				return false;
-			}				
+			}	
+			
+			// No need for more
+			if(code & Automatic)
+				return true;
 		}
 		
+		// Change value
 		control.value = value;
 		if (_xioctl(_fd, VIDIOC_S_CTRL, &control) == -1) {
 			_perror("Setting Control");
@@ -191,7 +196,7 @@ public:
 		if(code & Saturation)
 			control.id = V4L2_CID_SATURATION;
 		else if(code & Exposure)
-			control.id = V4L2_CID_EXPOSURE_ABSOLUTE;
+			control.id = code & Automatic ? V4L2_CID_EXPOSURE_AUTO : V4L2_CID_EXPOSURE_ABSOLUTE;
 		else 
 			return 0.0;
 		
@@ -208,14 +213,16 @@ public:
 			return queryctrl.maximum;
 		else if(code & Default)
 			return queryctrl.default_value > queryctrl.maximum ? (queryctrl.maximum+queryctrl.minimum)/2 : queryctrl.default_value;
-		else if(code & Automatic)
-			return 0.0;
 		
 		// -- Return value if not a limit	
 		if (_xioctl(_fd, VIDIOC_G_CTRL, &control) == -1) {
 			_perror("Getting Control");
 			return 0.0;
 		}
+		
+		// Special case
+		if(code == AutoExposure)
+			return control.value != 0 ? 1 : 0;
 		
 		return control.value;
 	}

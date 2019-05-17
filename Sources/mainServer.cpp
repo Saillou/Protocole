@@ -96,7 +96,8 @@ int main() {
 		
 		std::cout << "----------" << std::endl;
 		
-		device0.set(Device::Exposure, 666);		
+		// device0.set(Device::Exposure, 666);
+		device0.set(Device::AutoExposure, 1);
 		
 		std::cout << "Exposure "	<< device0.get(Device::Exposure) 			<< std::endl;
 		std::cout << "Min exp " 	<< device0.get(Device::MinExposure) 		<< std::endl;
@@ -139,16 +140,16 @@ int main() {
 	}
 	
 	DeviceMt device1;
-	if(device1.open(PATH_CAMERA_1)) {
-		// Events
-		device1.onFrame([&](const Gb::Frame& frame){
-			for(auto& client: server.getClients()) {
-				if(client.connected  && mapRequests[client.id].play) {
-					server.sendData(client, Message(Message::DEVICE_1, reinterpret_cast<const char*>(frame.start()), frame.length()));
-				}
-			}
-		});
-	}
+	// if(device1.open(PATH_CAMERA_1)) {
+		// // Events
+		// device1.onFrame([&](const Gb::Frame& frame){
+			// for(auto& client: server.getClients()) {
+				// if(client.connected  && mapRequests[client.id].play) {
+					// server.sendData(client, Message(Message::DEVICE_1, reinterpret_cast<const char*>(frame.start()), frame.length()));
+				// }
+			// }
+		// });
+	// }
 	
 	
 	// -------- Main loop --------  
