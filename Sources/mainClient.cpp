@@ -21,20 +21,6 @@
 #endif
 
 
-int main() {
-	sockaddr_in s1;
-	sockaddr_in6 s2;
-	
-	sockaddr addr;
-	
-	
-	std::cout << sizeof(addr) << std::endl;
-	std::cout << sizeof(s1) << std::endl;
-	std::cout << sizeof(s2) << std::endl;
-	
-	return system("pause");
-}
-
 // -- Globals space --
 namespace Globals {
 	// Constantes
@@ -60,7 +46,7 @@ static void sigintHandler(int signal) {
 }
 
 // --- Entry point ---
-int main_() {
+int main() {
 	// -- Install signal handler
 	std::signal(SIGINT, sigintHandler);
 	
