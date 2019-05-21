@@ -156,6 +156,9 @@ namespace wlc {
 	
 	// --- Closing sockets ---
 	void closeSocket(SOCKET idSocket) {
+		if(idSocket < 0)
+			return;
+		
 #ifdef _WIN32 
 		closesocket(idSocket);
 #elif __linux__

@@ -249,7 +249,7 @@ private:
 			std::lock_guard<std::mutex> lockCbk(_mutCbk);
 			if(_cbkError) 
 				_cbkError(Error(wlc::getError(), msgOnError));
-		}		
+		}
 	}
 	
 private:

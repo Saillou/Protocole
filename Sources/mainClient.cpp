@@ -20,12 +20,13 @@
 	#include <opencv2/imgcodecs.hpp>
 #endif
 
+
 // -- Globals space --
 namespace Globals {
 	// Constantes
 	// const std::string IP_ADDRESS = "::1"; 					// localhost V6
-	const std::string IP_ADDRESS = "127.0.0.1"; 	// localhost V4
-	// const std::string IP_ADDRESS = "192.168.11.24";
+	// const std::string IP_ADDRESS = "127.0.0.1"; 	// localhost V4
+	const std::string IP_ADDRESS = "192.168.11.24";
 	const int PORT = 8888;
 	
 	// Variables

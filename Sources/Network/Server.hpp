@@ -22,7 +22,8 @@ public:
 		clock_t lastUpdate = 0;		
 		bool connected = false;
 		
-		Socket tcpSock;
+		SOCKET udpSockServerId; // <-- Server
+		Socket tcpSock;	// <-- Client
 		SocketAddress udpAddress;
 		
 		SOCKET id() const {
@@ -77,14 +78,22 @@ public:
 		_isConnected = false;
 		
 		// Server disconnecting .. Send something ?		
-		if(_pRecvUdp && _pRecvUdp->joinable())
-			_pRecvUdp->join();
+		if(_pRecvUdp4 && _pRecvUdp4->joinable())
+			_pRecvUdp4->join();
+		
+		if(_pRecvUdp6 && _pRecvUdp6->joinable())
+			_pRecvUdp6->join();
 
-		if(_pHandleTcp && _pHandleTcp->joinable())
-			_pHandleTcp->join();
+		if(_pHandleTcp4 && _pHandleTcp6->joinable())
+			_pHandleTcp4->join();
+		
+		if(_pHandleTcp4 && _pHandleTcp6->joinable())
+			_pHandleTcp6->join();
 
-		_udpSock.close();
-		_tcpSock.close();
+		_udpSock4.close();
+		_udpSock6.close();
+		_tcpSock4.close();
+		_tcpSock6.close();
 		
 		// After tcp has joined : no client will be accepted, and no clients will be deleted.
 		// Therefore, just wait for the threads to finish and then delete it. (Avoid mutex deadlock)
@@ -104,29 +113,46 @@ public:
 		// Init sockets
 		if(!wlc::initSockets())
 			return;
-		
+
 		// Create server address
-		if(!_address.create(Ip_v6, port))
+		SocketAddress address_v4;
+		
+		if(!address_v4.create(Ip_v4, port))
 			return disconnect();
 		
 		// Bind server sockets
-		if(!_udpSock.bind(_address, Proto_Udp))
+		if(!_udpSock4.bind(address_v4, Proto_Udp))
 			return disconnect();
 		
-		if(!_tcpSock.bind(_address, Proto_Tcp))
+		if(!_tcpSock4.bind(address_v4, Proto_Tcp))
 			return disconnect();		
+		
+		// Create server address
+		SocketAddress address_v6;
+		
+		if(!address_v6.create(Ip_v6, port))
+			return disconnect();
+		
+		// Bind server sockets
+		if(!_udpSock6.bind(address_v6, Proto_Udp))
+			return disconnect();
+		
+		if(!_tcpSock6.bind(address_v6, Proto_Tcp))
+			return disconnect();	
 		
 		// Create threads
 		_isConnected = true;
-		std::cout << "Connected!" << std::endl;
-		_pRecvUdp 	= std::make_shared<std::thread>(&Server::_recvUdp, this);
-		_pHandleTcp = std::make_shared<std::thread>(&Server::_handleTcp, this);
+		
+		_pRecvUdp4 	= std::make_shared<std::thread>(&Server::_recvUdp, this, std::ref(_udpSock4));
+		_pRecvUdp6 	= std::make_shared<std::thread>(&Server::_recvUdp, this, std::ref(_udpSock6));
+		_pHandleTcp4 = std::make_shared<std::thread>(&Server::_handleTcp, this, std::ref(_tcpSock4));
+		_pHandleTcp6 = std::make_shared<std::thread>(&Server::_handleTcp, this, std::ref(_tcpSock6));
 	}
 	
 	// Send message with UDP
 	void sendData(const ClientInfo& client, const Message& msg) const {
 		if(msg.length() < 64000) {
-			if(sendto(_udpSock.get(), msg.data(), (int)msg.length(), 0, client.udpAddress.get(), client.udpAddress.size()) != (int)msg.length()) {
+			if(sendto(client.udpSockServerId, msg.data(), (int)msg.length(), 0, client.udpAddress.get(), client.udpAddress.size()) != (int)msg.length()) {
 				std::lock_guard<std::mutex> lockCbk(_mutCbk);
 				if(_cbkError) 
 					_cbkError(Error(wlc::getError(), "UDP send Error"));
@@ -136,7 +162,7 @@ public:
 			unsigned int totalLengthSend = msg.length();
 			
 			// Send header
-			if(sendto(_udpSock.get(), msg.data(), 14, 0, client.udpAddress.get(), client.udpAddress.size()) != 14) {
+			if(sendto(client.udpSockServerId, msg.data(), 14, 0, client.udpAddress.get(), client.udpAddress.size()) != 14) {
 				std::lock_guard<std::mutex> lockCbk(_mutCbk);
 				if(_cbkError) 
 					_cbkError(Error(wlc::getError(), "UDP send Error"));
@@ -149,7 +175,7 @@ public:
 			while(totalLengthSend > 0) {
 				unsigned int sizeToSend = totalLengthSend > 64000 ? 64000 : totalLengthSend;
 				
-				if(sendto(_udpSock.get(), msg.data()+offset, sizeToSend, 0, client.udpAddress.get(), client.udpAddress.size()) != sizeToSend) {
+				if(sendto(client.udpSockServerId, msg.data()+offset, sizeToSend, 0, client.udpAddress.get(), client.udpAddress.size()) != sizeToSend) {
 					std::lock_guard<std::mutex> lockCbk(_mutCbk);
 					if(_cbkError) 
 						_cbkError(Error(wlc::getError(), "UDP send Error"));
@@ -174,6 +200,7 @@ public:
 	bool isConnected() const {
 		return _isConnected;
 	}
+	
 	std::vector<ClientInfo> getClients() const {
 		std::vector<ClientInfo> clients;
 	
@@ -211,17 +238,22 @@ public:
 	
 private:	
 	// Methods in threads
-	void _handleTcp() {
+	void _handleTcp(Socket& tcpSock) {
 		// Listen
-		if(!_isConnected || listen(_tcpSock.get(), SOMAXCONN) == SOCKET_ERROR)
+		if(!_isConnected || listen(tcpSock.get(), SOMAXCONN) == SOCKET_ERROR)
 			return;
 
 		// Accept new clients
 		ClientInfo clientInfo;
 		
+		if(tcpSock.type() == Ip_v4)
+			clientInfo.udpSockServerId = _udpSock4.get();
+		else if(tcpSock.type() == Ip_v6)
+			clientInfo.udpSockServerId = _udpSock6.get();
+		
 		// Loop accept() until the server is stopped
 		for(Timer timer; _isConnected; timer.wait(100)) {
-			if(_tcpSock.accept(clientInfo.tcpSock)) {
+			if(tcpSock.accept(clientInfo.tcpSock)) {
 				// Update infos
 				clientInfo.lastUpdate = clock();
 				clientInfo.udpAddress.memset(0);
@@ -307,20 +339,19 @@ private:
 		}
 	}
 	
-	void _recvUdp() {
+	void _recvUdp(Socket& udpSock) {
 		const int BUFFER_SIZE = 2048;
 		char buf[BUFFER_SIZE] = {0};
 		ssize_t recv_len = 0;
 
-		sockaddr clientAddress;
-		socklen_t slen(sizeof(sockaddr));
+		SocketAddress clientSockAddress;
 		
 		for(Timer timer; _isConnected; ) {
 			memset(buf, 0, BUFFER_SIZE);
 
 			// ----- Receive -----
 			clock_t time = clock();
-			if ((recv_len = recvfrom(_udpSock.get(), buf, BUFFER_SIZE, 0, &clientAddress, &slen)) == SOCKET_ERROR) {
+			if(!udpSock.receiveFrom(recv_len, buf, BUFFER_SIZE, clientSockAddress)) {
 				// What kind of error ?
 				int error = wlc::getError();
 				if(wlc::errorIs(wlc::WOULD_BLOCK, error) || wlc::errorIs(wlc::NOT_CONNECT, error)) { // Timeout || Waiting for connection
@@ -342,14 +373,12 @@ private:
 			if(recv_len == 0) 
 				continue;
 			
-			// --- Address --- 
-			SocketAddress clientSockAddress(_udpSock.type(), clientAddress, slen);
-
 			// ----- Read message -----
 			if(recv_len < 14) // Bad message
 				continue;
+				
 			Message message(buf, recv_len);
-			
+
 			// Update list
 			std::lock_guard<std::mutex> lockMut(_mutClients); // Free mutex when scope end
 			
@@ -400,9 +429,10 @@ private:
 	// Members
 	std::atomic<bool> _isConnected;
 	
-	Socket _udpSock;
-	Socket _tcpSock;
-	SocketAddress _address;
+	Socket _udpSock4;
+	Socket _udpSock6;
+	Socket _tcpSock4;
+	Socket _tcpSock6;
 	
 	// Callbacks
 	mutable std::mutex _mutCbk;
@@ -413,8 +443,10 @@ private:
 	std::function<void(const ClientInfo& client)> _cbkDisconnect;
 	
 	// Threads
-	std::shared_ptr<std::thread> _pHandleTcp;
-	std::shared_ptr<std::thread> _pRecvUdp;
+	std::shared_ptr<std::thread> _pHandleTcp4;
+	std::shared_ptr<std::thread> _pHandleTcp6;
+	std::shared_ptr<std::thread> _pRecvUdp4;
+	std::shared_ptr<std::thread> _pRecvUdp6;
 	
 	// Clients
 	mutable std::mutex _mutClients;

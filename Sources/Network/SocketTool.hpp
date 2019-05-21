@@ -121,8 +121,28 @@ struct SocketAddress {
 		_port(0),
 		_type(type), 
 		_ipDefined(false),
-		_sizeSockaddr(size),
-		_sockaddr(addr)
+		_sizeSockaddr(size)
+	{
+		 if(_type != Ip_error)
+			 memcpy(_get(), &addr, size);
+	}
+	SocketAddress(const sockaddr_in& addr4) :
+		_ip(""),
+		_port(0),
+		_type(Ip_v4), 
+		_ipDefined(false),
+		_sizeSockaddr(sizeof(addr4)),
+		_sockaddr4(addr4)
+	{
+
+	}
+	SocketAddress(const sockaddr_in6& addr6) :
+		_ip(""),
+		_port(0),
+		_type(Ip_v6), 
+		_ipDefined(false),
+		_sizeSockaddr(sizeof(addr6)),
+		_sockaddr6(addr6)
 	{
 
 	}
@@ -143,8 +163,10 @@ struct SocketAddress {
 		return _create();
 	}
 	
-	void memset(int c) {
-		::memset(&_sockaddr, c, size());
+	void memset(int c = 0) {
+		if(_sizeSockaddr > 0) {
+			::memset(_get(), c, _sizeSockaddr);
+		}
 	}
 	
 	// Statics
@@ -153,20 +175,11 @@ struct SocketAddress {
 			return false;
 		}
 		else if(addressA._type == Ip_v4) {			
-			sockaddr_in* pA = (sockaddr_in*)(&addressA._sockaddr);
-			sockaddr_in* pB = (sockaddr_in*)(&addressB._sockaddr);
-			
-			 return (pA->sin_addr.s_addr == pB->sin_addr.s_addr);
+			 return (addressA._sockaddr4.sin_addr.s_addr == addressB._sockaddr4.sin_addr.s_addr);
 		}
 		else if(addressA._type == Ip_v6) {
-			sockaddr_in6* pA = (sockaddr_in6*)(&addressA._sockaddr);
-			sockaddr_in6* pB = (sockaddr_in6*)(&addressB._sockaddr);
-			
-			unsigned char* pAs = pA->sin6_addr.s6_addr;
-			unsigned char* pBs = pB->sin6_addr.s6_addr;
-			
 			for(int i = 0; i < 16; i++) {
-				if(pAs[i] != pBs[i])
+				if(addressA._sockaddr6.sin6_addr.s6_addr[i] != addressB._sockaddr6.sin6_addr.s6_addr[i])
 					return false;
 			}
 			
@@ -194,7 +207,14 @@ struct SocketAddress {
 		return _port;
 	}
 	const sockaddr * get() const {
-		return &_sockaddr;
+		 if(_type == Ip_error)
+			 return nullptr;
+		else if(_type == Ip_v4)
+			return (sockaddr*)&_sockaddr4;
+		else if(_type == Ip_v6)
+			return (sockaddr*)&_sockaddr6;
+		
+		return nullptr;
 	}
 
 private:
@@ -211,43 +231,48 @@ private:
 			return false;
 		
 		if (_type == Ip_v4) {
-			sockaddr_in* pSock4 = (sockaddr_in*)(&_sockaddr);
-			::memset(pSock4, 0, sizeof(_sockaddr));
+			_sizeSockaddr = sizeof(_sockaddr4);
 			
-			pSock4->sin_family 	= AF_INET;
-			pSock4->sin_port 		= htons(_port);
+			memset();
+			_sockaddr4.sin_family 	= AF_INET;
+			_sockaddr4.sin_port 	= htons(_port);
 			
 			if(!_ipDefined) {
-				pSock4->sin_addr.s_addr = htonl(INADDR_ANY);
+				_sockaddr4.sin_addr.s_addr	= htonl(INADDR_ANY);
 			}
 			else {
-				if(inet_pton(AF_INET, _ip.c_str(), &pSock4->sin_addr) != 1)
+				if(inet_pton(AF_INET, _ip.c_str(), &_sockaddr4.sin_addr.s_addr) != 1)
 					return false;
 			}
-			
-			// Socket Address
-			_sizeSockaddr	= (socklen_t)sizeof(sockaddr_in);
 		}	
 		else if (_type == Ip_v6) {
-			sockaddr_in6* pSock6 = (sockaddr_in6*)(&_sockaddr);
-			::memset(pSock6, 0, sizeof(_sockaddr));
+			_sizeSockaddr = sizeof(_sockaddr6);
 			
-			pSock6->sin6_family	= AF_INET6;
-			pSock6->sin6_port 	= htons(_port);
-			
+			memset();
+			_sockaddr6.sin6_family = AF_INET6;
+			_sockaddr6.sin6_port 	= htons(_port);
+
 			if(!_ipDefined) {
-				pSock6->sin6_addr = in6addr_any;
+				_sockaddr6.sin6_addr = in6addr_any;
 			}
 			else {
-				if(inet_pton(AF_INET6, _ip.c_str(), &pSock6->sin6_addr) != 1)
+				if(inet_pton(AF_INET6, _ip.c_str(), &_sockaddr6.sin6_addr.s6_addr) != 1)
 					return false;
 			}
-			
-			// Socket Address
-			_sizeSockaddr	= sizeof(sockaddr_in6);
 		}
 		
 		return _sizeSockaddr>0;
+	}
+		
+	sockaddr* _get() {
+		 if(_type == Ip_error)
+			 return nullptr;
+		else if(_type == Ip_v4)
+			return (sockaddr*)&_sockaddr4;
+		else if(_type == Ip_v6)
+			return (sockaddr*)&_sockaddr6;
+		
+		return nullptr;
 	}
 		
 	// Members
@@ -257,7 +282,9 @@ private:
 	bool _ipDefined;
 	
 	socklen_t _sizeSockaddr;
-	sockaddr _sockaddr;
+	sockaddr_in _sockaddr4;
+	sockaddr_in6 _sockaddr6;
+	
 };
 
 
@@ -304,7 +331,6 @@ struct Socket {
 			return false;
 		
 		// -- Bounding --
-		std::cout << "Bind " << (proto == Proto_Tcp ? "Tcp" : "Udp") << std::endl;
 		if(::bind(_socket, _address.get(), _address.size()) == SOCKET_ERROR) {
 			std::cout << wlc::getError() << std::endl;
 			close();
@@ -324,7 +350,7 @@ struct Socket {
 			return false;
 		
 		sockaddr address;
-		socklen_t slen = sizeof(address);
+		socklen_t slen =  _address.size();
 		SOCKET socketId = ::accept(_socket, &address, &slen);
 		
 		if(socketId == SOCKET_ERROR)
@@ -334,6 +360,31 @@ struct Socket {
 		socketAccepted = Socket(socketId, _protoType, SocketAddress(_address.type(), address, slen));
 
 		return socketAccepted.initialized();
+	}
+	
+	bool receiveFrom(ssize_t& recvLen, char* buffer, const int bufferSize, SocketAddress& senderAddress) const {
+		if(type() == Ip_v4) {
+			sockaddr_in clientAddress;
+			socklen_t slen = sizeof(clientAddress);
+			
+			if ((recvLen = recvfrom(_socket, buffer, bufferSize, 0, (sockaddr*)&clientAddress, &slen)) == SOCKET_ERROR)
+				return false;
+			
+			senderAddress = SocketAddress(clientAddress);
+			return senderAddress.size() > 0;
+		}
+		else if(type() == Ip_v6) {
+			sockaddr_in6 clientAddress;
+			socklen_t slen = sizeof(clientAddress);
+			
+			if ((recvLen = recvfrom(_socket, buffer, bufferSize, 0, (sockaddr*)&clientAddress, &slen)) == SOCKET_ERROR)
+				return false;
+			
+			senderAddress = SocketAddress(clientAddress);
+			return senderAddress.size() > 0;
+		}
+		
+		return false;
 	}
 	
 	void close() {

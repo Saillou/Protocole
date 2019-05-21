@@ -69,7 +69,7 @@ int main() {
 		mapRequests[client.id()].play = false;
 	});
 	server.onError([&](const Error& error) {
-		std::cout << "Error : " << error.msg() << std::endl;
+		std::cout << "Error : " << error.msg() << " code: " << error.code() << std::endl;
 	});
 	
 	server.onInfo([&](const Server::ClientInfo& client, const Message& message) {
@@ -138,50 +138,50 @@ int main() {
 	std::deque<double> freq(100, 0.0);
 	
 	// -- Open devices --	
-	// if(device0.open(PATH_CAMERA_0)) {
-		// // Params
-		// device0.setFormat(1280, 720, Device::MJPG);	
-		// // device0.setFormat(320, 240, Device::MJPG);	
+	if(device0.open(PATH_CAMERA_0)) {
+		// Params
+		device0.setFormat(1280, 720, Device::MJPG);	
+		// device0.setFormat(320, 240, Device::MJPG);	
 		
-		// for(auto& client: server.getClients()) {
-			// if(client.connected) {
-				// server.sendInfo(client, Message(Message::DEVICE_0, "Started."));
-			// }
-		// }
+		for(auto& client: server.getClients()) {
+			if(client.connected) {
+				server.sendInfo(client, Message(Message::DEVICE_0, "Started."));
+			}
+		}
 		
-		// // Events		
-		// device0.onFrame([&](const Gb::Frame& frame) {
-			// // Show frame and fps
-			// t.end();
-			// freq.push_back(1000000.0/t.mus());
-			// freq.pop_front();
-			// t.beg();
+		// Events		
+		device0.onFrame([&](const Gb::Frame& frame) {
+			// Show frame and fps
+			t.end();
+			freq.push_back(1000000.0/t.mus());
+			freq.pop_front();
+			t.beg();
 			
-// #ifdef _WIN32				
-			// cv::Mat f = cv::imdecode(cv::Mat(1, frame.length(), CV_8UC1, (void*)(frame.start())), cv::IMREAD_COLOR);
-			// if(!f.empty()) {
-				// cv::line(f, cv::Point(0, 100),  cv::Point(100, 100), cv::Scalar(0,0,255), 1, 16);
-				// cv::line(f, cv::Point(0, 70),  cv::Point(100, 70), cv::Scalar(255,0,0), 1, 16);
-				// for(int i = 1; i < 100; i++) {
-					// int y0 = freq[i-1] > 100 ? 100 : (int)(freq[i-1]);
-					// int y1 = freq[i] > 100 ? 100 : (int)(freq[i]);
+#ifdef _WIN32				
+			cv::Mat f = cv::imdecode(cv::Mat(1, frame.length(), CV_8UC1, (void*)(frame.start())), cv::IMREAD_COLOR);
+			if(!f.empty()) {
+				cv::line(f, cv::Point(0, 100),  cv::Point(100, 100), cv::Scalar(0,0,255), 1, 16);
+				cv::line(f, cv::Point(0, 70),  cv::Point(100, 70), cv::Scalar(255,0,0), 1, 16);
+				for(int i = 1; i < 100; i++) {
+					int y0 = freq[i-1] > 100 ? 100 : (int)(freq[i-1]);
+					int y1 = freq[i] > 100 ? 100 : (int)(freq[i]);
 	
-					// cv::line(f, cv::Point(i, 100-y0),  cv::Point(i+1, 100-y1), cv::Scalar(0,255,0), 1, 16);
-				// }
+					cv::line(f, cv::Point(i, 100-y0),  cv::Point(i+1, 100-y1), cv::Scalar(0,255,0), 1, 16);
+				}
 				
-				// cv::imshow("frame0", f);
-				// cv::waitKey(1);
-			// }
-// #endif
+				cv::imshow("frame0", f);
+				cv::waitKey(1);
+			}
+#endif
 		
-			// // Send
-			// for(auto& client: server.getClients()) {
-				// if(client.connected && mapRequests[client.id()].play) {
-					// server.sendData(client, Message(Message::DEVICE_0, reinterpret_cast<const char*>(frame.start()), frame.length()));
-				// }
-			// }
-		// });
-	// }
+			// Send
+			for(auto& client: server.getClients()) {
+				if(client.connected && mapRequests[client.id()].play) {
+					server.sendData(client, Message(Message::DEVICE_0, reinterpret_cast<const char*>(frame.start()), frame.length()));
+				}
+			}
+		});
+	}
 	
 	// if(device1.open(PATH_CAMERA_1)) {
 		// // Events
@@ -209,4 +209,3 @@ int main() {
 	std::cout << "Press a key to continue..." << std::endl;
 	return std::cin.get();
 }
-
