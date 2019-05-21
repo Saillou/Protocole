@@ -106,7 +106,7 @@ public:
 			return;
 		
 		// Create server address
-		if(!_address.create(Ip_v4, port))
+		if(!_address.create(Ip_v6, port))
 			return disconnect();
 		
 		// Bind server sockets
