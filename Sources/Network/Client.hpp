@@ -11,13 +11,14 @@
 #include <functional>
 
 #include "WinLinConversion.hpp"
+#include "SocketTool.hpp"
 #include "Message.hpp"
 #include "../Timer.hpp"
 
 class Client {
 	// -------------- Main class --------------
 public:
-	Client() : _isConnected(false), _isAlive(false), _udpSock(INVALID_SOCKET), _tcpSock(INVALID_SOCKET) {
+	Client() : _isConnected(false), _isAlive(false) {
 		// Wait for connectTo
 	}
 	~Client() {
@@ -26,39 +27,23 @@ public:
 	
 	
 	// Methods
-	void connectTo(const std::string& ipAddress, const int port) {		
+	void connectTo(const std::string& ipAddress, const int port) {	
 		if(_isConnected)
 			return;
 		
 		// Init windows sockets
 		if(!wlc::initSockets())
 			return;
-		
+
 		// Create address
-		memset((char *) &_address, 0, sizeof(_address));
-		
-		_address.sin_family	= AF_INET;
-		_address.sin_port 	= htons(port);
-		InetPton(AF_INET, ipAddress.c_str(), &_address.sin_addr.s_addr);
-		
-		// Create sockets
-		_udpSock = socket(PF_INET, SOCK_DGRAM , IPPROTO_UDP);
-		if(_udpSock == INVALID_SOCKET)
+		if(!_address.create(ipAddress, port))
 			return disconnect();
 
-		_tcpSock = socket(PF_INET, SOCK_STREAM , IPPROTO_TCP);
-		if(_tcpSock == INVALID_SOCKET)
+		// Set sockets up
+		if(!_udpSock.connect(_address, Proto_Udp))
 			return disconnect();
 		
-		// Connect TCP
-		if(connect(_tcpSock, (sockaddr *)&_address, sizeof(_address)) == SOCKET_ERROR)
-			return disconnect();
-		
-		// Options
-		if(wlc::setNonBlocking(_udpSock, true) < 0)
-			return disconnect();
-		
-		if(wlc::setNonBlocking(_tcpSock, true) < 0)
+		if(!_tcpSock.connect(_address, Proto_Tcp))
 			return disconnect();	
 
 		// Thread
@@ -79,26 +64,18 @@ public:
 			if(_pRecvUdp->joinable())
 				_pRecvUdp->join();
 		
-		wlc::closeSocket(_udpSock);
-		wlc::closeSocket(_tcpSock);
+		_udpSock.close();
+		_tcpSock.close();
 		
 		wlc::uninitSockets();
 	}
 	
 	void sendInfo(const Message& msg) const {
-		if(send(_tcpSock, msg.data(), (int)msg.length(), 0) != (int)msg.length()) {
-			std::lock_guard<std::mutex> lockCbk(_mutCbk);
-			if(_cbkError) 
-				_cbkError(Error(wlc::getError(), "TCP send Error"));
-		}
+		_send(_tcpSock, msg, "TCP send Error");
 	}
 	
 	void sendData(const Message& msg) const {		
-		if(sendto(_udpSock, msg.data(), (int)msg.length(), 0, (sockaddr*) &_address, sizeof(_address)) != (int)msg.length()) {
-			std::lock_guard<std::mutex> lockCbk(_mutCbk);
-			if(_cbkError) 
-				_cbkError(Error(wlc::getError(), "UDP send Error"));
-		}
+		_send(_udpSock, msg, "UDP send Error");
 	}
 	
 	// Getters
@@ -135,7 +112,7 @@ private:
 			// Receive TCP maybe
 			memset(buf, 0, BUFFER_SIZE);
 			
-			if((recv_len = recv(_tcpSock, buf, BUFFER_SIZE, 0)) == SOCKET_ERROR) {
+			if((recv_len = recv(_tcpSock.get(), buf, BUFFER_SIZE, 0)) == SOCKET_ERROR) {
 				// What kind of error ?
 				int error = wlc::getError();
 				if(wlc::errorIs(wlc::WOULD_BLOCK, error)) { // Temporary unavailable
@@ -191,11 +168,9 @@ private:
 	} // -- End function recv tcp
 	
 	void _recvUdp() {
-		sockaddr_in serverAddress;
 		const int BUFFER_SIZE	= 64000;
 		char buf[BUFFER_SIZE]	= {0};
 		ssize_t recv_len 	= 0;
-		socklen_t slen(sizeof(serverAddress));
 		
 		bool buffering = false;
 		size_t sizeWaited = 0;
@@ -205,7 +180,7 @@ private:
 			// UDP - Receive
 			memset(buf, 0, BUFFER_SIZE);
 			
-			if ((recv_len = recvfrom(_udpSock, buf, BUFFER_SIZE, 0, (sockaddr *)&serverAddress, &slen)) == SOCKET_ERROR) {			
+			if((recv_len = recv(_udpSock.get(), buf, BUFFER_SIZE, 0)) == SOCKET_ERROR) {		
 				// What kind of error ?
 				int error = wlc::getError();
 				if(wlc::errorIs(wlc::WOULD_BLOCK, error) || wlc::errorIs(wlc::INVALID_ARG, error)) {
@@ -269,14 +244,22 @@ private:
 			disconnect();
 	}
 
+	void _send(const Socket& connectSocked, const Message& msg, const std::string& msgOnError = "Send error") const {
+		if(send(connectSocked.get(), msg.data(), (int)msg.length(), 0) != (int)msg.length()) {
+			std::lock_guard<std::mutex> lockCbk(_mutCbk);
+			if(_cbkError) 
+				_cbkError(Error(wlc::getError(), msgOnError));
+		}		
+	}
+	
 private:
 	// Members
 	std::atomic<bool> _isConnected;
 	std::atomic<bool> _isAlive;		// Control threads
 	
-	SOCKET _udpSock;
-	SOCKET _tcpSock;
-	sockaddr_in _address;
+	Socket _udpSock;
+	Socket _tcpSock;
+	SocketAddress _address;
 	
 	// Callbacks
 	mutable std::mutex _mutCbk;

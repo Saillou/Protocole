@@ -52,29 +52,30 @@ int main() {
 	// Variables
 	Server server;
 	DeviceMt device0;
+	DeviceMt device1;
 	std::map<SOCKET, ClientRequest> mapRequests;
 	
 	// -- Connect server --
 	server.connectAt(Globals::PORT);
 	
 	server.onClientConnect([&](const Server::ClientInfo& client) {
-		std::cout << "New client, client_" << client.id << std::endl;
+		std::cout << "New client, client_" << client.id() << std::endl;
 		
 		server.sendInfo(client, Message(Message::DEVICE_0, device0.isOpened() ? "Started." : "Not Started."));
-		mapRequests[client.id].play = false;
+		mapRequests[client.id()].play = false;
 	});
 	server.onClientDisconnect([&](const Server::ClientInfo& client) {
-		std::cout << "Client quit, client_" << client.id << std::endl;
-		mapRequests[client.id].play = false;
+		std::cout << "Client quit, client_" << client.id() << std::endl;
+		mapRequests[client.id()].play = false;
 	});
 	server.onError([&](const Error& error) {
 		std::cout << "Error : " << error.msg() << std::endl;
 	});
 	
 	server.onInfo([&](const Server::ClientInfo& client, const Message& message) {
-		std::cout << "Info received from client_" << client.id << ": [Code:" << message.code() << "] " << message.str() << std::endl;
+		std::cout << "Info received from client_" << client.id() << ": [Code:" << message.code() << "] " << message.str() << std::endl;
 		if(message.code() == Message::TEXT && message.str() == "Send") {
-			mapRequests[client.id].play = true;
+			mapRequests[client.id()].play = true;
 		}
 		else {
 			if(message.code() & Message::DEVICE_0) {
@@ -129,7 +130,7 @@ int main() {
 		}
 	});
 	server.onData([&](const Server::ClientInfo& client, const Message& message) {
-		std::cout << "Data received from client_" << client.id << ": [Code:" << message.code() << "] " << message.str() << std::endl;
+		std::cout << "Data received from client_" << client.id() << ": [Code:" << message.code() << "] " << message.str() << std::endl;
 	});
 	
 	
@@ -137,57 +138,56 @@ int main() {
 	std::deque<double> freq(100, 0.0);
 	
 	// -- Open devices --	
-	if(device0.open(PATH_CAMERA_0)) {
-		// Params
-		device0.setFormat(1280, 720, Device::MJPG);	
-		// device0.setFormat(320, 240, Device::MJPG);	
+	// if(device0.open(PATH_CAMERA_0)) {
+		// // Params
+		// device0.setFormat(1280, 720, Device::MJPG);	
+		// // device0.setFormat(320, 240, Device::MJPG);	
 		
-		for(auto& client: server.getClients()) {
-			if(client.connected) {
-				server.sendInfo(client, Message(Message::DEVICE_0, "Started."));
-			}
-		}
+		// for(auto& client: server.getClients()) {
+			// if(client.connected) {
+				// server.sendInfo(client, Message(Message::DEVICE_0, "Started."));
+			// }
+		// }
 		
-		// Events		
-		device0.onFrame([&](const Gb::Frame& frame) {
-			// Show frame and fps
-			t.end();
-			freq.push_back(1000000.0/t.mus());
-			freq.pop_front();
-			t.beg();
+		// // Events		
+		// device0.onFrame([&](const Gb::Frame& frame) {
+			// // Show frame and fps
+			// t.end();
+			// freq.push_back(1000000.0/t.mus());
+			// freq.pop_front();
+			// t.beg();
 			
-#ifdef _WIN32				
-			cv::Mat f = cv::imdecode(cv::Mat(1, frame.length(), CV_8UC1, (void*)(frame.start())), cv::IMREAD_COLOR);
-			if(!f.empty()) {
-				cv::line(f, cv::Point(0, 100),  cv::Point(100, 100), cv::Scalar(0,0,255), 1, 16);
-				cv::line(f, cv::Point(0, 70),  cv::Point(100, 70), cv::Scalar(255,0,0), 1, 16);
-				for(int i = 1; i < 100; i++) {
-					int y0 = freq[i-1] > 100 ? 100 : (int)(freq[i-1]);
-					int y1 = freq[i] > 100 ? 100 : (int)(freq[i]);
+// #ifdef _WIN32				
+			// cv::Mat f = cv::imdecode(cv::Mat(1, frame.length(), CV_8UC1, (void*)(frame.start())), cv::IMREAD_COLOR);
+			// if(!f.empty()) {
+				// cv::line(f, cv::Point(0, 100),  cv::Point(100, 100), cv::Scalar(0,0,255), 1, 16);
+				// cv::line(f, cv::Point(0, 70),  cv::Point(100, 70), cv::Scalar(255,0,0), 1, 16);
+				// for(int i = 1; i < 100; i++) {
+					// int y0 = freq[i-1] > 100 ? 100 : (int)(freq[i-1]);
+					// int y1 = freq[i] > 100 ? 100 : (int)(freq[i]);
 	
-					cv::line(f, cv::Point(i, 100-y0),  cv::Point(i+1, 100-y1), cv::Scalar(0,255,0), 1, 16);
-				}
+					// cv::line(f, cv::Point(i, 100-y0),  cv::Point(i+1, 100-y1), cv::Scalar(0,255,0), 1, 16);
+				// }
 				
-				cv::imshow("frame0", f);
-				cv::waitKey(1);
-			}
-#endif
+				// cv::imshow("frame0", f);
+				// cv::waitKey(1);
+			// }
+// #endif
 		
-			// Send
-			for(auto& client: server.getClients()) {
-				if(client.connected && mapRequests[client.id].play) {
-					server.sendData(client, Message(Message::DEVICE_0, reinterpret_cast<const char*>(frame.start()), frame.length()));
-				}
-			}
-		});
-	}
+			// // Send
+			// for(auto& client: server.getClients()) {
+				// if(client.connected && mapRequests[client.id()].play) {
+					// server.sendData(client, Message(Message::DEVICE_0, reinterpret_cast<const char*>(frame.start()), frame.length()));
+				// }
+			// }
+		// });
+	// }
 	
-	DeviceMt device1;
 	// if(device1.open(PATH_CAMERA_1)) {
 		// // Events
 		// device1.onFrame([&](const Gb::Frame& frame){
 			// for(auto& client: server.getClients()) {
-				// if(client.connected  && mapRequests[client.id].play) {
+				// if(client.connected  && mapRequests[client.id()].play) {
 					// server.sendData(client, Message(Message::DEVICE_1, reinterpret_cast<const char*>(frame.start()), frame.length()));
 				// }
 			// }

@@ -3,6 +3,7 @@
 #include <deque>
 
 #include "Timer.hpp"
+#include "Buffers.hpp"
 #include "Network/Client.hpp"
 #include "Network/Message.hpp"
 
@@ -19,62 +20,12 @@
 	#include <opencv2/imgcodecs.hpp>
 #endif
 
-// --- Tools ---
-struct FrameBuffer {	
-	void lock() const {
-		mut.lock();
-	}
-	void unlock() const {
-		mut.unlock();
-	}
-	size_t size() const {
-		return frames.size();
-	}
-	
-	bool update(cv::Mat& frame) {
-		if(size() > 1) {			
-			if(timer.elapsed_mus() >= timeToWait ) {
-				timer.beg();
-				
-				// Change frame disp
-				frames.front().copyTo(frame);
-				timeToWait = 1000*((int64_t)times[1] - (int64_t)times[0])/2;
-				
-				// Change buffer
-				pop();
-				
-				return !frame.empty();
-			}
-		}	
-		return false;
-	}
-	
-	
-	void pop() {
-		frames.pop_front();
-		times.pop_front();	
-	}
-	
-	void push(const cv::Mat& f, const uint64_t& t) {
-		frames.push_back(f.clone());
-		times.push_back(t);
-	}
-	
-private:
-	mutable std::mutex mut;
-	std::deque<cv::Mat> frames;
-	std::deque<uint64_t> times;
-	
-	Timer timer;
-	int64_t timeToWait = 0;
-};
-
-
 // -- Globals space --
 namespace Globals {
 	// Constantes
-	// const std::string IP_ADDRESS = "127.0.0.1";
-	const std::string IP_ADDRESS = "192.168.11.24";
+	// const std::string IP_ADDRESS = "::1"; 					// localhost V6
+	const std::string IP_ADDRESS = "127.0.0.1"; 	// localhost V4
+	// const std::string IP_ADDRESS = "192.168.11.24";
 	const int PORT = 8888;
 	
 	// Variables
@@ -138,7 +89,6 @@ int main() {
 	
 	// -------- Main loop --------
 	cv::Mat frameDisp_0, frameDisp_1;
-	
 	for(; Globals::signalStatus != SIGINT && cv::waitKey(1) != 27; ) {
 		// Update buffers
 		Globals::buffer0.lock();
