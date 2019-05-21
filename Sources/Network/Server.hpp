@@ -130,7 +130,7 @@ public:
 		// Create server address
 		SocketAddress address_v6;
 		
-		if(!address_v6.create(Ip_v6, port))
+		if(!address_v6.create(Ip_v6, port+1))
 			return disconnect();
 		
 		// Bind server sockets
