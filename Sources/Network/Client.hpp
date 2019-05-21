@@ -223,7 +223,7 @@ private:
 				}
 				else {
 					if(msgHeader.code() & Message::HEADER) {
-						unsigned int code 		 = msgHeader.code() & ~(Message::HEADER & Message::FRAGMENT);
+						unsigned int code 		 = msgHeader.code() & ~(Message::HEADER | Message::FRAGMENT);
 						messagesBuffering[code] = MessageBuffer(code, msgHeader.timestamp(), msgHeader.size());
 						
 						// No offset up because nothing read
@@ -235,7 +235,7 @@ private:
 						}
 						else { // add
 							messagesBuffering[code].packets.push_back(std::vector<char>(buffer + offset, buffer + offset + msgHeader.size()));
-							
+
 							// Is it finish ?
 							if(messagesBuffering[code].complete()) {
 								if(messagesBuffering[code].compose(msgHeader)) {
