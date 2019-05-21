@@ -40,12 +40,16 @@ public:
 			return disconnect();
 
 		// Set sockets up
-		if(!_udpSock.connect(_address, Proto_Udp))
+		if(!_udpSock.connect(_address, Proto_Udp)) {
+			std::cout << "UDP connect: " << wlc::getError() << std::endl;
 			return disconnect();
+		}
 		
-		if(!_tcpSock.connect(_address, Proto_Tcp))
+		if(!_tcpSock.connect(_address, Proto_Tcp)) {
+			std::cout << "TCP connect: " << wlc::getError() << std::endl;
 			return disconnect();	
-
+		}
+		
 		// Thread
 		_isAlive = true;
 		_pRecvTcp = std::make_shared<std::thread>(&Client::_recvTcp, this);
