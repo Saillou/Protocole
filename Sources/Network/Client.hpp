@@ -173,22 +173,20 @@ private:
 	
 	void _recvUdp() {
 		const int BUFFER_SIZE	= 64000;
-		char buf[BUFFER_SIZE]	= {0};
+		char buffer[BUFFER_SIZE]	= {0};
 		ssize_t recv_len 	= 0;
 		
-		bool buffering = false;
-		size_t sizeWaited = 0;
-		std::vector<char> msgSerializedBuffer;
+		std::map<unsigned int, MessageBuffer> messagesBuffering;
 		
 		for(Timer timer; _isAlive; ) {	
 			// UDP - Receive
-			memset(buf, 0, BUFFER_SIZE);
+			memset(buffer, 0, BUFFER_SIZE);
 			
-			if((recv_len = recv(_udpSock.get(), buf, BUFFER_SIZE, 0)) == SOCKET_ERROR) {		
+			if((recv_len = recv(_udpSock.get(), buffer, BUFFER_SIZE, 0)) == SOCKET_ERROR) {		
 				// What kind of error ?
 				int error = wlc::getError();
 				if(wlc::errorIs(wlc::WOULD_BLOCK, error) || wlc::errorIs(wlc::INVALID_ARG, error)) {
-					timer.wait(buffering ? 1 : 100);
+					timer.wait(1);
 					continue;
 				}
 				else if(wlc::errorIs(wlc::REFUSED_CONNECT, error)) { // Forcibly disconnected
@@ -205,60 +203,53 @@ private:
 				}
 			}
 			
-			// Read message
-			if(!buffering && recv_len < 14) // Bad message
+			// Read buffer
+			if(recv_len < 14) // Bad message
 				continue;
 			
-			// Get only header (14bytes)
-			if(recv_len == 14) {
-				Message message(buf, recv_len); // Will only read the header
+			for(ssize_t offset = 0; offset < recv_len;) {
+				// Read header
+				Message msgHeader(buffer + offset, 14);
+				offset += 14;
 				
-				sizeWaited 				= (size_t)message.length();
-				msgSerializedBuffer	= std::vector<char>(buf, buf+14);
-				buffering = true;
-
-				continue;
-			}
-			
-			if(!buffering) { // Already full message : send it
-				Message message(buf, recv_len);
-				
-				std::lock_guard<std::mutex> lockCbk(_mutCbk);
-				if(_cbkData) 
-					_cbkData(message);
-			}
-			else {
-				if(recv_len + msgSerializedBuffer.size() < sizeWaited) { // Buffering
-					msgSerializedBuffer.insert(msgSerializedBuffer.end(), buf, buf+recv_len);
-					
-					continue;
-				}
-				else { // Ending message
-					size_t sizeToTake = sizeWaited - msgSerializedBuffer.size();
-					msgSerializedBuffer.insert(msgSerializedBuffer.end(), buf, buf+sizeToTake);
-					
-					Message message(msgSerializedBuffer.data(), msgSerializedBuffer.size());
-					buffering = false;
+				// Not a fragment: read all
+				if(!(msgHeader.code() & Message::FRAGMENT)) {
+					msgHeader.appendData(buffer+offset, msgHeader.size());
+					offset += msgHeader.size();
 					
 					std::lock_guard<std::mutex> lockCbk(_mutCbk);
 					if(_cbkData) 
-						_cbkData(message);
-					
-					if(sizeToTake == recv_len)
-						continue;
-					
-					if(sizeToTake - recv_len < 14) {
-						std::cout << "Bug" << std::endl;
+						_cbkData(msgHeader);
+				}
+				else {
+					if(msgHeader.code() & Message::HEADER) {
+						unsigned int code 		 = msgHeader.code() & ~(Message::HEADER & Message::FRAGMENT);
+						messagesBuffering[code] = MessageBuffer(code, msgHeader.timestamp(), msgHeader.size());
+						
+						// No offset up because nothing read
 					}
-					
-					// Preparing new buffer
-					message = Message(buf, recv_len); // Will only read the header
-					
-					sizeWaited 				= (size_t)message.length();
-					msgSerializedBuffer	= std::vector<char>(buf, buf+14);
-					buffering = true;
+					else {
+						unsigned int code = msgHeader.code() & ~Message::FRAGMENT;
+						if(messagesBuffering[code].timestamp > msgHeader.timestamp()) { // discard
+							// do something ?
+						}
+						else { // add
+							messagesBuffering[code].packets.push_back(std::vector<char>(buffer + offset, buffer + offset + msgHeader.size()));
+							
+							// Is it finish ?
+							if(messagesBuffering[code].complete()) {
+								if(messagesBuffering[code].compose(msgHeader)) {
+									std::lock_guard<std::mutex> lockCbk(_mutCbk);
+									if(_cbkData) 
+										_cbkData(msgHeader);
+								}
+							}
+						}
+						offset += msgHeader.size();
+					}
 				}
 			}
+
 		}
 		
 		// Forcibly disconnected

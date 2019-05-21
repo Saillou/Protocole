@@ -153,7 +153,7 @@ public:
 	void sendData(const ClientInfo& client, const Message& msg) const {
 		const Socket& udpSock = client.udpSockServerId == _udpSock4.get() ? _udpSock4 : _udpSock6;
 		
-		if(!udpSock.sendTo(msg.data(), (int)msg.length(), client.udpAddress)) {
+		if(!udpSock.sendTo(msg, client.udpAddress)) {
 			std::lock_guard<std::mutex> lockCbk(_mutCbk);
 			if(_cbkError) 
 				_cbkError(Error(wlc::getError(), "UDP send Error"));			

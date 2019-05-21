@@ -1,6 +1,8 @@
 #pragma once
 
 #include "WinLinConversion.hpp"
+#include "Message.hpp"
+
 #include <string>
 #include <sstream>
 #include <vector>
@@ -386,32 +388,43 @@ struct Socket {
 		
 		return false;
 	}
-	bool sendTo(const char* buffer, const int bufferSize, const SocketAddress& receiverAddress) const {
+	bool sendTo(const Message& msg, const SocketAddress& receiverAddress) const {
 		bool error = false;
+		const int bufferSize = (int)msg.length();
+		const char* buffer = msg.data();
 		
-		if(bufferSize < 64000) {
+		if(bufferSize < 64000) { // 64k is almost the limit (exactly it should be [65 535 - socketAddressSize] ~ 65 500 bytes)
 			// Send header + content
-			if(sendto(_socket, buffer, bufferSize, 0, receiverAddress.get(), receiverAddress.size()) != bufferSize)
+			if(sendto(_socket, msg.data(), bufferSize, 0, receiverAddress.get(), receiverAddress.size()) != bufferSize)
 				return false;
 		}
-		else {
-			// Send header
-			if(sendto(_socket, buffer, 14, 0, receiverAddress.get(), receiverAddress.size()) != 14)
+		else {		
+			unsigned int codeFrag	= msg.code() | Message::FRAGMENT;
+			uint64_t timestampMsg	= msg.timestamp();
+			
+			// - Create header
+			Message msgHeader(codeFrag | Message::HEADER, nullptr, msg.size(), timestampMsg);
+			if(sendto(_socket, msgHeader.data(), 14, 0, receiverAddress.get(), receiverAddress.size()) != 14)
 				return false;
 			
-			// Send content
-			int offset = 14;
-			int totalLengthSend = bufferSize - offset;
+			// - Cut in messages fragment
+			int offset 					= 0;
+			int limitFragmentSize 	= 60000;
+			int totalLengthSend 		= (int)msg.size();
 			
-			while(totalLengthSend > 0) {
-				int sizeToSend = totalLengthSend > 64000 ? 64000 : totalLengthSend;
+			do {
+				int sizeToSend = totalLengthSend > limitFragmentSize ? limitFragmentSize : totalLengthSend;
 				
-				if(sendto(_socket, buffer, sizeToSend, 0, receiverAddress.get(), receiverAddress.size()) != sizeToSend) 
+				Message msgFrag(codeFrag, buffer+14+offset, (size_t)sizeToSend, timestampMsg);
+				
+				if(sendto(_socket, msgFrag.data(), 14+sizeToSend, 0, receiverAddress.get(), receiverAddress.size()) != 14+sizeToSend)
 					return false;
 				
-				totalLengthSend -= sizeToSend;
 				offset += sizeToSend;
-			}
+				totalLengthSend -= sizeToSend;
+				limitFragmentSize--; // Avoid to get packets of the same size
+				
+			} while(totalLengthSend > 0);	
 		}
 		
 		return true;
