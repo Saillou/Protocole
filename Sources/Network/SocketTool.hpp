@@ -386,7 +386,7 @@ struct Socket {
 		
 		return false;
 	}
-	bool sendTo(char* buffer, const int bufferSize, const SocketAddress& receiverAddress) const {
+	bool sendTo(const char* buffer, const int bufferSize, const SocketAddress& receiverAddress) const {
 		bool error = false;
 		
 		if(bufferSize < 64000) {
