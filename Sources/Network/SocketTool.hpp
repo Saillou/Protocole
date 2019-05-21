@@ -306,7 +306,7 @@ struct Socket {
 		// -- Bounding --
 		std::cout << "Bind " << (proto == Proto_Tcp ? "Tcp" : "Udp") << std::endl;
 		if(::bind(_socket, _address.get(), _address.size()) == SOCKET_ERROR) {
-			std::cout << WSAGetLastError() << std::endl;
+			std::cout << wlc::getError() << std::endl;
 			close();
 			return false;
 		}
