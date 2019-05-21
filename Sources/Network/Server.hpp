@@ -84,10 +84,10 @@ public:
 		if(_pRecvUdp6 && _pRecvUdp6->joinable())
 			_pRecvUdp6->join();
 
-		if(_pHandleTcp4 && _pHandleTcp6->joinable())
+		if(_pHandleTcp4 && _pHandleTcp4->joinable())
 			_pHandleTcp4->join();
 		
-		if(_pHandleTcp4 && _pHandleTcp6->joinable())
+		if(_pHandleTcp6 && _pHandleTcp6->joinable())
 			_pHandleTcp6->join();
 
 		_udpSock4.close();
@@ -151,39 +151,12 @@ public:
 	
 	// Send message with UDP
 	void sendData(const ClientInfo& client, const Message& msg) const {
-		if(msg.length() < 64000) {
-			if(sendto(client.udpSockServerId, msg.data(), (int)msg.length(), 0, client.udpAddress.get(), client.udpAddress.size()) != (int)msg.length()) {
-				std::lock_guard<std::mutex> lockCbk(_mutCbk);
-				if(_cbkError) 
-					_cbkError(Error(wlc::getError(), "UDP send Error"));
-			}
-		}
-		else {
-			unsigned int totalLengthSend = msg.length();
-			
-			// Send header
-			if(sendto(client.udpSockServerId, msg.data(), 14, 0, client.udpAddress.get(), client.udpAddress.size()) != 14) {
-				std::lock_guard<std::mutex> lockCbk(_mutCbk);
-				if(_cbkError) 
-					_cbkError(Error(wlc::getError(), "UDP send Error"));
-				return;
-			}
-			totalLengthSend -= 14;
-			
-			// Send content
-			unsigned int offset = 14;
-			while(totalLengthSend > 0) {
-				unsigned int sizeToSend = totalLengthSend > 64000 ? 64000 : totalLengthSend;
-				
-				if(sendto(client.udpSockServerId, msg.data()+offset, sizeToSend, 0, client.udpAddress.get(), client.udpAddress.size()) != sizeToSend) {
-					std::lock_guard<std::mutex> lockCbk(_mutCbk);
-					if(_cbkError) 
-						_cbkError(Error(wlc::getError(), "UDP send Error"));
-					return;
-				}
-				totalLengthSend -= sizeToSend;
-				offset += sizeToSend;
-			}
+		Socket& udpSock = client.udpSockServerId == _udpSock4.get() ? _udpSock4 : _udpSock6;
+		
+		if(!udpSock.sendTo(msg.data(), (int)msg.length(), client.udpAddress)) {
+			std::lock_guard<std::mutex> lockCbk(_mutCbk);
+			if(_cbkError) 
+				_cbkError(Error(wlc::getError(), "UDP send Error"));			
 		}
 	}
 	

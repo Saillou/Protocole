@@ -183,18 +183,18 @@ int main() {
 		});
 	}
 	
-	if(device1.open(PATH_CAMERA_1)) {
-		device1.setFormat(320, 240, Device::MJPG);	
+	// if(device1.open(PATH_CAMERA_1)) {
+		// device1.setFormat(320, 240, Device::MJPG);	
 		
-		// Events
-		device1.onFrame([&](const Gb::Frame& frame){
-			for(auto& client: server.getClients()) {
-				if(client.connected  && mapRequests[client.id()].play) {
-					server.sendData(client, Message(Message::DEVICE_1, reinterpret_cast<const char*>(frame.start()), frame.length()));
-				}
-			}
-		});
-	}
+		// // Events
+		// device1.onFrame([&](const Gb::Frame& frame){
+			// for(auto& client: server.getClients()) {
+				// if(client.connected  && mapRequests[client.id()].play) {
+					// server.sendData(client, Message(Message::DEVICE_1, reinterpret_cast<const char*>(frame.start()), frame.length()));
+				// }
+			// }
+		// });
+	// }
 	
 	
 	// -------- Main loop --------  

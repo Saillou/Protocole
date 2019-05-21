@@ -386,6 +386,36 @@ struct Socket {
 		
 		return false;
 	}
+	bool sendTo(char* buffer, const int bufferSize, const SocketAddress& receiverAddress) const {
+		bool error = false;
+		
+		if(bufferSize < 64000) {
+			// Send header + content
+			if(sendto(_socket, buffer, bufferSize, 0, receiverAddress.get(), receiverAddress.size()) != bufferSize)
+				return false;
+		}
+		else {
+			// Send header
+			if(sendto(_socket, buffer, 14, 0, receiverAddress.get(), receiverAddress.size()) != 14)
+				return false;
+			
+			// Send content
+			int offset = 14;
+			int totalLengthSend = bufferSize - offset;
+			
+			while(totalLengthSend > 0) {
+				int sizeToSend = totalLengthSend > 64000 ? 64000 : totalLengthSend;
+				
+				if(sendto(_socket, buffer, sizeToSend, 0, receiverAddress.get(), receiverAddress.size()) != sizeToSend) 
+					return false;
+				
+				totalLengthSend -= sizeToSend;
+				offset += sizeToSend;
+			}
+		}
+		
+		return true;
+	}
 	
 	void close() {
 		if(_socket == INVALID_SOCKET)

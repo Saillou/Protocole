@@ -227,11 +227,16 @@ private:
 				if(_cbkData) 
 					_cbkData(message);
 			}
-			else { // Buffering
-				msgSerializedBuffer.insert(msgSerializedBuffer.end(), buf, buf+recv_len);
-				
-				// Finally get the full message : send it
-				if(sizeWaited <= msgSerializedBuffer.size()) {
+			else {
+				if(recv_len + msgSerializedBuffer.size() < sizeWaited) { // Buffering
+					msgSerializedBuffer.insert(msgSerializedBuffer.end(), buf, buf+recv_len);
+					
+					continue;
+				}
+				else { // Ending message
+					size_t sizeToTake = sizeWaited - msgSerializedBuffer.size();
+					msgSerializedBuffer.insert(msgSerializedBuffer.end(), buf, buf+sizeToTake);
+					
 					Message message(msgSerializedBuffer.data(), msgSerializedBuffer.size());
 					buffering = false;
 					
@@ -239,6 +244,19 @@ private:
 					if(_cbkData) 
 						_cbkData(message);
 					
+					if(sizeToTake == recv_len)
+						continue;
+					
+					if(sizeToTake - recv_len < 14) {
+						std::cout << "Bug" << std::endl;
+					}
+					
+					// Preparing new buffer
+					message = Message(buf, recv_len); // Will only read the header
+					
+					sizeWaited 				= (size_t)message.length();
+					msgSerializedBuffer	= std::vector<char>(buf, buf+14);
+					buffering = true;
 				}
 			}
 		}
