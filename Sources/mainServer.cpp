@@ -184,7 +184,8 @@ int main() {
 	}
 	
 	if(device1.open(PATH_CAMERA_1)) {
-		device1.setFormat(320, 240, Device::MJPG);	
+		// device1.setFormat(320, 240, Device::MJPG);	
+		device1.setFormat(1280, 720, Device::MJPG);	
 		
 		// Events
 		device1.onFrame([&](const Gb::Frame& frame){
