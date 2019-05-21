@@ -151,7 +151,7 @@ public:
 	
 	// Send message with UDP
 	void sendData(const ClientInfo& client, const Message& msg) const {
-		Socket& udpSock = client.udpSockServerId == _udpSock4.get() ? _udpSock4 : _udpSock6;
+		const Socket& udpSock = client.udpSockServerId == _udpSock4.get() ? _udpSock4 : _udpSock6;
 		
 		if(!udpSock.sendTo(msg.data(), (int)msg.length(), client.udpAddress)) {
 			std::lock_guard<std::mutex> lockCbk(_mutCbk);
