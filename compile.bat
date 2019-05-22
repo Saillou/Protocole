@@ -3,7 +3,7 @@ setlocal EnableDelayedExpansion
 
 cd /d %~dp0
 set fRelease=%~dp0Release\
-set gitPush=1
+set commit=1
 set launch=0
 
 REM call compileCode.bat Server mainServer
@@ -26,7 +26,7 @@ if not exist Client.exe (
 
 if !bug!==1 (
 	echo. & pause & exit
-) else if %gitPush%==1 (
+) else if %commit%==1 (
 	cd /d %~dp0
 	call git add compile*
 	call git add Sources/*
@@ -37,7 +37,7 @@ if !bug!==1 (
 	pause
 )
 
-if %gitPush%==0 (
+if %commit%==0 (
 	pause
 )
 
