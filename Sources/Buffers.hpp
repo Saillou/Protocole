@@ -5,6 +5,7 @@
 #include <iostream>
 #include <csignal>
 #include <deque>
+#include <mutex>
 
 #include "Network/Message.hpp"
 
@@ -87,5 +88,45 @@ public:
 		return false;
 	}
 };
+
+
+// -- Multi threaded cv::frames
+class MtFrame {
+public:	
+	MtFrame() : _frame(cv::Mat::zeros(1, 1, CV_8UC3)) {
+	}
+	
+	void lock() const {
+		_mut.lock();
+	}
+	void unlock() const {
+		_mut.unlock();
+	}
+	void resetSize(int width, int height) {
+		_frame = cv::Mat::zeros(height, width, CV_8UC3);
+	}
+	
+	const cv::Mat& get() const {
+		return _frame;
+	}
+	int width() const {
+		return _frame.cols;
+	}
+	int height() const {
+		return _frame.rows;
+	}
+	unsigned char* data() {
+		return _frame.data;
+	}
+	bool empty() const {
+		return _frame.empty();
+	}
+	
+private:
+	cv::Mat _frame;
+	mutable std::mutex _mut;
+};
+
+
 
 

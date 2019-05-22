@@ -36,7 +36,12 @@ namespace Globals {
 
 // --- Structures ---
 struct ClientRequest {
-	bool play;
+	ClientRequest() : play0(false), play1(false) {
+		
+	}
+	
+	bool play0;
+	bool play1;
 };
 
 // --- Signals ---
@@ -66,11 +71,11 @@ int main() {
 		std::cout << "New client, client_" << client.id() << std::endl;
 		
 		server.sendInfo(client, Message(Message::DEVICE_0, device0.isOpened() ? "Started." : "Not Started."));
-		mapRequests[client.id()].play = false;
+		mapRequests[client.id()].play = ClientRequest();
 	});
 	server.onClientDisconnect([&](const Server::ClientInfo& client) {
 		std::cout << "Client quit, client_" << client.id() << std::endl;
-		mapRequests[client.id()].play = false;
+		mapRequests[client.id()].play = ClientRequest();
 	});
 	server.onError([&](const Error& error) {
 		std::cout << "Error : " << error.msg() << " code: " << error.code() << std::endl;
@@ -78,60 +83,71 @@ int main() {
 	
 	server.onInfo([&](const Server::ClientInfo& client, const Message& message) {
 		std::cout << "Info received from client_" << client.id() << ": [Code:" << message.code() << "] " << message.str() << std::endl;
-		if(message.code() == Message::TEXT && message.str() == "Send") {
-			mapRequests[client.id()].play = true;
+		
+		// -- About device 0 --
+		
+		// Asked by client to start
+		if(message.code() == Message::DEVICE_0 && message.str() == "Send") {
+			mapRequests[client.id()].play0 = true;
 		}
-		else {
-			if(message.code() & Message::DEVICE_0) {
-				std::string msg = message.str();
-				// --- get ---
-				if(msg == "?") {
-					if(message.code() == Message::DEVICE_0_FORMAT) {
-						Device::FrameFormat fmt = device0.getFormat();
-						
-						MessageFormat command;
-						command.add("width", fmt.width);
-						command.add("height", fmt.height);
-						command.add("pixel", fmt.format);
-						server.sendInfo(client, Message(Message::DEVICE_0_FORMAT, command.str()));
-					}
-					if(message.code() == Message::DEVICE_0_PROPERTIES) {
-						MessageFormat command;
-						command.add("saturation", device0.get(Device::Saturation));
-						server.sendInfo(client, Message(Message::DEVICE_0_FORMAT, command.str()));
-					}
-				}
-				else {
-					// --- set ---
-					bool exist = false;
-					MessageFormat command(msg);
-					
-					if(message.code() == Message::DEVICE_0_FORMAT) {
-						int width 	= command.valueOf<int>("width");
-						int height 	= command.valueOf<int>("height");
-						Device::PixelFormat pixFmt = command.valueOf<Device::PixelFormat>("pixel", &exist);
-						
-						if(exist && width > 0 && height > 0) {
-							device0.setFormat(width, height, pixFmt);
-						}					
-					}
-					if(message.code() == Message::DEVICE_0_PROPERTIES) {
-						double saturation	= command.valueOf<double>("saturation", &exist);
-						if(exist)
-							device0.set(Device::Saturation, saturation);
-						
-						double exposure = command.valueOf<double>("exposure", &exist);
-						if(exist)
-							device0.set(Device::Exposure, exposure);
-						
-						double autoExposure = command.valueOf<double>("auto_exposure", &exist);
-						if(exist)
-							device0.set(Device::AutoExposure, autoExposure);
-						
-					}
+		
+		// Talking about format
+		if(message.code() == DEVICE_0_FORMAT) {
+			std::string msg = message.str();
+			
+			// --- get ---
+			if(msg == "?") {
+				Device::FrameFormat fmt = device0.getFormat();
+				
+				MessageFormat command;
+				command.add("width", fmt.width);
+				command.add("height", fmt.height);
+				command.add("pixel", fmt.format);
+				
+				server.sendInfo(client, Message(Message::DEVICE_0_FORMAT, command.str()));
+			}
+			else {
+				bool exist = false;
+				MessageFormat command(msg);
+				
+				// --- set ---				
+				int width 	= command.valueOf<int>("width");
+				int height 	= command.valueOf<int>("height");
+				Device::PixelFormat pixFmt = command.valueOf<Device::PixelFormat>("pixel", &exist);
+				
+				if(exist && width > 0 && height > 0) {
+					device0.setFormat(width, height, pixFmt);
 				}
 			}
 		}
+		
+		// Talking about properties
+		if(message.code() == DEVICE_0_PROPERTIES) {
+			// --- get ---
+			if(msg == "?") {
+				MessageFormat command;
+				command.add("saturation", device0.get(Device::Saturation));
+				server.sendInfo(client, Message(Message::DEVICE_0_FORMAT, command.str()));
+			}
+			else {
+				bool exist = false;
+				MessageFormat command(msg);
+				
+				// --- set ---
+				double saturation	= command.valueOf<double>("saturation", &exist);
+				if(exist)
+					device0.set(Device::Saturation, saturation);
+				
+				double exposure = command.valueOf<double>("exposure", &exist);
+				if(exist)
+					device0.set(Device::Exposure, exposure);
+				
+				double autoExposure = command.valueOf<double>("auto_exposure", &exist);
+				if(exist)
+					device0.set(Device::AutoExposure, autoExposure);
+			}
+		}
+		
 	});
 	server.onData([&](const Server::ClientInfo& client, const Message& message) {
 		std::cout << "Data received from client_" << client.id() << ": [Code:" << message.code() << "] " << message.str() << std::endl;

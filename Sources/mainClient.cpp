@@ -18,6 +18,9 @@
 	#include <opencv2/highgui.hpp>
 	#include <opencv2/imgproc.hpp>
 	#include <opencv2/imgcodecs.hpp>
+	
+	// Decode jpg
+	#include <turbojpeg.h>
 #endif
 
 
@@ -38,6 +41,11 @@ namespace Globals {
 	// Frames
 	FrameBuffer buffer0;
 	FrameBuffer buffer1;
+	
+	MtFrame frameDevice0;
+	MtFrame frameDevice1;
+	
+	tjhandle decoder = nullptr;
 }
 
 // --- Signals ---
@@ -49,6 +57,9 @@ static void sigintHandler(int signal) {
 int main() {
 	// -- Install signal handler
 	std::signal(SIGINT, sigintHandler);
+	
+	// -- Init decoder
+	Globals::decoder = tjInitDecompress();
 	
 	//-- Connect client
 	Client client;
@@ -65,32 +76,53 @@ int main() {
 	
 	client.onData([&](const Message& message) {		
 		if(message.code() == Message::DEVICE_0 || message.code() == Message::DEVICE_1) {
-			Timer t;
-			cv::Mat f = cv::imdecode(cv::Mat(1, message.size(), CV_8UC1, (void*)message.content()), cv::IMREAD_COLOR);
-			auto mus =  t.elapsed_mus();
-			std::cout << "decode time: " <<mus/1000.0 << "ms \n";
+			MtFrame& frameDevice = message.code() == Message::DEVICE_0 ? Globals::frameDevice0 : Globals::frameDevice1;
 			
-			if(!f.empty()) {
+			frameDevice.lock();
+			tjDecompress2(Globals::decoder, (const unsigned char*)message.content(), message.size(), frameDevice.data(), frameDevice.width(), 0, frameDevice.height(), TJPF_BGR, TJFLAG_FASTDCT);
+			
+			if(!frameDevice.empty()) {
 				if(message.code() == Message::DEVICE_0) {
 					Globals::buffer0.lock();
-					Globals::buffer0.push(f, message.timestamp());
+					Globals::buffer0.push(frameDevice.get(), message.timestamp());
 					Globals::buffer0.unlock();
 				}
 				if(message.code() == Message::DEVICE_1) {
 					Globals::buffer1.lock();
-					Globals::buffer1.push(f, message.timestamp());
+					Globals::buffer1.push(frameDevice.get(), message.timestamp());
 					Globals::buffer1.unlock();
 				}
 			}
+			
+			frameDevice.unlock();
 		}
 	});
 	
 	client.onInfo([&](const Message& message) {
 		std::cout << "Info received: [Code:" << message.code() << "] " << message.str() << std::endl;
+		
+		// Ask format
 		if(message.code() == Message::DEVICE_0 && message.str() == "Started.") {
 			client.sendInfo(Message(Message::DEVICE_0_FORMAT, "?"));
-			client.sendInfo(Message("Send"));
 		}
+
+		// Answered format
+		if(message.code() == Message::DEVICE_0_FORMAT) {
+			bool exist = false;
+			MessageFormat command(message.str());
+			
+			int width 	= command.valueOf<int>("width");
+			int height 	= command.valueOf<int>("height");
+			
+			Globals::frameDevice0.lock();
+			Globals::frameDevice0.resetSize(width, height);
+			// Can start
+			if(!Globals::frameDevice0.empty())
+				client.sendInfo(Message(Message::DEVICE_0, "Send"));
+			
+			Globals::frameDevice0.unlock();
+		}
+		
 	});
 	
 	client.onError([&](const Error& error) {
@@ -121,6 +153,7 @@ int main() {
 	// -- End
 	cv::destroyAllWindows();
 	client.disconnect();
+	tjDestroy(Globals::decoder);
 
 	std::cout << "Clean exit" << std::endl;
 	std::cout << "Press a key to continue..." << std::endl;

@@ -49,10 +49,12 @@ REM set EVT_SCRIPT="C:\Program Files (x86)\Microsoft Visual Studio\2017\Communit
 
 :: ----- Define dependecies -----
 set INCLUDES_PATH_DEP=^
-	D:\Dev\Opencv4\build_vc15_x64\install\include
+	D:\Dev\Opencv4\build_vc15_x64\install\include ^
+	D:\Dev\LibJpeg\libjpeg-turbo-1.5.2
 
 set LIBRARIES_PATH_DEP=^
-	D:\Dev\Opencv4\build_vc15_x64\install\x64\vc15\lib
+	D:\Dev\Opencv4\build_vc15_x64\install\x64\vc15\lib ^
+	D:\Dev\LibJpeg\build_vc17x64\Release
  
 set LIBRARIES_NAME_DEP=^
 	ws2_32.lib ^
@@ -61,7 +63,8 @@ set LIBRARIES_NAME_DEP=^
 	opencv_highgui400.lib ^
 	opencv_imgcodecs400.lib ^
 	opencv_dnn400.lib ^
-	opencv_videoio400.lib
+	opencv_videoio400.lib ^
+	turbojpeg.lib
  
 set COMMAND_LAUNCH=
 
@@ -73,6 +76,7 @@ call :needFile D:\Dev\Opencv4\build_vc15_x64\install\x64\vc15\bin opencv_imgcode
 call :needFile D:\Dev\Opencv4\build_vc15_x64\install\x64\vc15\bin opencv_imgproc400.dll !fRelease!
 call :needFile D:\Dev\Opencv4\build_vc15_x64\install\x64\vc15\bin opencv_videoio400.dll !fRelease!
 call :needFile D:\Dev\Opencv4\build_vc15_x64\install\x64\vc15\bin opencv_ffmpeg400_64.dll !fRelease!
+call :needFile D:\Dev\LibJpeg\build_vc17x64\Release turbojpeg.dll !fRelease!
 echo.
 
 ::--------------------------------------------------------
