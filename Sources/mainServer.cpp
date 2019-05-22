@@ -141,8 +141,8 @@ int main() {
 	if(device0.open(PATH_CAMERA_0)) {
 		// Params
 		// device0.setFormat(1280, 720, Device::MJPG);	
-		// device0.setFormat(640, 480, Device::MJPG);	
-		device0.setFormat(320, 240, Device::MJPG);	
+		device0.setFormat(640, 480, Device::MJPG);	
+		// device0.setFormat(320, 240, Device::MJPG);	
 		
 		for(auto& client: server.getClients()) {
 			if(client.connected) {
@@ -186,8 +186,8 @@ int main() {
 	
 	if(device1.open(PATH_CAMERA_1)) {
 		// device1.setFormat(1280, 720, Device::MJPG);	
-		// device1.setFormat(640, 480, Device::MJPG);	
-		device1.setFormat(320, 240, Device::MJPG);	
+		device1.setFormat(640, 480, Device::MJPG);	
+		// device1.setFormat(320, 240, Device::MJPG);	
 		
 		// Events
 		device1.onFrame([&](const Gb::Frame& frame){
