@@ -42,8 +42,8 @@ namespace Globals {
 	FrameBuffer buffer0;
 	FrameBuffer buffer1;
 	
-	MtFrame frameDevice0;
-	MtFrame frameDevice1;
+	FrameMt frameDevice0;
+	FrameMt frameDevice1;
 	
 	tjhandle decoder = nullptr;
 }
@@ -76,7 +76,7 @@ int main() {
 	
 	client.onData([&](const Message& message) {		
 		if(message.code() == Message::DEVICE_0 || message.code() == Message::DEVICE_1) {
-			MtFrame& frameDevice = message.code() == Message::DEVICE_0 ? Globals::frameDevice0 : Globals::frameDevice1;
+			FrameMt& frameDevice = message.code() == Message::DEVICE_0 ? Globals::frameDevice0 : Globals::frameDevice1;
 			
 			frameDevice.lock();
 			tjDecompress2(Globals::decoder, (const unsigned char*)message.content(), message.size(), frameDevice.data(), frameDevice.width(), 0, frameDevice.height(), TJPF_BGR, TJFLAG_FASTDCT);
@@ -101,28 +101,52 @@ int main() {
 	client.onInfo([&](const Message& message) {
 		std::cout << "Info received: [Code:" << message.code() << "] " << message.str() << std::endl;
 		
-		// Ask format
-		if(message.code() == Message::DEVICE_0 && message.str() == "Started.") {
-			client.sendInfo(Message(Message::DEVICE_0_FORMAT, "?"));
-		}
-
-		// Answered format
-		if(message.code() == Message::DEVICE_0_FORMAT) {
-			bool exist = false;
-			MessageFormat command(message.str());
+		auto __treatDeviceInfo = [&](FrameMt& frame, unsigned int deviceCode) {
+			bool treat = false;
 			
-			int width 	= command.valueOf<int>("width");
-			int height 	= command.valueOf<int>("height");
+			// Device just started -> Ask format
+			if(message.code() == deviceCode) {
+				if(message.str() == "Started.") {
+					client.sendInfo(Message(message.code() | Message::DEVICE_FORMAT, "?"));
+					treat = true;
+				}
+			}
 			
-			Globals::frameDevice0.lock();
-			Globals::frameDevice0.resetSize(width, height);
-			// Can start
-			if(!Globals::frameDevice0.empty())
-				client.sendInfo(Message(Message::DEVICE_0, "Send"));
+			// Device answered about format
+			if(message.code() & Message::DEVICE_FORMAT) {
+				bool exist = false;
+				MessageFormat command(message.str());
+				
+				int width 	= command.valueOf<int>("width");
+				int height 	= command.valueOf<int>("height");
+				
+				frame.lock();
+				frame.resetSize(width, height);
+				
+				// Ask device to send images
+				if(!frame.empty())
+					client.sendInfo(Message(deviceCode, "Send"));
+				
+				frame.unlock();
+				treat = true;
+			}
 			
-			Globals::frameDevice0.unlock();
+			return treat;
+		};
+		
+		// -- Treat device 0 --
+		if(message.code() & Message::DEVICE_0) {
+			if(!__treatDeviceInfo(Globals::frameDevice0, Message::DEVICE_0)) {
+				// Do something?
+			}
 		}
 		
+		// -- Treat device 1 --
+		if(message.code() & Message::DEVICE_1) {
+			if(!__treatDeviceInfo(Globals::frameDevice1, Message::DEVICE_1)) {
+				// Do something?
+			}			
+		}
 	});
 	
 	client.onError([&](const Error& error) {

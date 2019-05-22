@@ -91,9 +91,9 @@ public:
 
 
 // -- Multi threaded cv::frames
-class MtFrame {
+class FrameMt {
 public:	
-	MtFrame() : _frame(cv::Mat::zeros(1, 1, CV_8UC3)) {
+	FrameMt() : _frame(cv::Mat::zeros(1, 1, CV_8UC3)) {
 	}
 	
 	void lock() const {

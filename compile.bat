@@ -5,9 +5,12 @@ cd /d %~dp0
 set fRelease=%~dp0Release\
 set commit=1
 set launch=0
+set compile=0
 
-call compileCode.bat Server mainServer
-REM call compileCode.bat Client mainClient
+if %compile%==1 (
+REM call compileCode.bat Server mainServer
+call compileCode.bat Client mainClient
+)
 
 :: Launch on success
 cd /d %fRelease%/
