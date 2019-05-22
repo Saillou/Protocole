@@ -154,16 +154,9 @@ public:
 		const Socket& udpSock = client.udpSockServerId == _udpSock4.get() ? _udpSock4 : _udpSock6;
 		
 		if(!udpSock.sendTo(msg, client.udpAddress)) {
-			int error = wlc::getError();
-			if(wlc::errorIs(wlc::WOULD_BLOCK, error)) {
-				Timer::wait(1);
-				return sendData(client, msg); // Recursive call
-			}
-			else {
-				std::lock_guard<std::mutex> lockCbk(_mutCbk);
-				if(_cbkError) 
-					_cbkError(Error(error, "UDP send Error"));	
-			}			
+			std::lock_guard<std::mutex> lockCbk(_mutCbk);
+			if(_cbkError) 
+				_cbkError(Error(wlc::getError(), "UDP send Error"));			
 		}
 	}
 	
