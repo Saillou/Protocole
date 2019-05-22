@@ -5,10 +5,10 @@ cd /d %~dp0
 set fRelease=%~dp0Release\
 set commit=1
 set launch=0
-set compile=0
+set compile=1
 
 if %compile%==1 (
-REM call compileCode.bat Server mainServer
+call compileCode.bat Server mainServer
 call compileCode.bat Client mainClient
 )
 

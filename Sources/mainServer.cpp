@@ -86,7 +86,7 @@ int main() {
 	server.onInfo([&](const Server::ClientInfo& client, const Message& message) {
 		std::cout << "Info received from client_" << client.id() << ": [Code:" << message.code() << "] " << message.str() << std::endl;
 		
-		auto __treatDeviceInfo = [&](DeviceMt& device) {
+		auto __treatDeviceInfo = [&](DeviceMt& device, unsigned int deviceCode) {
 			bool treated = false;
 			
 			// Talking about format
@@ -102,7 +102,7 @@ int main() {
 					command.add("height", fmt.height);
 					command.add("pixel", fmt.format);
 					
-					server.sendInfo(client, Message(Message::DEVICE_0_FORMAT, command.str()));
+					server.sendInfo(client, Message(deviceCode | Message::DEVICE_FORMAT, command.str()));
 				}
 				else {
 					bool exist = false;
@@ -128,7 +128,7 @@ int main() {
 				if(msg == "?") {
 					MessageFormat command;
 					command.add("saturation", device.get(Device::Saturation));
-					server.sendInfo(client, Message(Message::DEVICE_0_FORMAT, command.str()));
+					server.sendInfo(client, Message(deviceCode | Message::DEVICE_PROPERTIES, command.str()));
 				}
 				else {
 					bool exist = false;
@@ -156,7 +156,7 @@ int main() {
 		
 		// -- About device 0 --
 		if(message.code() & Message::DEVICE_0) {
-			if(!__treatDeviceInfo(device0)) {
+			if(!__treatDeviceInfo(device0, Message::DEVICE_0)) {
 				if(message.str() == "Send")
 					mapRequests[client.id()].play0 = true;
 			}
@@ -164,7 +164,7 @@ int main() {
 		
 		// -- About device 1 --
 		if(message.code() & Message::DEVICE_1) {
-			if(!__treatDeviceInfo(device1)) {
+			if(!__treatDeviceInfo(device1, Message::DEVICE_1)) {
 				if(message.str() == "Send")
 					mapRequests[client.id()].play1 = true;
 			}
