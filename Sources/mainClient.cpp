@@ -65,7 +65,10 @@ int main() {
 	
 	client.onData([&](const Message& message) {		
 		if(message.code() == Message::DEVICE_0 || message.code() == Message::DEVICE_1) {
+			Timer t;
 			cv::Mat f = cv::imdecode(cv::Mat(1, message.size(), CV_8UC1, (void*)message.content()), cv::IMREAD_COLOR);
+			auto mus =  t.elapsed_mus();
+			std::cout << "decode time: " <<mus/1000.0 << "ms \n";
 			
 			if(!f.empty()) {
 				if(message.code() == Message::DEVICE_0) {
