@@ -96,9 +96,9 @@ namespace wlc {
 		switch(eCode) {
 		case WOULD_BLOCK:
 #ifdef _WIN32 	
-			return (error == WSAEWOULDBLOCK);
+			return (error == WSAEWOULDBLOCK) || (error == EAGAIN);
 #elif __linux__	
-			return (error == EWOULDBLOCK);
+			return (error == EWOULDBLOCK) || (error == EAGAIN);
 #endif
 		break;
 		

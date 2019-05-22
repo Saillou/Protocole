@@ -207,13 +207,13 @@ private:
 			if(recv_len < 14) // Bad message
 				continue;
 			
-			for(ssize_t offset = 0; offset < recv_len;) {
+			for(ssize_t offset = 0; offset < recv_len;) { // Assume that we can received packets stacked together
 				// Read header
 				Message msgHeader(buffer + offset, 14);
 				offset += 14;
 				
-				// Not a fragment: read all
-				if(!(msgHeader.code() & Message::FRAGMENT)) {
+				// Complete or Fragmented?
+				if(!(msgHeader.code() & Message::FRAGMENT)) { // Complete message
 					msgHeader.appendData(buffer+offset, msgHeader.size());
 					offset += msgHeader.size();
 					
@@ -221,24 +221,24 @@ private:
 					if(_cbkData) 
 						_cbkData(msgHeader);
 				}
-				else {
-					if(msgHeader.code() & Message::HEADER) {
+				else { // Fragmented messages
+					if(msgHeader.code() & Message::HEADER) { // Header don't have data, only information (timestamps, code, size total)
 						unsigned int code 		 = msgHeader.code() & ~(Message::HEADER | Message::FRAGMENT);
 						messagesBuffering[code] = MessageBuffer(code, msgHeader.timestamp(), msgHeader.size());
 						
-						// No offset up because nothing read
+						// No offsets up because nothing read (data are empty and will come in fragments)
 					}
-					else {
+					else { // Fragment
 						unsigned int code = msgHeader.code() & ~Message::FRAGMENT;
-						if(messagesBuffering[code].timestamp > msgHeader.timestamp()) { // discard
+						if(messagesBuffering[code].timestamp > msgHeader.timestamp()) { // discard, it's and old message
 							// do something ?
 						}
-						else { // add
+						else { // add fragment to packet list
 							messagesBuffering[code].packets.push_back(std::vector<char>(buffer + offset, buffer + offset + msgHeader.size()));
 
-							// Is it finish ?
+							// Are all the packets here ?
 							if(messagesBuffering[code].complete()) {
-								if(messagesBuffering[code].compose(msgHeader)) {
+								if(messagesBuffering[code].compose(msgHeader)) { // Overwrite the message by the concatenated one
 									std::lock_guard<std::mutex> lockCbk(_mutCbk);
 									if(_cbkData) 
 										_cbkData(msgHeader);
@@ -246,11 +246,11 @@ private:
 							}
 						}
 						offset += msgHeader.size();
-					}
-				}
-			}
+					} // End Fragment part
+				} // End Fragmented message part
+			} // End loop stacked packets
 
-		}
+		} // ENd loop receiving message
 		
 		// Forcibly disconnected
 		if(_isConnected)

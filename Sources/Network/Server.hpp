@@ -152,12 +152,23 @@ public:
 	// Send message with UDP
 	void sendData(const ClientInfo& client, const Message& msg) const {
 		const Socket& udpSock = client.udpSockServerId == _udpSock4.get() ? _udpSock4 : _udpSock6;
+		int error = 0;
 		
-		if(!udpSock.sendTo(msg, client.udpAddress)) {
-			std::lock_guard<std::mutex> lockCbk(_mutCbk);
-			if(_cbkError) 
-				_cbkError(Error(wlc::getError(), "UDP send Error"));			
+		for(;;Timer::wait(1)) {
+			if(udpSock.sendTo(msg, client.udpAddress)) {
+				break;
+			}
+			else {
+				error = wlc::getError();
+				if(error != 0 && !wlc::errorIs(error, wlc::WOULD_BLOCK)) {
+					std::lock_guard<std::mutex> lockCbk(_mutCbk);
+					if(_cbkError) 
+						_cbkError(Error(wlc::getError(), "UDP send Error"));	
+					break;
+				}
+			}
 		}
+		
 	}
 	
 	// Send message with TCP
