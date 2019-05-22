@@ -52,7 +52,11 @@ int main() {
 	
 	//-- Connect client
 	Client client;
-	client.connectTo(Globals::IP_ADDRESS, Globals::PORT);
+	if(!client.connectTo(Globals::IP_ADDRESS, Globals::PORT)) {
+		std::cout << "Can't reach server" << std::endl;
+		std::cout << "Press a key to continue..." << std::endl;
+		return std::cin.get();
+	}
 	
 	// -------- Callbacks --------
 	client.onConnect([&]() {
@@ -114,7 +118,7 @@ int main() {
 	// -- End
 	cv::destroyAllWindows();
 	client.disconnect();
-	
+
 	std::cout << "Clean exit" << std::endl;
 	std::cout << "Press a key to continue..." << std::endl;
 	return std::cin.get();

@@ -56,7 +56,11 @@ int main() {
 	std::map<SOCKET, ClientRequest> mapRequests;
 	
 	// -- Connect server --
-	server.connectAt(Globals::PORT);
+	if(!server.connectAt(Globals::PORT)) {
+		std::cout << "Can create server" << std::endl;
+		std::cout << "Press a key to continue..." << std::endl;
+		return std::cin.get();
+	}
 	
 	server.onClientConnect([&](const Server::ClientInfo& client) {
 		std::cout << "New client, client_" << client.id() << std::endl;

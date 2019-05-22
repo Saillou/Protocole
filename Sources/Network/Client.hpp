@@ -27,36 +27,34 @@ public:
 	
 	
 	// Methods
-	void connectTo(const std::string& ipAddress, const int port) {	
+	bool connectTo(const std::string& ipAddress, const int port) {	
 		if(_isConnected)
-			return;
+			return true;
 		
 		// Init windows sockets
 		if(!wlc::initSockets())
-			return;
+			return false;
 
 		// Create address
 		if(!_address.create(ipAddress, port))
 			return disconnect();
 
 		// Set sockets up
-		if(!_udpSock.connect(_address, Proto_Udp)) {
-			std::cout << "UDP - Can't reach server" << std::endl;
+		if(!_udpSock.connect(_address, Proto_Udp)) 
 			return disconnect();
-		}
 		
-		if(!_tcpSock.connect(_address, Proto_Tcp)) {
-			std::cout << "TCP - Can't reach server" << std::endl;
-			return disconnect();	
-		}
+		if(!_tcpSock.connect(_address, Proto_Tcp))
+			return disconnect();
 		
 		// Thread
 		_isAlive = true;
 		_pRecvTcp = std::make_shared<std::thread>(&Client::_recvTcp, this);
 		_pRecvUdp = std::make_shared<std::thread>(&Client::_recvUdp, this);
+		
+		return true;
 	}
 	
-	void disconnect() {
+	bool disconnect() {
 		_isConnected = false;
 		_isAlive = false;
 		
@@ -72,6 +70,8 @@ public:
 		_tcpSock.close();
 		
 		wlc::uninitSockets();
+		
+		return false;
 	}
 	
 	void sendInfo(const Message& msg) const {

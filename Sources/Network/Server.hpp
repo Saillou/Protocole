@@ -74,7 +74,7 @@ public:
 	}
 	
 	// Methods
-	void disconnect() {
+	bool disconnect() {
 		_isConnected = false;
 		
 		// Server disconnecting .. Send something ?		
@@ -104,15 +104,17 @@ public:
 		_clients.clear();
 		
 		wlc::uninitSockets();
+		
+		return false;
 	}
 	
-	void connectAt(const int port) {
+	bool connectAt(const int port) {
 		if(_isConnected)
-			return;
+			return true;
 		
 		// Init sockets
 		if(!wlc::initSockets())
-			return;
+			return false;
 
 		// Create server address
 		SocketAddress address_v4;
@@ -147,6 +149,8 @@ public:
 		_pRecvUdp6 	= std::make_shared<std::thread>(&Server::_recvUdp, this, std::ref(_udpSock6));
 		_pHandleTcp4 = std::make_shared<std::thread>(&Server::_handleTcp, this, std::ref(_tcpSock4));
 		_pHandleTcp6 = std::make_shared<std::thread>(&Server::_handleTcp, this, std::ref(_tcpSock6));
+		
+		return true;
 	}
 	
 	// Send message with UDP
