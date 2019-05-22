@@ -7,7 +7,7 @@ set gitPush=1
 set launch=0
 
 REM call compileCode.bat Server mainServer
-REM call compileCode.bat Client mainClient
+call compileCode.bat Client mainClient
 
 :: Launch on success
 cd /d %fRelease%/
@@ -44,8 +44,8 @@ if %gitPush%==0 (
 
 :: Launch
 if %launch%==1 (
-	REM start "Server" Server.exe
-	REM timeout 1
+	start "Server" Server.exe
+	timeout 1
 	start "Client" Client.exe
 )
 
