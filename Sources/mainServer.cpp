@@ -140,9 +140,9 @@ int main() {
 	// -- Open devices --	
 	if(device0.open(PATH_CAMERA_0)) {
 		// Params
-		// device0.setFormat(1280, 720, Device::MJPG);	
+		device0.setFormat(1280, 720, Device::MJPG);	
 		// device0.setFormat(640, 480, Device::MJPG);	
-		device0.setFormat(320, 240, Device::MJPG);	
+		// device0.setFormat(320, 240, Device::MJPG);	
 		
 		for(auto& client: server.getClients()) {
 			if(client.connected) {
