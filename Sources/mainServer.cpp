@@ -71,11 +71,11 @@ int main() {
 		std::cout << "New client, client_" << client.id() << std::endl;
 		
 		server.sendInfo(client, Message(Message::DEVICE_0, device0.isOpened() ? "Started." : "Not Started."));
-		mapRequests[client.id()].play = ClientRequest();
+		mapRequests[client.id()] = ClientRequest();
 	});
 	server.onClientDisconnect([&](const Server::ClientInfo& client) {
 		std::cout << "Client quit, client_" << client.id() << std::endl;
-		mapRequests[client.id()].play = ClientRequest();
+		mapRequests[client.id()] = ClientRequest();
 	});
 	server.onError([&](const Error& error) {
 		std::cout << "Error : " << error.msg() << " code: " << error.code() << std::endl;
@@ -92,7 +92,7 @@ int main() {
 		}
 		
 		// Talking about format
-		if(message.code() == DEVICE_0_FORMAT) {
+		if(message.code() == Message::DEVICE_0_FORMAT) {
 			std::string msg = message.str();
 			
 			// --- get ---
@@ -122,8 +122,9 @@ int main() {
 		}
 		
 		// Talking about properties
-		if(message.code() == DEVICE_0_PROPERTIES) {
+		if(message.code() == Message::DEVICE_0_PROPERTIES) {
 			// --- get ---
+			std::string msg = message.str();
 			if(msg == "?") {
 				MessageFormat command;
 				command.add("saturation", device0.get(Device::Saturation));
@@ -197,7 +198,7 @@ int main() {
 		
 			// Send
 			for(auto& client: server.getClients()) {
-				if(client.connected && mapRequests[client.id()].play) {
+				if(client.connected && mapRequests[client.id()].play0) {
 					server.sendData(client, Message(Message::DEVICE_0, reinterpret_cast<const char*>(frame.start()), frame.length()));
 				}
 			}
@@ -212,7 +213,7 @@ int main() {
 		// // Events
 		// device1.onFrame([&](const Gb::Frame& frame){
 			// for(auto& client: server.getClients()) {
-				// if(client.connected  && mapRequests[client.id()].play) {
+				// if(client.connected  && mapRequests[client.id()].play1) {
 					// server.sendData(client, Message(Message::DEVICE_1, reinterpret_cast<const char*>(frame.start()), frame.length()));
 				// }
 			// }
