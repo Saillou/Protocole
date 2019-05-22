@@ -61,20 +61,21 @@ int main() {
 	
 	client.onData([&](const Message& message) {		
 		if(message.code() == Message::DEVICE_0 || message.code() == Message::DEVICE_1) {
-			cv::Mat f = cv::imdecode(cv::Mat(1, message.size(), CV_8UC1, (void*)message.content()), cv::IMREAD_COLOR);
+			std::cout << clock() << std::endl;
+			// cv::Mat f = cv::imdecode(cv::Mat(1, message.size(), CV_8UC1, (void*)message.content()), cv::IMREAD_COLOR);
 			
-			if(!f.empty()) {
-				if(message.code() == Message::DEVICE_0) {
-					Globals::buffer0.lock();
-					Globals::buffer0.push(f, message.timestamp());
-					Globals::buffer0.unlock();
-				}
-				if(message.code() == Message::DEVICE_1) {
-					Globals::buffer1.lock();
-					Globals::buffer1.push(f, message.timestamp());
-					Globals::buffer1.unlock();
-				}
-			}
+			// if(!f.empty()) {
+				// if(message.code() == Message::DEVICE_0) {
+					// Globals::buffer0.lock();
+					// Globals::buffer0.push(f, message.timestamp());
+					// Globals::buffer0.unlock();
+				// }
+				// if(message.code() == Message::DEVICE_1) {
+					// Globals::buffer1.lock();
+					// Globals::buffer1.push(f, message.timestamp());
+					// Globals::buffer1.unlock();
+				// }
+			// }
 		}
 	});
 	

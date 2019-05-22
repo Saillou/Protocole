@@ -41,12 +41,12 @@ public:
 
 		// Set sockets up
 		if(!_udpSock.connect(_address, Proto_Udp)) {
-			std::cout << "UDP connect: " << wlc::getError() << std::endl;
+			std::cout << "UDP - Can't reach server" << std::endl;
 			return disconnect();
 		}
 		
 		if(!_tcpSock.connect(_address, Proto_Tcp)) {
-			std::cout << "TCP connect: " << wlc::getError() << std::endl;
+			std::cout << "TCP - Can't reach server" << std::endl;
 			return disconnect();	
 		}
 		
