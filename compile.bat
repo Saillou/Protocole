@@ -5,7 +5,7 @@ cd /d %~dp0
 set fRelease=%~dp0Release\
 set compile=1
 set commit=1
-set launch=1
+set launch=0
 
 if %compile%==1 (
 	call compileCode.bat Server mainServer
@@ -47,8 +47,8 @@ if %commit%==0 (
 
 :: Launch
 if %launch%==1 (
-	REM start "Server" Server.exe
-	REM timeout 1
+	start "Server" Server.exe
+	timeout 1
 	start "Client" Client.exe
 )
 

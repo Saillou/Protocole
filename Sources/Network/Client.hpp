@@ -34,16 +34,17 @@ public:
 		// Init windows sockets
 		if(!wlc::initSockets())
 			return false;
-
+		
 		// Create address
-		if(!_address.create(ipAddress, port))
-			return disconnect();
-
-		// Set sockets up
-		if(!_udpSock.connect(_address, Proto_Udp)) 
+		SocketAddress address;
+		if(!address.create(ipAddress, port))
 			return disconnect();
 		
-		if(!_tcpSock.connect(_address, Proto_Tcp))
+		// Set sockets up
+		if(!_udpSock.connect(address, Proto_Udp)) 
+			return disconnect();
+		
+		if(!_tcpSock.connect(address, Proto_Tcp))
 			return disconnect();
 		
 		// Thread
@@ -272,7 +273,6 @@ private:
 	
 	Socket _udpSock;
 	Socket _tcpSock;
-	SocketAddress _address;
 	
 	// Callbacks
 	mutable std::mutex _mutCbk;

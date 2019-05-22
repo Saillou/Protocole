@@ -60,12 +60,7 @@ int main() {
 	DeviceMt device1;
 	std::map<SOCKET, ClientRequest> mapRequests;
 	
-	// -- Connect server --
-	if(!server.connectAt(Globals::PORT)) {
-		std::cout << "Can create server" << std::endl;
-		std::cout << "Press a key to continue..." << std::endl;
-		return std::cin.get();
-	}
+	// -- Events
 	
 	server.onClientConnect([&](const Server::ClientInfo& client) {
 		std::cout << "New client, client_" << client.id() << std::endl;
@@ -176,8 +171,18 @@ int main() {
 		std::cout << "Data received from client_" << client.id() << ": [Code:" << message.code() << "] " << message.str() << std::endl;
 	});
 	
+	// -- Create server --
+	while(Globals::signalStatus != SIGINT && !server.connectAt(Globals::PORT)) {
+		std::cout << "Can create server" << std::endl;
+		Timer::wait(1000);
+	}
 	
+	if( Globals::signalStatus == SIGINT) {
+		std::cout << "Press a key to continue..." << std::endl;
+		return std::cin.get();
+	}
 	
+	// --- Open Devices ---
 	
 	Timer t;
 	std::deque<double> freq(100, 0.0);
@@ -230,6 +235,7 @@ int main() {
 		});
 	}
 	
+	
 	if(device1.open(PATH_CAMERA_1)) {
 		device1.setFormat(1280, 720, Device::MJPG);	
 		// device1.setFormat(640, 480, Device::MJPG);	
@@ -251,7 +257,6 @@ int main() {
 			}
 		});
 	}
-	
 	
 	// -------- Main loop --------  
 	for(Timer timer; Globals::signalStatus != SIGINT; timer.wait(100)) {

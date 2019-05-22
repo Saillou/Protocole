@@ -28,12 +28,12 @@
 namespace Globals {
 	// Constantes
 	// const std::string IP_ADDRESS = "192.168.11.24"; 	// Barnacle V4
-	// const std::string IP_ADDRESS = "127.0.0.1"; 			// localhost V4
-	// const int PORT = 8888;											// Port v4
+	const std::string IP_ADDRESS = "127.0.0.1"; 	// localhost V4
+	const int PORT = 8888;										// Port v4
 	
-	const std::string IP_ADDRESS = "fe80::ba93:fb12:aea8:c64c"; 	// Barnacle V6
-	// const std::string IP_ADDRESS = "::1"; 								// localhost V6
-	const int PORT = 8889;														// Port v6
+	// const std::string IP_ADDRESS = "fe80::ba93:fb12:aea8:c64c"; 	// Barnacle V6
+	// const std::string IP_ADDRESS = "::1"; 									// localhost V6
+	// const int PORT = 8889;															// Port v6
 	
 	// Variables
 	volatile std::sig_atomic_t signalStatus = 0;
@@ -61,13 +61,8 @@ int main() {
 	// -- Init decoder
 	Globals::decoder = tjInitDecompress();
 	
-	//-- Connect client
+	//-- Create client
 	Client client;
-	if(!client.connectTo(Globals::IP_ADDRESS, Globals::PORT)) {
-		std::cout << "Can't reach server" << std::endl;
-		std::cout << "Press a key to continue..." << std::endl;
-		return std::cin.get();
-	}
 	
 	// -------- Callbacks --------
 	client.onConnect([&]() {
@@ -153,6 +148,17 @@ int main() {
 		std::cout << "Error: " << error.msg() << std::endl;
 	});
 	
+	
+	// Connect client
+	while(Globals::signalStatus != SIGINT && !client.connectTo(Globals::IP_ADDRESS, Globals::PORT)) {
+		std::cout << "Can't reach server..." << std::endl;
+		Timer::wait(1000);
+	}
+	
+	if( Globals::signalStatus == SIGINT) {
+		std::cout << "Press a key to continue..." << std::endl;
+		return std::cin.get();
+	}
 	
 	// -------- Main loop --------
 	cv::Mat frameDisp_0, frameDisp_1;
