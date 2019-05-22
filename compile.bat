@@ -8,7 +8,7 @@ set launch=0
 set compile=1
 
 if %compile%==1 (
-call compileCode.bat Server mainServer
+REM call compileCode.bat Server mainServer
 call compileCode.bat Client mainClient
 )
 
