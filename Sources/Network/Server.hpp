@@ -160,7 +160,7 @@ public:
 			}
 			else {
 				error = wlc::getError();
-				if(error != 0 && !wlc::errorIs(error, wlc::WOULD_BLOCK)) {
+				if(error != 0 && !wlc::errorIs(wlc::WOULD_BLOCK, error)) {
 					std::lock_guard<std::mutex> lockCbk(_mutCbk);
 					if(_cbkError) 
 						_cbkError(Error(wlc::getError(), "UDP send Error"));	
