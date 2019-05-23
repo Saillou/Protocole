@@ -180,8 +180,10 @@ int main() {
 		if(updated_0)
 			cv::imshow("frame device 0", frameDisp_0);
 		
-		if(updated_1)
+		if(updated_1) {
 			cv::imshow("frame device 1", frameDisp_1);
+			client.sendInfo(Message(Message::DEVICE_1, "Send"));
+		}
 	}
 		
 	// -- End
