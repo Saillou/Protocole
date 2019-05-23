@@ -201,10 +201,8 @@ public:
 		
 		_mutSendCtn.lock();
 		_pendingSend.push_back(s);
-		// _pendingSendUpdated = true;
+		_pendingSendUpdated = true;
 		_mutSendCtn.unlock();
-		
-		// Timer::waitMus(1);
 	}
 	
 	// Send message with TCP
@@ -217,10 +215,8 @@ public:
 		
 		_mutSendCtn.lock();
 		_pendingSend.push_back(s);
-		// _pendingSendUpdated = true;
+		_pendingSendUpdated = true;
 		_mutSendCtn.unlock();
-		
-		// Timer::waitMus(1);	
 	}
 	
 	// Getters
@@ -444,10 +440,10 @@ private:
 	void _sendLoop() {
 		// FIFO
 		for(Timer timer; _isConnected; ) {
-			// if(!_pendingSendUpdated)
-				// continue;
+			if(!_pendingSendUpdated)
+				continue;
 			
-			std::lock_guard<std::mutex> lockCtn(_mutSendCtn);
+			std::lock_guard<std::mutex> lockCbk(_mutSendCtn);
 			if(_pendingSend.empty())
 				continue;
 			
