@@ -184,13 +184,11 @@ private:
 		const int TIMEOUT = 30 * 1000; // 30 sec
 		
 		std::map<unsigned int, MessageBuffer> messagesBuffering;
+		std::map<unsigned int, uint64_t> messagesBufferingTs;
 		
 		// Loop
 		for(Timer timer; _isAlive; ) {
-			int rc = wlc::polling(&fdRead, 1, TIMEOUT);
-			if (rc <= 0) // timeout (==0) or failed (<0)
-				break;
-			if(!(fdRead.revents & POLLIN)) // Unexpected
+			if (wlc::polling(&fdRead, 1, TIMEOUT) <= 0 || !(fdRead.revents & POLLIN)) // timeout (==0) or failed (<0) or unexpected
 				break;
 			
 			// UDP - Receive
@@ -240,6 +238,7 @@ private:
 					if(message.code() & Message::HEADER) { // Header don't have data, only information (timestamps, code, size total)
 						unsigned int code 		 = message.code() & ~(Message::HEADER | Message::FRAGMENT);
 						messagesBuffering[code] = MessageBuffer(code, message.timestamp(), message.size());
+						messagesBufferingTs[code] = Timer::timestampMs();
 						// No offsets up because nothing read (data are empty and will come in fragments)
 					}
 					else { // Fragment
@@ -252,7 +251,9 @@ private:
 
 							// Are all the packets here ?
 							if(messagesBuffering[code].complete()) {
-								if(messagesBuffering[code].compose(message)) { // Overwrite the message by the concatenated one					
+								if(messagesBuffering[code].compose(message)) { // Overwrite the message by the concatenated one	
+									uint64_t now = Timer::timestampMs();
+									std::cout << now - messagesBufferingTs[code] << "ms" << std::endl;
 									std::lock_guard<std::mutex> lockCbk(_mutCbk);
 									if(_cbkData) 
 										_cbkData(message);
