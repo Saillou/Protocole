@@ -22,9 +22,9 @@ public:
 		clock_t lastUpdate = 0;		
 		bool connected = false;
 		
-		SOCKET udpSockServerId; // <-- Server
-		Socket tcpSock;	// <-- Client
-		SocketAddress udpAddress;
+		SOCKET udpSockServerId; 	// <-- Server
+		Socket tcpSock;				// <-- Client
+		SocketAddress udpAddress; // <-- Client
 		
 		SOCKET id() const {
 			return tcpSock.get();
@@ -155,6 +155,7 @@ public:
 	
 	// Send message with UDP
 	void sendData(const ClientInfo& client, const Message& msg) const {
+		std::cout << std::this_thread::get_id() << std::endl;
 		const Socket& udpSock = client.udpSockServerId == _udpSock4.get() ? _udpSock4 : _udpSock6;
 		
 		if(!udpSock.sendTo(msg, client.udpAddress)) {
@@ -166,6 +167,7 @@ public:
 	
 	// Send message with TCP
 	void sendInfo(const ClientInfo& client, const Message& msg) const {
+		std::cout << std::this_thread::get_id() << std::endl;
 		if(send(client.tcpSock.get(), msg.data(), (int)msg.length(), 0) != (int)msg.length()) {
 			std::lock_guard<std::mutex> lockCbk(_mutCbk);
 			if(_cbkError) 
