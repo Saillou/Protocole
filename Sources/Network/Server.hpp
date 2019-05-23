@@ -6,6 +6,7 @@
 #include <thread>
 #include <atomic>
 #include <mutex>
+#include <deque>
 #include <vector>
 #include <algorithm>
 #include <functional>
