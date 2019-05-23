@@ -53,9 +53,9 @@ int main() {
 	
 	client.onData([&](const Message& message) {		
 		// std::cout << "Datas : - code : [" << message.code() << "] - size : " << message.size()/1000.0 << "KB \n";
-		unsigned long long time = std::stoull(message.str());
-		unsigned long long diff = Timer::timestampMs() - time;
-		std::cout << diff << "ms elapsed." << std::endl;
+		unsigned long long t1 = Timer::timestampMs();
+		unsigned long long t0 = std::stoull(message.str());
+		std::cout << t1 - t0 << "ms." << std::endl;
 		client.sendData(Message("Ping"));
 	});
 	
