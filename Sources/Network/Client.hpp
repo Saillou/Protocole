@@ -229,7 +229,7 @@ private:
 					if(message.code() & Message::HEADER) { // Header don't have data, only information (timestamps, code, size total)
 						unsigned int code 		 = message.code() & ~(Message::HEADER | Message::FRAGMENT);
 						messagesBuffering[code] = MessageBuffer(code, message.timestamp(), message.size());
-						messagesBufferingTimestamps[code] = Timer::timestampMs();
+						// messagesBufferingTimestamps[code] = Timer::timestampMs();
 						// No offsets up because nothing read (data are empty and will come in fragments)
 					}
 					else { // Fragment
@@ -243,7 +243,7 @@ private:
 							// Are all the packets here ?
 							if(messagesBuffering[code].complete()) {
 								if(messagesBuffering[code].compose(message)) { // Overwrite the message by the concatenated one									
-									std::cout << Timer::timestampMs() - messagesBufferingTimestamps[code] << "ms elapsed - Send \n";
+									// std::cout << Timer::timestampMs() - messagesBufferingTimestamps[code] << "ms elapsed - Send \n";
 									std::lock_guard<std::mutex> lockCbk(_mutCbk);
 									if(_cbkData) 
 										_cbkData(message);
