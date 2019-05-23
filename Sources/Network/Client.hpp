@@ -181,6 +181,7 @@ private:
 		std::map<unsigned int, uint64_t> messagesBufferingTimestamps;
 		
 		for(Timer timer; _isAlive; ) {	
+			std::cout << "Beg" << std::endl;
 			auto t0 = Timer::timestampMs();
 			// UDP - Receive
 			memset(buffer, 0, BUFFER_SIZE);
