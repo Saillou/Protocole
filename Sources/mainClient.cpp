@@ -100,7 +100,7 @@ int main() {
 	});
 	
 	client.onInfo([&](const Message& message) {
-		std::cout << "Info received: [Code:" << message.code() << "] " << message.str() << std::endl;
+		// std::cout << "Info received: [Code:" << message.code() << "] " << message.str() << std::endl;
 		
 		auto __treatDeviceInfo = [&](FrameMt& frame, unsigned int deviceCode) {
 			bool treat = false;
