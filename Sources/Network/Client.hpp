@@ -210,9 +210,6 @@ private:
 				continue;
 			
 			for(ssize_t offset = 0; offset < recv_len;) { // Assume that we can received packets stacked together
-				std::cout << Timer::timestampMs() - messagesBufferingTimestamps[0] << "ms elapsed \n";
-				messagesBufferingTimestamps[0] = Timer::timestampMs();
-				
 				// Read header
 				Message msgHeader(buffer + offset, 14);
 				offset += 14;
@@ -230,7 +227,7 @@ private:
 					if(msgHeader.code() & Message::HEADER) { // Header don't have data, only information (timestamps, code, size total)
 						unsigned int code 		 = msgHeader.code() & ~(Message::HEADER | Message::FRAGMENT);
 						messagesBuffering[code] = MessageBuffer(code, msgHeader.timestamp(), msgHeader.size());
-						// messagesBufferingTimestamps[code] = Timer::timestampMs();
+						messagesBufferingTimestamps[code] = Timer::timestampMs();
 						// No offsets up because nothing read (data are empty and will come in fragments)
 					}
 					else { // Fragment
@@ -244,11 +241,14 @@ private:
 							// Are all the packets here ?
 							if(messagesBuffering[code].complete()) {
 								if(messagesBuffering[code].compose(msgHeader)) { // Overwrite the message by the concatenated one
-									// std::cout << Timer::timestampMs() - messagesBufferingTimestamps[code] << "ms elapsed \n";
+									std::cout << Timer::timestampMs() - messagesBufferingTimestamps[code] << "ms elapsed - Send \n";
 									std::lock_guard<std::mutex> lockCbk(_mutCbk);
 									if(_cbkData) 
 										_cbkData(msgHeader);
 								}
+							}
+							else {
+								std::cout << Timer::timestampMs() - messagesBufferingTimestamps[code] << "ms elapsed \n";
 							}
 						}
 						offset += msgHeader.size();
