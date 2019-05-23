@@ -199,10 +199,10 @@ public:
 		const Socket& udpSock = client.udpSockServerId == _udpSock4.get() ? _udpSock4 : _udpSock6;
 		SendingContainer s(udpSock, client.udpAddress, msg);
 		
-		// _mutSendCtn.lock();
+		_mutSendCtn.lock();
 		_pendingSend.push_back(s);
 		// _pendingSendUpdated = true;
-		// _mutSendCtn.unlock();
+		_mutSendCtn.unlock();
 		
 		// Timer::waitMus(1);
 	}
@@ -215,10 +215,10 @@ public:
 		
 		SendingContainer s(itClient->info.tcpSock, msg);
 		
-		// _mutSendCtn.lock();
+		_mutSendCtn.lock();
 		_pendingSend.push_back(s);
 		// _pendingSendUpdated = true;
-		// _mutSendCtn.unlock();
+		_mutSendCtn.unlock();
 		
 		// Timer::waitMus(1);	
 	}
@@ -447,9 +447,9 @@ private:
 			// if(!_pendingSendUpdated)
 				// continue;
 			
-			// std::lock_guard<std::mutex> lockCbk(_mutSendCtn);
-			// if(_pendingSend.empty())
-				// continue;
+			std::lock_guard<std::mutex> lockCtn(_mutSendCtn);
+			if(_pendingSend.empty())
+				continue;
 			
 			// Send first and remove
 			_pendingSend.front().send();
