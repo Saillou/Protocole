@@ -259,7 +259,7 @@ private:
 	}
 
 	void _send(const Socket& connectSocked, const Message& msg, const std::string& msgOnError = "Send error") const {
-		if(send(connectSocked.get(), msg.data(), (int)msg.length(), 0) != (int)msg.length()) {
+		if(!connectSocked.send(msg)) {
 			std::lock_guard<std::mutex> lockCbk(_mutCbk);
 			if(_cbkError) 
 				_cbkError(Error(wlc::getError(), msgOnError));

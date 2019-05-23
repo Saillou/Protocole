@@ -430,6 +430,9 @@ struct Socket {
 		
 		return true;
 	}
+	bool send(const Message& msg) const {
+		return (::send(_socket, msg.data(), (int)msg.length(), 0) == (int)msg.length());
+	}
 	
 	void close() {
 		if(_socket == INVALID_SOCKET)

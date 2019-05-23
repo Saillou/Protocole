@@ -62,6 +62,42 @@ private:
 		std::shared_ptr<std::thread> pThread;
 	};
 	
+	class SendingContainer {
+	public:
+		// -- Constructors
+		// Socket connected
+		SendingContainer(Socket& emitter, const Message& msg) :
+			_proto(Proto_Tcp),
+			_msg(msg),
+			_emitter(emitter)
+		{	}
+		
+		// Socket not connected
+		SendingContainer(Socket& emitter, const SocketAddress& address, const Message& msg) :
+			_proto(Proto_Udp),
+			_msg(msg),
+			_emitter(emitter),
+			_address(address)
+		{	}
+		
+		// -- Methods
+		bool send() {
+			switch(_proto) {
+			case Proto_Tcp:
+				return _emitter.send(_msg);
+			case Proto_Udp:
+				return _emitter.sendTo(_msg, _address);
+			}
+			return false;
+		}
+		
+	private:
+		// -- Members
+		ProtoType _proto;
+		Message _msg;
+		Socket& _emitter;
+		SocketAddress _address;
+	};
 	
 	
 	// -------------- Main class --------------
@@ -155,7 +191,6 @@ public:
 	
 	// Send message with UDP
 	void sendData(const ClientInfo& client, const Message& msg) const {
-		std::cout << std::this_thread::get_id() << std::endl;
 		const Socket& udpSock = client.udpSockServerId == _udpSock4.get() ? _udpSock4 : _udpSock6;
 		
 		if(!udpSock.sendTo(msg, client.udpAddress)) {
@@ -167,8 +202,11 @@ public:
 	
 	// Send message with TCP
 	void sendInfo(const ClientInfo& client, const Message& msg) const {
-		std::cout << std::this_thread::get_id() << std::endl;
-		if(send(client.tcpSock.get(), msg.data(), (int)msg.length(), 0) != (int)msg.length()) {
+		std::vector<ConnectedClient>::const_iterator itClient = _findClientFromId(client.tcpSock.get());
+		if(itClient == _clients.end())
+			return;
+			
+		if(!itClient->info.tcpSock.send(msg)) {
 			std::lock_guard<std::mutex> lockCbk(_mutCbk);
 			if(_cbkError) 
 				_cbkError(Error(wlc::getError(), "TCP send Error"));
@@ -397,6 +435,16 @@ private:
 	std::vector<ConnectedClient>::iterator _findClientFromAddress(const SocketAddress& address) {			
 		for(std::vector<ConnectedClient>::iterator itClient = _clients.begin(); itClient != _clients.end(); ++itClient) {
 			if(SocketAddress::compareHost(itClient->info.tcpSock.address(), address)) {
+				return itClient;
+			}
+		}
+				
+		return _clients.end(); // If not found
+	}
+	
+	std::vector<ConnectedClient>::const_iterator _findClientFromId(const SOCKET& socketId) const {			
+		for(std::vector<ConnectedClient>::const_iterator itClient = _clients.cbegin(); itClient != _clients.cend(); ++itClient) {
+			if(itClient->info.tcpSock.get() == socketId) {
 				return itClient;
 			}
 		}
