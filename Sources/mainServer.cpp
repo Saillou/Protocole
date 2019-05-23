@@ -60,7 +60,7 @@ int main(int argc, char* argv[]) {
 	
 	server.onData([&](const Server::ClientInfo& client, const Message& message) {
 		std::cout << "Data received from client_" << client.id() << ": [Code:" << message.code() << "] " << message.str() << std::endl;
-		client.sendData(Message(std::to_string(message.timestamp())));
+		server.sendData(client, Message(std::to_string(message.timestamp())));
 	});
 	
 	// -- Create server --
