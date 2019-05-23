@@ -190,17 +190,17 @@ private:
 		std::map<unsigned int, MessageBuffer> messagesBuffering;
 		
 		for(Timer timer; _isAlive; ) {
-			int rc = WSAPoll(&fdarray, 1, timeout);
-			std::cout << rc <<std::endl;
 			// int rc = wlc::polling(fds, 1, timeout);
-			// if (rc <= 0) // timeout (==0) or failed (<0)
-				// break;
-			// if(fds[0].revents != POLLIN) // Unexpected
-				// break;
+
+			int rc = WSAPoll(&fdarray, 1, timeout);
+			if (rc <= 0) // timeout (==0) or failed (<0)
+				break;
+			if(!(fdarray.revents & POLLIN)) // Unexpected
+				break;
 			
 			// UDP - Receive
 			memset(buffer, 0, BUFFER_SIZE);
-			
+			std::cout << "Read" << std::endl;
 			if((recv_len = recv(_udpSock.get(), buffer, BUFFER_SIZE, 0)) == SOCKET_ERROR) {		
 				// What kind of error ?
 				int error = wlc::getError();
@@ -212,6 +212,7 @@ private:
 					break;
 				}
 				else if(wlc::errorIs(wlc::MSG_SIZE, error)) { // Message too big
+					std::cout << "Too big" << std::endl;
 					continue;
 				}
 				else {
@@ -221,7 +222,7 @@ private:
 					break;
 				}
 			}
-			
+			std::cout << recv_len << std::endl;
 			// Read buffer
 			if(recv_len < 14) // Bad message
 				continue;
