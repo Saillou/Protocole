@@ -98,7 +98,7 @@ int main() {
 	});
 	
 	client.onInfo([&](const Message& message) {
-		// std::cout << "Info received: [Code:" << message.code() << "] " << message.str() << std::endl;
+		std::cout << "Info received: [Code:" << message.code() << "] " << message.str() << std::endl;
 		
 		auto __treatDeviceInfo = [&](FrameMt& frame, unsigned int deviceCode) {
 			bool treat = false;
@@ -177,15 +177,11 @@ int main() {
 		Globals::buffer1.unlock();
 		
 		// Display frames
-		if(updated_0) {
+		if(updated_0)
 			cv::imshow("frame device 0", frameDisp_0);
-			client.sendInfo(Message(Message::DEVICE_0, "Send"));
-		}
 		
-		if(updated_1) {
+		if(updated_1)
 			cv::imshow("frame device 1", frameDisp_1);
-			client.sendInfo(Message(Message::DEVICE_1, "Send"));
-		}
 	}
 		
 	// -- End
