@@ -181,6 +181,7 @@ private:
 		std::map<unsigned int, uint64_t> messagesBufferingTimestamps;
 		
 		for(Timer timer; _isAlive; ) {	
+			auto t0 = Timer::timestampMs();
 			// UDP - Receive
 			memset(buffer, 0, BUFFER_SIZE);
 			
@@ -209,7 +210,7 @@ private:
 			if(recv_len < 14) // Bad message
 				continue;
 			
-			auto t0 = Timer::timestampMs();
+			
 			for(ssize_t offset = 0; offset < recv_len;) { // Assume that we can received packets stacked together
 				// Read header
 				Message message(buffer + offset, 14);
