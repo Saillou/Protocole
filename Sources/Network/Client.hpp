@@ -177,30 +177,24 @@ private:
 		char buffer[BUFFER_SIZE]	= {0};
 		ssize_t recv_len 	= 0;
 		
-		// struct pollfd fds[1];
-		// memset(fds, 0 , sizeof(fds));
-		// fds[0].fd = _udpSock.get();
-		// fds[0].events = POLLIN;
-		int timeout = 30 * 1000; // 30 sec
-		
-		WSAPOLLFD fdarray = {0};
-		fdarray.fd = _udpSock.get();
-		fdarray.events = POLLIN;
+		// Init polling socket
+		pollfd fdRead 	= {0};
+		fdRead.fd 		= _udpSock.get();
+		fdRead.events 	= POLLIN;
+		const int TIMEOUT = 30 * 1000; // 30 sec
 		
 		std::map<unsigned int, MessageBuffer> messagesBuffering;
 		
+		// Loop
 		for(Timer timer; _isAlive; ) {
-			// int rc = wlc::polling(fds, 1, timeout);
-
-			int rc = WSAPoll(&fdarray, 1, timeout);
+			int rc = wlc::polling(&fdRead, 1, TIMEOUT);
 			if (rc <= 0) // timeout (==0) or failed (<0)
 				break;
-			if(!(fdarray.revents & POLLIN)) // Unexpected
+			if(!(fdRead.revents & POLLIN)) // Unexpected
 				break;
 			
 			// UDP - Receive
 			memset(buffer, 0, BUFFER_SIZE);
-			std::cout << "Read" << std::endl;
 			if((recv_len = recv(_udpSock.get(), buffer, BUFFER_SIZE, 0)) == SOCKET_ERROR) {		
 				// What kind of error ?
 				int error = wlc::getError();
@@ -222,7 +216,7 @@ private:
 					break;
 				}
 			}
-			std::cout << recv_len << std::endl;
+
 			// Read buffer
 			if(recv_len < 14) // Bad message
 				continue;
