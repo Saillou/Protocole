@@ -229,7 +229,7 @@ int main() {
 			// Send
 			for(auto& client: server.getClients()) {
 				if(client.connected && mapRequests[client.id()].play0) {
-					static const unsigned int SKIP_FRAME = 15;
+					static const unsigned int SKIP_FRAME = 30;
 					static unsigned int now_frame = 0;
 					
 					if(now_frame == 0)
@@ -258,10 +258,10 @@ int main() {
 		device1.onFrame([&](const Gb::Frame& frame){
 			for(auto& client: server.getClients()) {
 				if(client.connected  && mapRequests[client.id()].play1) {
-					static const unsigned int SKIP_FRAME = 15;
+					static const unsigned int SKIP_FRAME = 30;
 					static unsigned int now_frame = 0;
 					
-					if(now_frame == 0)
+					if(now_frame == 15)
 						server.sendData(client, Message(Message::DEVICE_1, reinterpret_cast<const char*>(frame.start()), frame.length()));
 					
 					now_frame = (now_frame+1) % (SKIP_FRAME+1);
