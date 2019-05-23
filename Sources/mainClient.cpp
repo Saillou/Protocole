@@ -90,8 +90,9 @@ int main() {
 			// }
 			
 			// frameDevice.unlock();
+			std::cout << "Got camera" << std::endl;
 		}
-		if(message.code() == Message::TEXT) {
+		else if(message.code() == Message::TEXT) {
 			std::cout << message.str() << std::endl;
 		}
 	});
