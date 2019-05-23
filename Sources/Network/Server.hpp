@@ -204,7 +204,7 @@ public:
 		_pendingSendUpdated = true;
 		_mutSendCtn.unlock();
 		
-		Timer::waitMus(1);	
+		std::cout << clock() << " lol \n";
 	}
 	
 	// Send message with TCP
