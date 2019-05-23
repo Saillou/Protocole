@@ -183,9 +183,8 @@ int main() {
 	}
 	
 	// --- Open Devices ---
-	std::vector<char> big_buffer(150000, 'A');
 	
-	Timer t;
+	Timer t;	
 	std::deque<double> freq(100, 0.0);
 	
 	// -- Open devices --	
@@ -230,9 +229,13 @@ int main() {
 			// Send
 			for(auto& client: server.getClients()) {
 				if(client.connected && mapRequests[client.id()].play0) {
-					// server.sendData(client, Message(Message::DEVICE_0, reinterpret_cast<const char*>(frame.start()), frame.length()));
-					server.sendData(client, Message(Message::DEVICE_0, big_buffer.data(), big_buffer.size()));
-					// server.sendData(client, Message(Message::TEXT, "Got camera 1"));
+					static const unsigned int SKIP_FRAME = 15;
+					static unsigned int now_frame = 0;
+					
+					if(now_frame == 0)
+						server.sendData(client, Message(Message::DEVICE_0, reinterpret_cast<const char*>(frame.start()), frame.length()));
+					
+					now_frame = (now_frame+1) % (SKIP_FRAME+1);
 				}
 			}
 		});
@@ -256,7 +259,6 @@ int main() {
 			for(auto& client: server.getClients()) {
 				if(client.connected  && mapRequests[client.id()].play1) {
 					// server.sendData(client, Message(Message::DEVICE_1, reinterpret_cast<const char*>(frame.start()), frame.length()));
-					server.sendData(client, Message(Message::TEXT, "Got camera 2"));
 				}
 			}
 		});
