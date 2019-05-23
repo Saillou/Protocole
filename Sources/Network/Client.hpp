@@ -177,10 +177,21 @@ private:
 		char buffer[BUFFER_SIZE]	= {0};
 		ssize_t recv_len 	= 0;
 		
+		struct pollfd fds[1];
+		memset(fds, 0 , sizeof(fds));
+		fds[0].fd = _udpSock.get();
+		fds[0].events = POLLIN;
+		int timeout = 30 * 1000; // 30 sec
+		
 		std::map<unsigned int, MessageBuffer> messagesBuffering;
-		std::map<unsigned int, uint64_t> messagesBufferingTimestamps;
 		
 		for(Timer timer; _isAlive; ) {	
+			int rc = wlc::polling(fds, 1, timeout);
+			if (rc <= 0) // timeout (==0) or failed (<0)
+				break;
+			if(fds[0].revents != POLLIN) // Unexpected
+				break;
+			
 			auto t0 = Timer::timestampMs();
 			// UDP - Receive
 			memset(buffer, 0, BUFFER_SIZE);
@@ -229,7 +240,6 @@ private:
 					if(message.code() & Message::HEADER) { // Header don't have data, only information (timestamps, code, size total)
 						unsigned int code 		 = message.code() & ~(Message::HEADER | Message::FRAGMENT);
 						messagesBuffering[code] = MessageBuffer(code, message.timestamp(), message.size());
-						// messagesBufferingTimestamps[code] = Timer::timestampMs();
 						// No offsets up because nothing read (data are empty and will come in fragments)
 					}
 					else { // Fragment
@@ -242,8 +252,7 @@ private:
 
 							// Are all the packets here ?
 							if(messagesBuffering[code].complete()) {
-								if(messagesBuffering[code].compose(message)) { // Overwrite the message by the concatenated one									
-									// std::cout << Timer::timestampMs() - messagesBufferingTimestamps[code] << "ms elapsed - Send \n";
+								if(messagesBuffering[code].compose(message)) { // Overwrite the message by the concatenated one					
 									std::lock_guard<std::mutex> lockCbk(_mutCbk);
 									if(_cbkData) 
 										_cbkData(message);

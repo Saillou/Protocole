@@ -317,7 +317,7 @@ struct Socket {
 		}
 		
 		// -- Options --
-		if(wlc::setNonBlocking(_socket, !blocking) < 0) {
+		if(wlc::setNonBlocking(_socket, !blocking) < 0 || wlc::setReusable(_socket, true) < 0) {
 			close();
 			return false;
 		}
@@ -340,7 +340,7 @@ struct Socket {
 		}
 		
 		// -- Options --
-		if(wlc::setNonBlocking(_socket, !blocking) < 0) {
+		if(wlc::setNonBlocking(_socket, !blocking) < 0 || wlc::setReusable(_socket, true) < 0) {
 			close();
 			return false;
 		}
@@ -360,6 +360,7 @@ struct Socket {
 		
 		// Create socket | address
 		socketAccepted = Socket(socketId, _protoType, SocketAddress(_address.type(), address, slen));
+		wlc::setReusable(socketId, true);
 		wlc::setNonBlocking(socketId, true);
 
 		return socketAccepted.initialized();

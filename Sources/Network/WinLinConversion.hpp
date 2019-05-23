@@ -17,6 +17,7 @@
 	#include <sys/select.h>
 	#include <sys/socket.h>
 	#include <sys/types.h>
+	#include <sys/poll.h>
 	#include <netinet/in.h>	
 	#include <arpa/inet.h>
 	#include <fcntl.h>
@@ -43,13 +44,9 @@
 	#include <ws2tcpip.h>
 	
 	/* Names */
-	#ifndef socklen_t
-		#define socklen_t int
-	#endif
-	
-	#ifndef ssize_t
-		#define ssize_t int
-	#endif
+	typedef int socklen_t;
+	typedef int ssize_t;
+	typedef WSAPOLLFD pollfd;
 
 #endif
 
@@ -152,6 +149,20 @@ namespace wlc {
 #endif
 
 		return -1;
+	}
+	
+	int setReusable(SOCKET idSocket, bool reusable) {
+		int on = reusable ? 1 : 0; // Parameter for SO_REUSEADDR
+		return setsockopt(idSocket, SOL_SOCKET,  SO_REUSEADDR, (char *)&on, sizeof(on));
+	}
+	
+	// --- Non blocking ---
+	int polling(pollfd* pfds, unsigned long nfds, int timeout) {
+#ifdef _WIN32 
+		return WSAPoll(pfds, nfds, timeout);
+#elif __linux__
+		return poll(pfds, nfds, timeout);
+#endif		
 	}
 	
 	// --- Closing sockets ---

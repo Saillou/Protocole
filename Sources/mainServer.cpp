@@ -82,7 +82,7 @@ int main(int argc, char* argv[]) {
 	});
 	
 	server.onInfo([&](const Server::ClientInfo& client, const Message& message) {
-		// std::cout << "Info received from client_" << client.id() << ": [Code:" << message.code() << "] " << message.str() << std::endl;
+		std::cout << "Info received from client_" << client.id() << ": [Code:" << message.code() << "] " << message.str() << std::endl;
 		
 		auto __treatDeviceInfo = [&](DeviceMt& device, unsigned int deviceCode) {
 			bool treated = false;
@@ -233,47 +233,35 @@ int main(int argc, char* argv[]) {
 			// Send
 			for(auto& client: server.getClients()) {
 				if(client.connected && mapRequests[client.id()].play0) {
-					// static const unsigned int SKIP_FRAME = 30;
-					// static unsigned int now_frame = 0;
-					
-					// if(now_frame == 0)
-						server.sendData(client, Message(Message::DEVICE_0, reinterpret_cast<const char*>(frame.start()), frame.length()));
-						mapRequests[client.id()].play0 = false;
-					// now_frame = (now_frame+1) % (SKIP_FRAME+1);
+					server.sendData(client, Message(Message::DEVICE_0, reinterpret_cast<const char*>(frame.start()), frame.length()));
 				}
 			}
 		});
 	}
 	
 	
-	if(device1.open(PATH_CAMERA_1)) {
-		device1.setFormat(WIDTH_DEVICE, HEIGHT_DEVICE, Device::MJPG);
-		// device1.setFormat(1280, 720, Device::MJPG);	
-		// device1.setFormat(640, 480, Device::MJPG);	
-		// device1.setFormat(320, 240, Device::MJPG);	
+	// if(device1.open(PATH_CAMERA_1)) {
+		// device1.setFormat(WIDTH_DEVICE, HEIGHT_DEVICE, Device::MJPG);
+		// // device1.setFormat(1280, 720, Device::MJPG);	
+		// // device1.setFormat(640, 480, Device::MJPG);	
+		// // device1.setFormat(320, 240, Device::MJPG);	
 		
-		// Broadcast to clients
-		for(auto& client: server.getClients()) {
-			if(client.connected) {
-				server.sendInfo(client, Message(Message::DEVICE_1, "Started."));
-			}
-		}
+		// // Broadcast to clients
+		// for(auto& client: server.getClients()) {
+			// if(client.connected) {
+				// server.sendInfo(client, Message(Message::DEVICE_1, "Started."));
+			// }
+		// }
 		
-		// Events
-		device1.onFrame([&](const Gb::Frame& frame){
-			for(auto& client: server.getClients()) {
-				if(client.connected  && mapRequests[client.id()].play1) {
-					// static const unsigned int SKIP_FRAME = 30;
-					// static unsigned int now_frame = 0;
-					
-					// if(now_frame == SKIP_FRAME/2)
-						server.sendData(client, Message(Message::DEVICE_1, reinterpret_cast<const char*>(frame.start()), frame.length()));
-						mapRequests[client.id()].play1 = false;
-					// now_frame = (now_frame+1) % (SKIP_FRAME+1);
-				}
-			}
-		});
-	}
+		// // Events
+		// device1.onFrame([&](const Gb::Frame& frame){
+			// for(auto& client: server.getClients()) {
+				// if(client.connected  && mapRequests[client.id()].play1) {
+					// server.sendData(client, Message(Message::DEVICE_1, reinterpret_cast<const char*>(frame.start()), frame.length()));
+				// }
+			// }
+		// });
+	// }
 	
 	// -------- Main loop --------  
 	for(Timer timer; Globals::signalStatus != SIGINT; timer.wait(100)) {
