@@ -54,11 +54,10 @@ int main() {
 	
 	client.onData([&](const Message& message) {		
 		// std::cout << "Datas : - code : [" << message.code() << "] - size : " << message.size()/1000.0 << "KB \n";
-		static unsigned long long t0 = Timer::timestampMs();
-		unsigned long long t1 = Timer::timestampMs();
+		unsigned long long t0 = message.timestamp();
+		static unsigned long long t1 = Timer::timestampMs();
 		client.sendData(Message("Ping"));
 		std::cout << "Udp ping: " << t1 - t0 << " ms. \n";
-		t0 = Timer::timestampMs();
 	});
 	
 	client.onInfo([&](const Message& message) {
