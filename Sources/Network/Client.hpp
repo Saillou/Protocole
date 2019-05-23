@@ -236,13 +236,15 @@ private:
 							// do something ?
 						}
 						else { // add fragment to packet list
-							auto t0 = Timer::timestampMs();
 							messagesBuffering[code].packets.push_back(std::vector<char>(buffer + offset, buffer + offset + message.size()));
-							auto t1 = Timer::timestampMs();
-							std::cout << "Added: " << message.size()/1000.0 << "KB - " << t1 - t0 << " ms elapsed" << std::endl;
+
 							// Are all the packets here ?
 							if(messagesBuffering[code].complete()) {
+								auto t0 = Timer::timestampMs();
 								if(messagesBuffering[code].compose(message)) { // Overwrite the message by the concatenated one
+									auto t1 = Timer::timestampMs();
+									std::cout << "Composed in" << t1 - t0 << " ms. \n";
+									
 									// std::cout << Timer::timestampMs() - messagesBufferingTimestamps[code] << "ms elapsed - Send \n";
 									std::lock_guard<std::mutex> lockCbk(_mutCbk);
 									if(_cbkData) 
