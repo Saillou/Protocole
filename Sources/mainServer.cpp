@@ -229,8 +229,8 @@ int main() {
 			// Send
 			for(auto& client: server.getClients()) {
 				if(client.connected && mapRequests[client.id()].play0) {
-					// server.sendData(client, Message(Message::DEVICE_0, reinterpret_cast<const char*>(frame.start()), frame.length()));
-					server.sendData(client, Message(Message::TEXT, "Got camera 1"));
+					server.sendData(client, Message(Message::DEVICE_0, reinterpret_cast<const char*>(frame.start()), frame.length()));
+					// server.sendData(client, Message(Message::TEXT, "Got camera 1"));
 				}
 			}
 		});
