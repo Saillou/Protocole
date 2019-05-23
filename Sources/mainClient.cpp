@@ -48,7 +48,7 @@ int main() {
 	// -------- Callbacks --------
 	client.onConnect([&]() {
 		std::cout << "Connection to server success" << std::endl;
-		// client.sendData(Message(std::to_string(Timer::timestampMs())));
+		client.sendData(Message(std::to_string(Timer::timestampMs())));
 		client.sendInfo(Message(std::to_string(Timer::timestampMs())));
 	});
 	
