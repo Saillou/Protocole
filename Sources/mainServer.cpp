@@ -50,7 +50,10 @@ static void sigintHandler(int signal) {
 }
 
 // --- Entry point ---
-int main() {
+int main(int argc, char* argv[]) {
+	const int WIDTH_DEVICE = argc < 3 ? 640 : std::stoi(argv[1]);
+	const int HEIGHT_DEVICE = argc < 3 ? 480 : std::stoi(argv[2]);
+	
 	// -- Install signal handler
 	std::signal(SIGINT, sigintHandler);
 	
@@ -190,7 +193,8 @@ int main() {
 	// -- Open devices --	
 	if(device0.open(PATH_CAMERA_0)) {
 		// Params
-		device0.setFormat(1280, 720, Device::MJPG);	
+		device0.setFormat(WIDTH_DEVICE, HEIGHT_DEVICE, Device::MJPG);
+		// device0.setFormat(1280, 720, Device::MJPG);	
 		// device0.setFormat(640, 480, Device::MJPG);	
 		// device0.setFormat(320, 240, Device::MJPG);	
 		
@@ -243,7 +247,8 @@ int main() {
 	
 	
 	if(device1.open(PATH_CAMERA_1)) {
-		device1.setFormat(1280, 720, Device::MJPG);	
+		device1.setFormat(WIDTH_DEVICE, HEIGHT_DEVICE, Device::MJPG);
+		// device1.setFormat(1280, 720, Device::MJPG);	
 		// device1.setFormat(640, 480, Device::MJPG);	
 		// device1.setFormat(320, 240, Device::MJPG);	
 		
