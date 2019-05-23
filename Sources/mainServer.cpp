@@ -261,6 +261,7 @@ int main() {
 	// -------- Main loop --------  
 	for(Timer timer; Globals::signalStatus != SIGINT; timer.wait(100)) {
 		// ... Do other stuff ...
+		std::cout << clock() << std::endl;
 	}
 	std::cout << "End of loop" << std::endl;
 	// -- End
