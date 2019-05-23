@@ -81,13 +81,11 @@ int main() {
 					Globals::buffer0.lock();
 					Globals::buffer0.push(frameDevice.get(), message.timestamp());
 					Globals::buffer0.unlock();
-					client.sendInfo(Message(Message::DEVICE_0, "Send"));
 				}
 				if(message.code() == Message::DEVICE_1) {
 					Globals::buffer1.lock();
 					Globals::buffer1.push(frameDevice.get(), message.timestamp());
 					Globals::buffer1.unlock();
-					client.sendInfo(Message(Message::DEVICE_1, "Send"));
 				}
 			}
 			
@@ -179,11 +177,15 @@ int main() {
 		Globals::buffer1.unlock();
 		
 		// Display frames
-		if(updated_0)
+		if(updated_0) {
 			cv::imshow("frame device 0", frameDisp_0);
+			client.sendInfo(Message(Message::DEVICE_0, "Send"));
+		}
 		
-		if(updated_1)
+		if(updated_1) {
 			cv::imshow("frame device 1", frameDisp_1);
+			client.sendInfo(Message(Message::DEVICE_1, "Send"));
+		}
 	}
 		
 	// -- End

@@ -238,7 +238,7 @@ int main(int argc, char* argv[]) {
 					
 					// if(now_frame == 0)
 						server.sendData(client, Message(Message::DEVICE_0, reinterpret_cast<const char*>(frame.start()), frame.length()));
-					mapRequests[client.id()].play0 = false;
+						mapRequests[client.id()].play0 = false;
 					// now_frame = (now_frame+1) % (SKIP_FRAME+1);
 				}
 			}
@@ -268,7 +268,7 @@ int main(int argc, char* argv[]) {
 					
 					// if(now_frame == SKIP_FRAME/2)
 						server.sendData(client, Message(Message::DEVICE_1, reinterpret_cast<const char*>(frame.start()), frame.length()));
-					mapRequests[client.id()].play1 = false;
+						mapRequests[client.id()].play1 = false;
 					// now_frame = (now_frame+1) % (SKIP_FRAME+1);
 				}
 			}
