@@ -113,7 +113,10 @@ public:
 	bool disconnect() {
 		_isConnected = false;
 		
-		// Server disconnecting .. Send something ?		
+		// Server disconnecting .. Send something ?	
+		if(_pSend && _pSend->joinable())
+			_pSend->join();
+		
 		if(_pRecvUdp4 && _pRecvUdp4->joinable())
 			_pRecvUdp4->join();
 		
@@ -181,6 +184,7 @@ public:
 		// Create threads
 		_isConnected = true;
 		
+		_pSend 		= std::make_shared<std::thread>(&Server::_sendLoop, this);
 		_pRecvUdp4 	= std::make_shared<std::thread>(&Server::_recvUdp, this, std::ref(_udpSock4));
 		_pRecvUdp6 	= std::make_shared<std::thread>(&Server::_recvUdp, this, std::ref(_udpSock6));
 		_pHandleTcp4 = std::make_shared<std::thread>(&Server::_handleTcp, this, std::ref(_tcpSock4));
@@ -196,6 +200,7 @@ public:
 		
 		_mutSendCtn.lock();
 		_pendingSend.push_back(s);
+		_pendingSendUpdated = true;
 		_mutSendCtn.unlock();
 	}
 	
@@ -209,6 +214,7 @@ public:
 		
 		_mutSendCtn.lock();
 		_pendingSend.push_back(s);
+		_pendingSendUpdated = true;
 		_mutSendCtn.unlock();
 	}
 	
@@ -430,6 +436,24 @@ private:
 		}
 	}
 	
+	void _sendLoop() {
+		// FIFO msg to send
+		for(Timer timer; _isConnected; timer.wait(2)) {
+			if(!_pendingSendUpdated)
+				continue;
+			
+			_pendingSendUpdated = false;
+			
+			std::lock_guard<std::mutex> lockCbk(_mutSendCtn);
+			if(_pendingSend.empty())
+				continue;
+			
+			// Send first and remove
+			_pendingSend.front().send();
+			_pendingSend.pop_front();
+		}
+	}
+	
 	// Search in the list. Not thread safe - Please use mutex before calling.
 	std::vector<ConnectedClient>::iterator _findClientFromAddress(const SocketAddress& address) {			
 		for(std::vector<ConnectedClient>::iterator itClient = _clients.begin(); itClient != _clients.end(); ++itClient) {
@@ -473,6 +497,7 @@ private:
 	std::shared_ptr<std::thread> _pHandleTcp6;
 	std::shared_ptr<std::thread> _pRecvUdp4;
 	std::shared_ptr<std::thread> _pRecvUdp6;
+	std::shared_ptr<std::thread> _pSend;
 	
 	// Clients
 	mutable std::mutex _mutClients;
@@ -481,6 +506,7 @@ private:
 	
 	// Messages sender
 	mutable std::mutex _mutSendCtn;
+	std::atomic<bool> _pendingSendUpdated;
 	std::deque<SendingContainer> _pendingSend;
 };
 
