@@ -62,7 +62,8 @@ int main(int argc, char* argv[]) {
 	server.onData([&](const Server::ClientInfo& client, const Message& message) {
 		// std::cout << "Data received from client_" << client.id() << ": [Code:" << message.code() << "] " << message.str() << std::endl;
 		server.sendData(client, Message("Pong"));
-		unsigned long long t1 = Timer::timestampMs();
+		// return static_cast<uint64_t>(std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch().count());
+		unsigned long long t1 = clock();
 		std::cout << "Udp ping: " << t1<< " ms. \n";
 	});
 	
