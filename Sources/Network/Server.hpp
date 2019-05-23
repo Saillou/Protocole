@@ -78,15 +78,19 @@ public:
 		_isConnected = false;
 		
 		// Server disconnecting .. Send something ?		
+		std::cout << "udp 4 join" << std::endl;
 		if(_pRecvUdp4 && _pRecvUdp4->joinable())
 			_pRecvUdp4->join();
 		
+		std::cout << "udp 6 joined" << std::endl;
 		if(_pRecvUdp6 && _pRecvUdp6->joinable())
 			_pRecvUdp6->join();
 
+		std::cout << "tcp 4 joined" << std::endl;
 		if(_pHandleTcp4 && _pHandleTcp4->joinable())
 			_pHandleTcp4->join();
 		
+		std::cout << "tcp 6 joined" << std::endl;
 		if(_pHandleTcp6 && _pHandleTcp6->joinable())
 			_pHandleTcp6->join();
 
@@ -95,6 +99,7 @@ public:
 		_tcpSock4.close();
 		_tcpSock6.close();
 		
+		std::cout << "clients killing" << std::endl;
 		// After tcp has joined : no client will be accepted, and no clients will be deleted.
 		// Therefore, just wait for the threads to finish and then delete it. (Avoid mutex deadlock)
 		for(auto& client : _clients) {

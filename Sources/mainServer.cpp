@@ -262,11 +262,13 @@ int main() {
 	for(Timer timer; Globals::signalStatus != SIGINT; timer.wait(100)) {
 		// ... Do other stuff ...
 	}
-		
+	std::cout << "End of loop" << std::endl;
 	// -- End
 	device0.release();
 	device1.release();
+	std::cout << "Closed of device" << std::endl;
 	server.disconnect();
+	std::cout << "Server disconnected" << std::endl;
 	
 	std::cout << "Clean exit" << std::endl;
 	std::cout << "Press a key to continue..." << std::endl;
