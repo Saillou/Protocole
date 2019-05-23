@@ -47,7 +47,7 @@ if %commit%==0 (
 
 :: Launch
 if %launch%==1 (
-	start "Server" Server.exe
+	start "Server" Server.exe 1280 720
 	timeout 1
 	start "Client" Client.exe
 )
