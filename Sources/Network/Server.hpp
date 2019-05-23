@@ -269,6 +269,7 @@ private:
 		for(Timer timer; _isConnected; ) {
 			// Receive
 			memset(buf, 0, BUFFER_SIZE);
+			std::cout << "recv()" << std::endl;
 			if((recv_len = recv(client.tcpSock.get(), buf, BUFFER_SIZE, 0)) == SOCKET_ERROR) {
 				// What kind of error ?
 				int error = wlc::getError();
@@ -301,6 +302,7 @@ private:
 				continue;
 			
 			for(const Message& message : MessageManager::readMessages(buf, recv_len)) {
+				std::cout << "cbk lock()" << std::endl;
 				std::lock_guard<std::mutex> lockCbk(_mutCbk);
 				if(_cbkInfo) 
 					_cbkInfo(client, message);
