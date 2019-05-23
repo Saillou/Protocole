@@ -109,7 +109,8 @@ public:
 private:	
 	// Methods in threads
 	void _recvTcp() {
-		const int BUFFER_SIZE = 2048; 
+		// const int BUFFER_SIZE = 2048; 
+		const int BUFFER_SIZE = 150000; 
 		char buf[BUFFER_SIZE] = {0};
 		ssize_t recv_len = 0;
 		
