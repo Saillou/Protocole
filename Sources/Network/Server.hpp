@@ -66,14 +66,14 @@ private:
 	public:
 		// -- Constructors
 		// Socket connected
-		SendingContainer(Socket& emitter, const Message& msg) :
+		SendingContainer(const Socket& emitter, const Message& msg) :
 			_proto(Proto_Tcp),
 			_msg(msg),
 			_emitter(emitter)
 		{	}
 		
 		// Socket not connected
-		SendingContainer(Socket& emitter, const SocketAddress& address, const Message& msg) :
+		SendingContainer(const Socket& emitter, const SocketAddress& address, const Message& msg) :
 			_proto(Proto_Udp),
 			_msg(msg),
 			_emitter(emitter),
@@ -95,7 +95,7 @@ private:
 		// -- Members
 		ProtoType _proto;
 		Message _msg;
-		Socket& _emitter;
+		const Socket& _emitter;
 		SocketAddress _address;
 	};
 	
@@ -190,27 +190,26 @@ public:
 	}
 	
 	// Send message with UDP
-	void sendData(const ClientInfo& client, const Message& msg) const {
+	void sendData(const ClientInfo& client, const Message& msg) {
 		const Socket& udpSock = client.udpSockServerId == _udpSock4.get() ? _udpSock4 : _udpSock6;
+		SendingContainer s(udpSock, client.udpAddress, msg);
 		
-		if(!udpSock.sendTo(msg, client.udpAddress)) {
-			std::lock_guard<std::mutex> lockCbk(_mutCbk);
-			if(_cbkError) 
-				_cbkError(Error(wlc::getError(), "UDP send Error"));			
-		}
+		_mutSendCtn.lock();
+		_pendingSend.push_back(s);
+		_mutSendCtn.unlock();
 	}
 	
 	// Send message with TCP
-	void sendInfo(const ClientInfo& client, const Message& msg) const {
+	void sendInfo(const ClientInfo& client, const Message& msg) {
 		std::vector<ConnectedClient>::const_iterator itClient = _findClientFromId(client.tcpSock.get());
 		if(itClient == _clients.end())
 			return;
-			
-		if(!itClient->info.tcpSock.send(msg)) {
-			std::lock_guard<std::mutex> lockCbk(_mutCbk);
-			if(_cbkError) 
-				_cbkError(Error(wlc::getError(), "TCP send Error"));
-		}
+		
+		SendingContainer s(itClient->info.tcpSock, msg);
+		
+		_mutSendCtn.lock();
+		_pendingSend.push_back(s);
+		_mutSendCtn.unlock();
 	}
 	
 	// Getters
@@ -479,5 +478,9 @@ private:
 	mutable std::mutex _mutClients;
 	std::vector<ConnectedClient> _clients;
 	std::vector<std::vector<ConnectedClient>::iterator> _garbageItClients;
+	
+	// Messages sender
+	mutable std::mutex _mutSendCtn;
+	std::deque<SendingContainer> _pendingSend;
 };
 
