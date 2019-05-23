@@ -98,7 +98,7 @@ private:
 	void _serialize(const unsigned int code, const size_t size, const char* pMessage) {
 		if(_time == 0)
 			_time = Timer::timestampMs();
-		
+		std::cout << "Message : " << _time << std::endl;
 		_code = code;
 		_size = static_cast<unsigned int>(size);
 		

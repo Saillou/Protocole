@@ -11,8 +11,8 @@
 // -- Globals space --
 namespace Globals {
 	// Constantes
-	const std::string IP_ADDRESS = "192.168.11.24"; 	// Barnacle V4
-	// const std::string IP_ADDRESS = "127.0.0.1"; 	// localhost V4
+	// const std::string IP_ADDRESS = "192.168.11.24"; 	// Barnacle V4
+	const std::string IP_ADDRESS = "127.0.0.1"; 	// localhost V4
 	const int PORT = 8888;										// Port v4
 	
 	// Variables
@@ -57,7 +57,7 @@ int main() {
 		unsigned long long t0 = message.timestamp();
 		unsigned long long t1 = Timer::timestampMs();
 		client.sendData(Message("Ping"));
-		std::cout << "Udp ping: " << t1 - t0 << "ms. \n";
+		std::cout << "Udp ping: " << t1 - t0 << " ms. \n";
 	});
 	
 	client.onInfo([&](const Message& message) {

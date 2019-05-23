@@ -37,6 +37,10 @@ bool waitServer(Server& server) {
 
 // --- Entry point ---
 int main(int argc, char* argv[]) {
+	Message msg("test");
+	std::cout << msg.timestamp() << std::endl;
+	return 0;
+	
 	// -- Install signal handler
 	std::signal(SIGINT, sigintHandler);
 	
@@ -64,7 +68,7 @@ int main(int argc, char* argv[]) {
 		unsigned long long t0 = message.timestamp();
 		unsigned long long t1 = Timer::timestampMs();
 		server.sendData(client, Message("Pong"));
-		std::cout << "Udp ping: " << t1 - t0 << "ms. \n";
+		std::cout << "Udp ping: " << t1 - t0 << " ms. \n";
 	});
 	
 	// -- Create server --
