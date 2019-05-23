@@ -443,7 +443,7 @@ private:
 			if(!_pendingSendUpdated)
 				continue;
 			
-			// std::lock_guard<std::mutex> lockCbk(_mutSendCtn);
+			std::lock_guard<std::mutex> lockCbk(_mutSendCtn);
 			if(_pendingSend.empty())
 				continue;
 			
