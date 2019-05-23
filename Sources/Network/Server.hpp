@@ -438,7 +438,7 @@ private:
 	
 	void _sendLoop() {
 		// FIFO
-		for(Timer timer; _isConnected; timer.wait(2)) {
+		for(Timer timer; _isConnected; timer.wait(100)) {
 			if(!_pendingSendUpdated)
 				continue;
 			
@@ -452,6 +452,11 @@ private:
 			
 			if(_pendingSend.empty())
 				_pendingSendUpdated = false;
+			
+			if(_pendingSend.size() > 30) {
+				_pendingSend.clear();
+				_pendingSendUpdated = false;
+			}
 		}
 	}
 	
