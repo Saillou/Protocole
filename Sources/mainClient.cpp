@@ -52,9 +52,10 @@ int main() {
 	});
 	
 	client.onData([&](const Message& message) {		
-		std::cout << "Datas : - code : [" << message.code() << "] - size : " << message.size()/1000.0 << "KB \n";
+		// std::cout << "Datas : - code : [" << message.code() << "] - size : " << message.size()/1000.0 << "KB \n";
 		unsigned long long time = std::stoull(message.str());
-		std::cout << Timer::timestampMs() - time << "ms elapsed." << std::endl;
+		unsigned long long diff = Timer::timestampMs() - time;
+		std::cout << diff << "ms elapsed." << std::endl;
 		client.sendData(Message("Ping"));
 	});
 	
