@@ -450,13 +450,13 @@ private:
 			_pendingSend.front().send();
 			_pendingSend.pop_front();
 			
+			// Limit
+			if(_pendingSend.size() > 30)
+				_pendingSend.clear();
+			
 			if(_pendingSend.empty())
 				_pendingSendUpdated = false;
 			
-			if(_pendingSend.size() > 30) {
-				_pendingSend.clear();
-				_pendingSendUpdated = false;
-			}
 		}
 	}
 	

@@ -173,7 +173,7 @@ private:
 	} // -- End function recv tcp
 	
 	void _recvUdp() {
-		const int BUFFER_SIZE	= 64000;
+		const int BUFFER_SIZE		= 64000;
 		char buffer[BUFFER_SIZE]	= {0};
 		ssize_t recv_len 	= 0;
 		
