@@ -209,6 +209,7 @@ private:
 			if(recv_len < 14) // Bad message
 				continue;
 			
+			auto t0 = Timer::timestampMs();
 			for(ssize_t offset = 0; offset < recv_len;) { // Assume that we can received packets stacked together
 				// Read header
 				Message message(buffer + offset, 14);
@@ -240,11 +241,7 @@ private:
 
 							// Are all the packets here ?
 							if(messagesBuffering[code].complete()) {
-								auto t0 = Timer::timestampMs();
-								if(messagesBuffering[code].compose(message)) { // Overwrite the message by the concatenated one
-									auto t1 = Timer::timestampMs();
-									std::cout << "Composed in" << t1 - t0 << " ms. \n";
-									
+								if(messagesBuffering[code].compose(message)) { // Overwrite the message by the concatenated one									
 									// std::cout << Timer::timestampMs() - messagesBufferingTimestamps[code] << "ms elapsed - Send \n";
 									std::lock_guard<std::mutex> lockCbk(_mutCbk);
 									if(_cbkData) 
@@ -257,6 +254,8 @@ private:
 				} // End Fragmented message part
 			} // End loop stacked packets
 
+			auto t1 = Timer::timestampMs();
+			std::cout << "Looped in" << t1 - t0 << " ms. \n";
 		} // ENd loop receiving message
 		
 		// Forcibly disconnected
