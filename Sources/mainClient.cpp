@@ -166,7 +166,7 @@ int main() {
 	
 	// -------- Main loop --------
 	cv::Mat frameDisp_0, frameDisp_1;
-	for(; Globals::signalStatus != SIGINT && cv::waitKey(1) != 27; ) {
+	for(; Globals::signalStatus != SIGINT && cv::waitKey(30) != 27; ) {
 		// Update buffers
 		Globals::buffer0.lock();
 		bool updated_0 = Globals::buffer0.update(frameDisp_0);
@@ -182,8 +182,10 @@ int main() {
 		
 		if(updated_1) {
 			cv::imshow("frame device 1", frameDisp_1);
-			client.sendInfo(Message(Message::DEVICE_1, "Send"));
 		}
+		
+		client.sendInfo(Message(Message::DEVICE_0, "Send"));
+		client.sendInfo(Message(Message::DEVICE_1, "Send"));
 	}
 		
 	// -- End
