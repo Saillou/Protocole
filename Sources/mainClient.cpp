@@ -73,9 +73,11 @@ int main() {
 	for(Timer timer; Globals::signalStatus != SIGINT; timer.wait(100)) {
 		// .. Do something ..
 	}
+	std::cout << "pok" << std::endl;
 		
 	// -- End
 	client.disconnect();
+	std::cout << "pok" << std::endl;
 
 	std::cout << "Clean exit" << std::endl;
 	std::cout << "Press a key to continue..." << std::endl;
