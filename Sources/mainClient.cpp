@@ -48,10 +48,14 @@ int main() {
 	// -------- Callbacks --------
 	client.onConnect([&]() {
 		std::cout << "Connection to server success" << std::endl;
+		client.sendData(Message("init"));
 	});
 	
 	client.onData([&](const Message& message) {		
 		std::cout << "Datas : - code : [" << message.code() << "] - size : " << message.size()/1000.0 << "KB \n";
+		unsigned long long time = std::stoull(message.str());
+		std::cout << Timer::timestampMs() - time << "ms elapsed." << std::endl;
+		client.sendData(Message("Ping"));
 	});
 	
 	client.onInfo([&](const Message& message) {
