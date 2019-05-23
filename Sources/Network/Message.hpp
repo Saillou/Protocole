@@ -124,6 +124,10 @@ private:
 			static_cast<unsigned char>((_time & 0xFF0000000000) >> 40),
 		};
 		
+		for(int i = 0; i < 6; i++) {
+			std::cout << (int)byteTime[i] << " " << std::endl;
+		}
+		
 		// Create string
 		_dataSerialized.resize(static_cast<size_t>(14+_size), '\0');
 		
