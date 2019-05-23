@@ -211,6 +211,7 @@ private:
 			
 			for(ssize_t offset = 0; offset < recv_len;) { // Assume that we can received packets stacked together
 				std::cout << Timer::timestampMs() - messagesBufferingTimestamps[0] << "ms elapsed \n";
+				messagesBufferingTimestamps[0] = Timer::timestampMs();
 				
 				// Read header
 				Message msgHeader(buffer + offset, 14);
