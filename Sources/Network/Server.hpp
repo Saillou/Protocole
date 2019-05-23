@@ -439,11 +439,11 @@ private:
 	
 	void _sendLoop() {
 		// FIFO
-		for(Timer timer; _isConnected; timer.wait(2)) {
+		for(Timer timer; _isConnected; ) {
 			if(!_pendingSendUpdated)
 				continue;
 			
-			std::lock_guard<std::mutex> lockCbk(_mutSendCtn);
+			// std::lock_guard<std::mutex> lockCbk(_mutSendCtn);
 			if(_pendingSend.empty())
 				continue;
 			
