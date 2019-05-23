@@ -90,19 +90,19 @@ public:
 	
 	// Setters
 	void onConnect(const std::function<void(void)>& cbkConnect) {
-		std::lock_guard<std::mutex> lockCbk(_mutCbk);
+		// std::lock_guard<std::mutex> lockCbk(_mutCbk);
 		_cbkConnect = cbkConnect;
 	}
 	void onInfo(const std::function<void(const Message& message)>& cbkInfo) {
-		std::lock_guard<std::mutex> lockCbk(_mutCbk);
+		// std::lock_guard<std::mutex> lockCbk(_mutCbk);
 		_cbkInfo = cbkInfo;	
 	}
 	void onData(const std::function<void(const Message& message)>& ckbData) {
-		std::lock_guard<std::mutex> lockCbk(_mutCbk);
+		// std::lock_guard<std::mutex> lockCbk(_mutCbk);
 		_cbkData = ckbData;		
 	}
 	void onError(const std::function<void(const Error& error)>& cbkError) {
-		std::lock_guard<std::mutex> lockCbk(_mutCbk);
+		// std::lock_guard<std::mutex> lockCbk(_mutCbk);
 		_cbkError = cbkError;		
 	}
 	
@@ -128,7 +128,7 @@ private:
 					break;
 				}
 				else {
-					std::lock_guard<std::mutex> lockCbk(_mutCbk);
+					// std::lock_guard<std::mutex> lockCbk(_mutCbk);
 					if(_cbkError) 
 						_cbkError(Error(error, "TCP receive Error"));
 					break;
@@ -136,7 +136,7 @@ private:
 			}
 			
 			if(recv_len == 0) {
-				std::lock_guard<std::mutex> lockCbk(_mutCbk);
+				// std::lock_guard<std::mutex> lockCbk(_mutCbk);
 				if(_cbkError) 
 					_cbkError(Error(wlc::REFUSED_CONNECT, "Server disconnected"));
 				break;
@@ -157,14 +157,14 @@ private:
 						else if(strMessage == "ok.") {	// Handshake complete
 							_isConnected = true;
 							
-							std::lock_guard<std::mutex> lockCbk(_mutCbk);
+							// std::lock_guard<std::mutex> lockCbk(_mutCbk);
 							if(_cbkConnect) 
 								_cbkConnect();
 						}
 					}
 				}
 				else {
-					std::lock_guard<std::mutex> lockCbk(_mutCbk);
+					// std::lock_guard<std::mutex> lockCbk(_mutCbk);
 					if(_cbkInfo) 
 						_cbkInfo(message);
 				}
@@ -217,7 +217,7 @@ private:
 					continue;
 				}
 				else {
-					std::lock_guard<std::mutex> lockCbk(_mutCbk);
+					// std::lock_guard<std::mutex> lockCbk(_mutCbk);
 					if(_cbkError) 
 						_cbkError(Error(error, "UDP receive Error"));
 					break;
@@ -239,7 +239,7 @@ private:
 					message.appendData(buffer+offset, message.size());
 					offset += message.size();
 					
-					std::lock_guard<std::mutex> lockCbk(_mutCbk);
+					// std::lock_guard<std::mutex> lockCbk(_mutCbk);
 					if(_cbkData) 
 						_cbkData(message);
 				}
@@ -247,7 +247,7 @@ private:
 					if(message.code() & Message::HEADER) { // Header don't have data, only information (timestamps, code, size total)
 						unsigned int code 		 = message.code() & ~(Message::HEADER | Message::FRAGMENT);
 						messagesBuffering[code] = MessageBuffer(code, message.timestamp(), message.size());
-						messagesBufferingTs[code] = Timer::timestampMs();
+						// messagesBufferingTs[code] = Timer::timestampMs();
 						// No offsets up because nothing read (data are empty and will come in fragments)
 					}
 					else { // Fragment
@@ -262,8 +262,8 @@ private:
 							if(messagesBuffering[code].complete()) {
 								if(messagesBuffering[code].compose(message)) { // Overwrite the message by the concatenated one	
 									uint64_t now = Timer::timestampMs();
-									std::cout << now - messagesBufferingTs[code] << "ms" << std::endl;
-									std::lock_guard<std::mutex> lockCbk(_mutCbk);
+									// std::cout << now - messagesBufferingTs[code] << "ms" << std::endl;
+									// std::lock_guard<std::mutex> lockCbk(_mutCbk);
 									if(_cbkData) 
 										_cbkData(message);
 								}
@@ -282,7 +282,7 @@ private:
 
 	void _send(const Socket& connectSocked, const Message& msg, const std::string& msgOnError = "Send error") const {
 		if(!connectSocked.send(msg)) {
-			std::lock_guard<std::mutex> lockCbk(_mutCbk);
+			// std::lock_guard<std::mutex> lockCbk(_mutCbk);
 			if(_cbkError) 
 				_cbkError(Error(wlc::getError(), msgOnError));
 		}
