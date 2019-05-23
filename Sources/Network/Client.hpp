@@ -188,17 +188,17 @@ private:
 		
 		// Loop
 		for(Timer timer; _isAlive; ) {
-			int pollResult = wlc::polling(&fdRead, 1, TIMEOUT);
-			if (pollResult < 0) 			// failed
-				break;
-			else if(pollResult == 0) {	// timeout
-				if(_isAlive)
-					continue;
-				else
-					break;
-			}
-			if(!(fdRead.revents & POLLIN)) // unexpected
-				break;
+			// int pollResult = wlc::polling(&fdRead, 1, TIMEOUT);
+			// if (pollResult < 0) 			// failed
+				// break;
+			// else if(pollResult == 0) {	// timeout
+				// if(_isAlive)
+					// continue;
+				// else
+					// break;
+			// }
+			// if(!(fdRead.revents & POLLIN)) // unexpected
+				// break;
 			
 			// UDP - Receive
 			memset(buffer, 0, BUFFER_SIZE);
