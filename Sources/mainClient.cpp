@@ -91,6 +91,9 @@ int main() {
 			
 			frameDevice.unlock();
 		}
+		if(message.code() == Message::TEXT) {
+			std::cout << message.str() << std::endl;
+		}
 	});
 	
 	client.onInfo([&](const Message& message) {
