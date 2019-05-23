@@ -274,7 +274,6 @@ private:
 				int error = wlc::getError();
 				if(wlc::errorIs(wlc::WOULD_BLOCK, error)) { // Temporarily unavailable
 					timer.wait(100);
-					std::cout << " client WOULD_BLOCK" << std::endl;
 					continue;
 				}
 				else if(wlc::errorIs(wlc::REFUSED_CONNECT, error)) { // Forcibly close
@@ -307,11 +306,14 @@ private:
 					_cbkInfo(client, message);
 			}
 		}
-		
+		std::cout << " > client thread ended" << std::endl;
+		std::cout << " > client cbk lock()" << std::endl;
 		// End
 		std::lock_guard<std::mutex> lockCbk(_mutCbk);
 		if(_cbkDisconnect) 
 			_cbkDisconnect(client);	
+		
+		std::cout << " > client mut lock()" << std::endl;
 		
 		std::lock_guard<std::mutex> lockClients(_mutClients);
 		std::vector<ConnectedClient>::iterator itClient = _findClientFromAddress(client.tcpSock.address());
