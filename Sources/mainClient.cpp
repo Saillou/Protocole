@@ -49,7 +49,7 @@ int main() {
 	client.onConnect([&]() {
 		std::cout << "Connection to server success" << std::endl;
 		client.sendData(Message(std::to_string(Timer::timestampMs())));
-		client.sendInfo(Message(std::to_string(Timer::timestampMs())));
+		// client.sendInfo(Message(std::to_string(Timer::timestampMs())));
 	});
 	
 	client.onData([&](const Message& message) {		
