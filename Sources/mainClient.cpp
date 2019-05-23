@@ -27,8 +27,8 @@
 // -- Globals space --
 namespace Globals {
 	// Constantes
-	const std::string IP_ADDRESS = "192.168.11.24"; 	// Barnacle V4
-	// const std::string IP_ADDRESS = "127.0.0.1"; 	// localhost V4
+	// const std::string IP_ADDRESS = "192.168.11.24"; 	// Barnacle V4
+	const std::string IP_ADDRESS = "127.0.0.1"; 	// localhost V4
 	const int PORT = 8888;										// Port v4
 	
 	// const std::string IP_ADDRESS = "fe80::ba93:fb12:aea8:c64c"; 	// Barnacle V6
