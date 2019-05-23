@@ -113,7 +113,23 @@ private:
 		char buf[BUFFER_SIZE] = {0};
 		ssize_t recv_len = 0;
 		
+		// Init polling socket
+		// const int TIMEOUT = 500; // 0.5 sec
+		// pollfd fdRead 	= {0};
+		// fdRead.fd 		= _tcpSock.get();
+		// fdRead.events 	= POLLIN;
+		
 		for(Timer timer; _isAlive; ) {
+			// Poll events
+			// int pollResult = wlc::polling(&fdRead, 1, TIMEOUT);
+			// if (pollResult < 0) 			// failed
+				// break;
+			// else if(pollResult == 0) {	// timeout
+				// if(_isAlive)
+					// continue;
+				// else
+					// break;
+				
 			// Receive TCP maybe
 			memset(buf, 0, BUFFER_SIZE);
 			
@@ -178,16 +194,17 @@ private:
 		ssize_t recv_len 	= 0;
 		
 		// Init polling socket
+		const int TIMEOUT = 500; // 0.5 sec
 		pollfd fdRead 	= {0};
 		fdRead.fd 		= _udpSock.get();
 		fdRead.events 	= POLLIN;
-		const int TIMEOUT = 500; // 0.5 sec
 		
 		std::map<unsigned int, MessageBuffer> messagesBuffering;
 		std::map<unsigned int, uint64_t> messagesBufferingTs;
 		
 		// Loop
 		for(Timer timer; _isAlive; ) {
+			// Poll events
 			int pollResult = wlc::polling(&fdRead, 1, TIMEOUT);
 			if (pollResult < 0) 			// failed
 				break;

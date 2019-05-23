@@ -307,10 +307,29 @@ private:
 		char buf[BUFFER_SIZE] = {0};
 		ssize_t recv_len = 0;
 		
+		// Init polling socket
+		const int TIMEOUT = 500; // 0.5 sec
+		pollfd fdRead 	= {0};
+		fdRead.fd 		= client.tcpSock.get();
+		fdRead.events 	= POLLIN;
+		
 		for(Timer timer; _isConnected; ) {
+			// Poll events
+			int pollResult = wlc::polling(&fdRead, 1, TIMEOUT);
+			if (pollResult < 0) 			// failed
+				break;
+			else if(pollResult == 0) {	// timeout
+				if(_isConnected)
+					continue;
+				else
+					break;
+			}
+			if(!(fdRead.revents & POLLIN)) // unexpected
+				break;
+				
 			// Receive
 			memset(buf, 0, BUFFER_SIZE);
-			if((recv_len = recv(client.tcpSock.get(), buf, BUFFER_SIZE, 0)) == SOCKET_ERROR) {
+			if((recv_len = recv(fdRead.fd, buf, BUFFER_SIZE, 0)) == SOCKET_ERROR) {
 				// What kind of error ?
 				int error = wlc::getError();
 				if(wlc::errorIs(wlc::WOULD_BLOCK, error)) { // Temporarily unavailable
@@ -363,16 +382,37 @@ private:
 	}
 	
 	void _recvUdp(Socket& udpSock) {
+		// Input
 		const int BUFFER_SIZE = 2048;
 		char buf[BUFFER_SIZE] = {0};
 		ssize_t recv_len = 0;
-
+		
 		SocketAddress clientSockAddress;
 		
-		for(Timer timer; _isConnected; ) {
-			memset(buf, 0, BUFFER_SIZE);
+		// Init polling socket
+		const int TIMEOUT = 500; // 0.5 sec
+		pollfd fdRead 	= {0};
+		fdRead.fd 		= udpSock.get();
+		fdRead.events 	= POLLIN;
 
+		
+		for(Timer timer; _isConnected; ) {
+			// Poll events
+			int pollResult = wlc::polling(&fdRead, 1, TIMEOUT);
+			if (pollResult < 0) 			// failed
+				break;
+			else if(pollResult == 0) {	// timeout
+				if(_isConnected)
+					continue;
+				else
+					break;
+			}
+			if(!(fdRead.revents & POLLIN)) // unexpected
+				break;
+			
 			// ----- Receive -----
+			memset(buf, 0, BUFFER_SIZE);
+			
 			clock_t time = clock();
 			if(!udpSock.receiveFrom(recv_len, buf, BUFFER_SIZE, clientSockAddress)) {
 				// What kind of error ?
