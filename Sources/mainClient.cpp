@@ -48,24 +48,20 @@ int main() {
 	// -------- Callbacks --------
 	client.onConnect([&]() {
 		std::cout << "Connection to server success" << std::endl;
-		client.sendData(Message(std::to_string(Timer::timestampMs())));
-		// client.sendInfo(Message(std::to_string(Timer::timestampMs())));
+		client.sendData(Message("init"));
+		// client.sendInfo(Message("init"));
 	});
 	
 	client.onData([&](const Message& message) {		
 		// std::cout << "Datas : - code : [" << message.code() << "] - size : " << message.size()/1000.0 << "KB \n";
+		unsigned long long t0 = message.timestamp();
 		unsigned long long t1 = Timer::timestampMs();
-		unsigned long long t0 = std::stoull(message.str());
+		client.sendData(Message("Ping"));
 		std::cout << "Udp ping: " << t1 - t0 << "ms. \n";
-		client.sendData(Message(std::to_string(Timer::timestampMs())));
 	});
 	
 	client.onInfo([&](const Message& message) {
 		// std::cout << "Info received: [Code:" << message.code() << "] " << message.str() << std::endl;
-		unsigned long long t1 = Timer::timestampMs();
-		unsigned long long t0 = std::stoull(message.str());
-		std::cout << "Tcp ping: " << t1 - t0 << "ms. \n";
-		client.sendInfo(Message(std::to_string(Timer::timestampMs())));
 	});
 	
 	client.onError([&](const Error& error) {

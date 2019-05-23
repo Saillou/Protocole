@@ -56,13 +56,15 @@ int main(int argc, char* argv[]) {
 	
 	server.onInfo([&](const Server::ClientInfo& client, const Message& message) {
 		// std::cout << "Info received from client_" << client.id() << ": [Code:" << message.code() << "] " << message.str() << std::endl;
-		server.sendInfo(client, Message(message.str()));
+		// server.sendInfo(client, Message(message.str()));
 	});
 	
 	server.onData([&](const Server::ClientInfo& client, const Message& message) {
 		// std::cout << "Data received from client_" << client.id() << ": [Code:" << message.code() << "] " << message.str() << std::endl;
-		server.sendData(client, Message(message.str()));
-		std::cout << Timer::timestampMs() - std::stoull(message.str()) << "ms." << std::endl;
+		unsigned long long t0 = message.timestamp();
+		unsigned long long t1 = Timer::timestampMs();
+		server.sendData(client, Message("Pong"));
+		std::cout << "Udp ping: " << t1 - t0 << "ms. \n";
 	});
 	
 	// -- Create server --
