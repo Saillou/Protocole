@@ -55,7 +55,7 @@ int main() {
 	client.onData([&](const Message& message) {		
 		// std::cout << "Datas : - code : [" << message.code() << "] - size : " << message.size()/1000.0 << "KB \n";
 		unsigned long long t1 = Timer::timestampMs();
-		unsigned long long t0 = std::stoull(message.str());
+		unsigned long long t0 = 0;//std::stoull(message.str());
 		std::cout << "Udp ping: " << t1 - t0 << "ms. \n";
 		client.sendData(Message("Ping"));
 	});
@@ -63,7 +63,7 @@ int main() {
 	client.onInfo([&](const Message& message) {
 		// std::cout << "Info received: [Code:" << message.code() << "] " << message.str() << std::endl;
 		unsigned long long t1 = Timer::timestampMs();
-		unsigned long long t0 = std::stoull(message.str());
+		unsigned long long t0 = 0;//std::stoull(message.str());
 		std::cout << "Tcp ping: " << t1 - t0 << "ms. \n";
 		client.sendInfo(Message("Ping"));
 	});
