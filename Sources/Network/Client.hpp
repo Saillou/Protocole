@@ -59,14 +59,17 @@ public:
 		_isConnected = false;
 		_isAlive = false;
 		
+		std::cout << "join tcp" << std::endl;
 		if(_pRecvTcp)
 			if(_pRecvTcp->joinable())
 				_pRecvTcp->join();
 			
+		std::cout << "udp tcp" << std::endl;
 		if(_pRecvUdp)
 			if(_pRecvUdp->joinable())
 				_pRecvUdp->join();
 		
+		std::cout << "ok" << std::endl;
 		_udpSock.close();
 		_tcpSock.close();
 		
