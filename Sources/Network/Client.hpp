@@ -211,47 +211,46 @@ private:
 			
 			for(ssize_t offset = 0; offset < recv_len;) { // Assume that we can received packets stacked together
 				// Read header
-				Message msgHeader(buffer + offset, 14);
+				Message message(buffer + offset, 14);
 				offset += 14;
 				
 				// Complete or Fragmented?
-				if(!(msgHeader.code() & Message::FRAGMENT)) { // Complete message
-					msgHeader.appendData(buffer+offset, msgHeader.size());
-					offset += msgHeader.size();
+				if(!(message.code() & Message::FRAGMENT)) { // Complete message
+					message.appendData(buffer+offset, message.size());
+					offset += message.size();
 					
 					std::lock_guard<std::mutex> lockCbk(_mutCbk);
 					if(_cbkData) 
-						_cbkData(msgHeader);
+						_cbkData(message);
 				}
 				else { // Fragmented messages
-					if(msgHeader.code() & Message::HEADER) { // Header don't have data, only information (timestamps, code, size total)
-						unsigned int code 		 = msgHeader.code() & ~(Message::HEADER | Message::FRAGMENT);
-						messagesBuffering[code] = MessageBuffer(code, msgHeader.timestamp(), msgHeader.size());
-						messagesBufferingTimestamps[code] = Timer::timestampMs();
+					if(message.code() & Message::HEADER) { // Header don't have data, only information (timestamps, code, size total)
+						unsigned int code 		 = message.code() & ~(Message::HEADER | Message::FRAGMENT);
+						messagesBuffering[code] = MessageBuffer(code, message.timestamp(), message.size());
+						// messagesBufferingTimestamps[code] = Timer::timestampMs();
 						// No offsets up because nothing read (data are empty and will come in fragments)
 					}
 					else { // Fragment
-						unsigned int code = msgHeader.code() & ~Message::FRAGMENT;
-						if(messagesBuffering[code].timestamp > msgHeader.timestamp()) { // discard, it's and old message
+						unsigned int code = message.code() & ~Message::FRAGMENT;
+						if(messagesBuffering[code].timestamp > message.timestamp()) { // discard, it's and old message
 							// do something ?
 						}
 						else { // add fragment to packet list
-							messagesBuffering[code].packets.push_back(std::vector<char>(buffer + offset, buffer + offset + msgHeader.size()));
-
+							auto t0 = Timer::timestampMs();
+							messagesBuffering[code].packets.push_back(std::vector<char>(buffer + offset, buffer + offset + message.size()));
+							auto t1 = Timer::timestampMs();
+							std::cout << "Added: " << message.size()/1000.0 << "KB - " << t1 - t0 << " ms elapsed" << std::endl;
 							// Are all the packets here ?
 							if(messagesBuffering[code].complete()) {
-								if(messagesBuffering[code].compose(msgHeader)) { // Overwrite the message by the concatenated one
-									std::cout << Timer::timestampMs() - messagesBufferingTimestamps[code] << "ms elapsed - Send \n";
+								if(messagesBuffering[code].compose(message)) { // Overwrite the message by the concatenated one
+									// std::cout << Timer::timestampMs() - messagesBufferingTimestamps[code] << "ms elapsed - Send \n";
 									std::lock_guard<std::mutex> lockCbk(_mutCbk);
 									if(_cbkData) 
-										_cbkData(msgHeader);
+										_cbkData(message);
 								}
 							}
-							else {
-								std::cout << Timer::timestampMs() - messagesBufferingTimestamps[code] << "ms elapsed \n";
-							}
 						}
-						offset += msgHeader.size();
+						offset += message.size();
 					} // End Fragment part
 				} // End Fragmented message part
 			} // End loop stacked packets
