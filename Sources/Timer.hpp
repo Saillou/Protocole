@@ -46,6 +46,10 @@ public:
 		if(ms > 0)
 			std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 	}
+	static void waitMus(int mus) {
+		if(mus > 0)
+			std::this_thread::sleep_for(std::chrono::microseconds(mus));
+	}
 	
 	static std::string date() {
 		time_t rawtime = time(NULL);
