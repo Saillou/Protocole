@@ -203,6 +203,8 @@ public:
 		_pendingSend.push_back(s);
 		_pendingSendUpdated = true;
 		_mutSendCtn.unlock();
+		
+		Timer::waitMus(1);	
 	}
 	
 	// Send message with TCP
@@ -217,6 +219,8 @@ public:
 		_pendingSend.push_back(s);
 		_pendingSendUpdated = true;
 		_mutSendCtn.unlock();
+		
+		Timer::waitMus(1);	
 	}
 	
 	// Getters
@@ -456,9 +460,7 @@ private:
 				_pendingSend.clear();
 			
 			if(_pendingSend.empty())
-				_pendingSendUpdated = false;
-			
-			timer.waitMus(1);			
+				_pendingSendUpdated = false;		
 		}
 	}
 	
