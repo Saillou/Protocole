@@ -98,7 +98,7 @@ private:
 	void _serialize(const unsigned int code, const size_t size, const char* pMessage) {
 		if(_time == 0)
 			_time = Timer::timestampMs();
-		std::cout << "Message : " << _time << std::endl;
+		
 		_code = code;
 		_size = static_cast<unsigned int>(size);
 		
@@ -123,10 +123,6 @@ private:
 			static_cast<unsigned char>((_time & 0x00FF00000000) >> 32),
 			static_cast<unsigned char>((_time & 0xFF0000000000) >> 40),
 		};
-		
-		for(int i = 0; i < 6; i++) {
-			std::cout << (int)byteTime[i] << " " << std::endl;
-		}
 		
 		// Create string
 		_dataSerialized.resize(static_cast<size_t>(14+_size), '\0');
