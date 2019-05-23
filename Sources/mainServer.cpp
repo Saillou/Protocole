@@ -55,7 +55,8 @@ int main(int argc, char* argv[]) {
 	});
 	
 	server.onInfo([&](const Server::ClientInfo& client, const Message& message) {
-		std::cout << "Info received from client_" << client.id() << ": [Code:" << message.code() << "] " << message.str() << std::endl;
+		// std::cout << "Info received from client_" << client.id() << ": [Code:" << message.code() << "] " << message.str() << std::endl;
+		server.sendInfo(client, Message(message.str()));
 	});
 	
 	server.onData([&](const Server::ClientInfo& client, const Message& message) {
