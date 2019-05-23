@@ -181,11 +181,17 @@ private:
 		// memset(fds, 0 , sizeof(fds));
 		// fds[0].fd = _udpSock.get();
 		// fds[0].events = POLLIN;
-		// int timeout = 30 * 1000; // 30 sec
+		int timeout = 30 * 1000; // 30 sec
+		
+		WSAPOLLFD fdarray = {0};
+		fdarray.fd = _udpSock.get();
+		fdarray.events = POLLIN;
 		
 		std::map<unsigned int, MessageBuffer> messagesBuffering;
 		
-		for(Timer timer; _isAlive; ) {	
+		for(Timer timer; _isAlive; ) {
+			int rc = WSAPoll(&fdarray, 1, timeout);
+			std::cout << rc <<std::endl;
 			// int rc = wlc::polling(fds, 1, timeout);
 			// if (rc <= 0) // timeout (==0) or failed (<0)
 				// break;
