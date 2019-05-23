@@ -62,8 +62,7 @@ int main(int argc, char* argv[]) {
 	server.onData([&](const Server::ClientInfo& client, const Message& message) {
 		// std::cout << "Data received from client_" << client.id() << ": [Code:" << message.code() << "] " << message.str() << std::endl;
 		server.sendData(client, Message("Pong"));
-		// std::cout << "Udp ping: " << clock()<< " ms. \n";
-		std::cout << "Udp ping: " << 42<< " ms. \n";
+		Timer::wait(1);
 	});
 	
 	// -- Create server --
