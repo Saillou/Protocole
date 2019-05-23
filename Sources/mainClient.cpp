@@ -90,7 +90,7 @@ int main() {
 			// }
 			
 			// frameDevice.unlock();
-			std::cout << "Got datas - size : " << message.size()/1000.0 << "KB" << std::endl;
+			std::cout << "Datas : - code : [" << message.code() << "] - size : " << message.size()/1000.0 << "KB" << std::endl;
 		}
 		else if(message.code() == Message::TEXT) {
 			std::cout << message.str() << std::endl;
