@@ -62,6 +62,7 @@ int main(int argc, char* argv[]) {
 	server.onData([&](const Server::ClientInfo& client, const Message& message) {
 		// std::cout << "Data received from client_" << client.id() << ": [Code:" << message.code() << "] " << message.str() << std::endl;
 		server.sendData(client, Message("Pong"));
+		std::cout << "\n";
 	});
 	
 	// -- Create server --
