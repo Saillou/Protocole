@@ -47,7 +47,6 @@ private:
 		void killThread() {
 			if(pThread) {
 				if(pThread->joinable()) {
-					std::cout << " > Wait join" << std::endl;
 					pThread->join();
 				}
 				
@@ -98,11 +97,8 @@ public:
 		
 		// After tcp has joined : no client will be accepted, and no clients will be deleted.
 		// Therefore, just wait for the threads to finish and then delete it. (Avoid mutex deadlock)
-		std::cout << "Clients killing" << std::endl;
 		for(auto& client : _clients) {
-			std::cout << " > Thread killing" << std::endl;
 			client.killThread();
-			std::cout << " > Disconnect" << std::endl;
 			client.disconnect();
 		}
 		_clients.clear();
@@ -159,7 +155,6 @@ public:
 	
 	// Send message with UDP
 	void sendData(const ClientInfo& client, const Message& msg) const {
-		std::lock_guard<std::mutex> lockCbk(_mutSendData);
 		const Socket& udpSock = client.udpSockServerId == _udpSock4.get() ? _udpSock4 : _udpSock6;
 		
 		if(!udpSock.sendTo(msg, client.udpAddress)) {
@@ -269,7 +264,6 @@ private:
 		for(Timer timer; _isConnected; ) {
 			// Receive
 			memset(buf, 0, BUFFER_SIZE);
-			std::cout << "recv()" << std::endl;
 			if((recv_len = recv(client.tcpSock.get(), buf, BUFFER_SIZE, 0)) == SOCKET_ERROR) {
 				// What kind of error ?
 				int error = wlc::getError();
@@ -302,20 +296,16 @@ private:
 				continue;
 			
 			for(const Message& message : MessageManager::readMessages(buf, recv_len)) {
-				std::cout << "cbk lock()" << std::endl;
 				std::lock_guard<std::mutex> lockCbk(_mutCbk);
 				if(_cbkInfo) 
 					_cbkInfo(client, message);
 			}
 		}
-		std::cout << " > client thread ended" << std::endl;
-		std::cout << " > client cbk lock()" << std::endl;
+		
 		// End
 		std::lock_guard<std::mutex> lockCbk(_mutCbk);
 		if(_cbkDisconnect) 
 			_cbkDisconnect(client);	
-		
-		std::cout << " > client mut lock()" << std::endl;
 		
 		std::lock_guard<std::mutex> lockClients(_mutClients);
 		std::vector<ConnectedClient>::iterator itClient = _findClientFromAddress(client.tcpSock.address());
@@ -439,7 +429,5 @@ private:
 	mutable std::mutex _mutClients;
 	std::vector<ConnectedClient> _clients;
 	std::vector<std::vector<ConnectedClient>::iterator> _garbageItClients;
-	
-	mutable std::mutex _mutSendData;
 };
 

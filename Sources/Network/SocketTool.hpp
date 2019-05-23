@@ -360,6 +360,7 @@ struct Socket {
 		
 		// Create socket | address
 		socketAccepted = Socket(socketId, _protoType, SocketAddress(_address.type(), address, slen));
+		wlc::setNonBlocking(socketId, true);
 
 		return socketAccepted.initialized();
 	}
