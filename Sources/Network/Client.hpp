@@ -177,22 +177,21 @@ private:
 		char buffer[BUFFER_SIZE]	= {0};
 		ssize_t recv_len 	= 0;
 		
-		struct pollfd fds[1];
-		memset(fds, 0 , sizeof(fds));
-		fds[0].fd = _udpSock.get();
-		fds[0].events = POLLIN;
-		int timeout = 30 * 1000; // 30 sec
+		// struct pollfd fds[1];
+		// memset(fds, 0 , sizeof(fds));
+		// fds[0].fd = _udpSock.get();
+		// fds[0].events = POLLIN;
+		// int timeout = 30 * 1000; // 30 sec
 		
 		std::map<unsigned int, MessageBuffer> messagesBuffering;
 		
 		for(Timer timer; _isAlive; ) {	
-			int rc = wlc::polling(fds, 1, timeout);
-			if (rc <= 0) // timeout (==0) or failed (<0)
-				break;
-			if(fds[0].revents != POLLIN) // Unexpected
-				break;
+			// int rc = wlc::polling(fds, 1, timeout);
+			// if (rc <= 0) // timeout (==0) or failed (<0)
+				// break;
+			// if(fds[0].revents != POLLIN) // Unexpected
+				// break;
 			
-			auto t0 = Timer::timestampMs();
 			// UDP - Receive
 			memset(buffer, 0, BUFFER_SIZE);
 			
