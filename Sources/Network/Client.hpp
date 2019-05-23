@@ -114,21 +114,24 @@ private:
 		ssize_t recv_len = 0;
 		
 		// Init polling socket
-		// const int TIMEOUT = 500; // 0.5 sec
-		// pollfd fdRead 	= {0};
-		// fdRead.fd 		= _tcpSock.get();
-		// fdRead.events 	= POLLIN;
+		const int TIMEOUT = 500; // 0.5 sec
+		pollfd fdRead 	= {0};
+		fdRead.fd 		= _tcpSock.get();
+		fdRead.events 	= POLLIN;
 		
 		for(Timer timer; _isAlive; ) {
 			// Poll events
-			// int pollResult = wlc::polling(&fdRead, 1, TIMEOUT);
-			// if (pollResult < 0) 			// failed
-				// break;
-			// else if(pollResult == 0) {	// timeout
-				// if(_isAlive)
-					// continue;
-				// else
-					// break;
+			int pollResult = wlc::polling(&fdRead, 1, TIMEOUT);
+			if (pollResult < 0) 			// failed
+				break;
+			else if(pollResult == 0) {	// timeout
+				if(_isAlive)
+					continue;
+				else
+					break;
+			}
+			if(!(fdRead.revents & POLLIN)) // unexpected
+				break;
 				
 			// Receive TCP maybe
 			memset(buf, 0, BUFFER_SIZE);
