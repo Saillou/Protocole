@@ -181,14 +181,23 @@ private:
 		pollfd fdRead 	= {0};
 		fdRead.fd 		= _udpSock.get();
 		fdRead.events 	= POLLIN;
-		const int TIMEOUT = 1000; // 1 sec
+		const int TIMEOUT = 500; // 0.5 sec
 		
 		std::map<unsigned int, MessageBuffer> messagesBuffering;
 		std::map<unsigned int, uint64_t> messagesBufferingTs;
 		
 		// Loop
 		for(Timer timer; _isAlive; ) {
-			if (wlc::polling(&fdRead, 1, TIMEOUT) <= 0 || !(fdRead.revents & POLLIN)) // timeout (==0) or failed (<0) or unexpected
+			int pollResult = wlc::polling(&fdRead, 1, TIMEOUT);
+			if (pollResult < 0) 			// failed
+				break;
+			else if(pollResult == 0) {	// timeout
+				if(_isAlive)
+					continue;
+				else
+					break;
+			}
+			if(!(fdRead.revents & POLLIN)) // unexpected
 				break;
 			
 			// UDP - Receive
