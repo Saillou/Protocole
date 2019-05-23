@@ -134,46 +134,17 @@ int main() {
 		};
 		
 		// -- Treat device 0 --
-		if(message.size() > 1000) {
-			if(message.code() == Message::DEVICE_0 || message.code() == Message::DEVICE_1) {
-				FrameMt& frameDevice = message.code() == Message::DEVICE_0 ? Globals::frameDevice0 : Globals::frameDevice1;
-				
-				frameDevice.lock();
-				tjDecompress2(Globals::decoder, (const unsigned char*)message.content(), message.size(), frameDevice.data(), frameDevice.width(), 0, frameDevice.height(), TJPF_BGR, TJFLAG_FASTDCT);
-				
-				if(!frameDevice.empty()) {
-					if(message.code() == Message::DEVICE_0) {
-						Globals::buffer0.lock();
-						Globals::buffer0.push(frameDevice.get(), message.timestamp());
-						Globals::buffer0.unlock();
-					}
-					if(message.code() == Message::DEVICE_1) {
-						Globals::buffer1.lock();
-						Globals::buffer1.push(frameDevice.get(), message.timestamp());
-						Globals::buffer1.unlock();
-					}
-				}
-				
-				frameDevice.unlock();
-				// std::cout << "Datas : - code : [" << message.code() << "] - size : " << message.size()/1000.0 << "KB \n";
-			}
-			else if(message.code() == Message::TEXT) {
-				std::cout << message.str() << std::endl;
+		if(message.code() & Message::DEVICE_0) {
+			if(!__treatDeviceInfo(Globals::frameDevice0, Message::DEVICE_0)) {
+				// Do something?
 			}
 		}
-		else {
-			if(message.code() & Message::DEVICE_0) {
-				if(!__treatDeviceInfo(Globals::frameDevice0, Message::DEVICE_0)) {
-					// Do something?
-				}
-			}
-			
-			// -- Treat device 1 --
-			if(message.code() & Message::DEVICE_1) {
-				if(!__treatDeviceInfo(Globals::frameDevice1, Message::DEVICE_1)) {
-					// Do something?
-				}			
-			}
+		
+		// -- Treat device 1 --
+		if(message.code() & Message::DEVICE_1) {
+			if(!__treatDeviceInfo(Globals::frameDevice1, Message::DEVICE_1)) {
+				// Do something?
+			}			
 		}
 	});
 	
