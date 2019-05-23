@@ -458,7 +458,7 @@ private:
 			if(_pendingSend.empty())
 				_pendingSendUpdated = false;
 			
-			timer.wait(1);			
+			// timer.wait(1);			
 		}
 	}
 	
