@@ -437,12 +437,10 @@ private:
 	}
 	
 	void _sendLoop() {
-		// FIFO msg to send
+		// FIFO
 		for(Timer timer; _isConnected; timer.wait(2)) {
 			if(!_pendingSendUpdated)
 				continue;
-			
-			_pendingSendUpdated = false;
 			
 			std::lock_guard<std::mutex> lockCbk(_mutSendCtn);
 			if(_pendingSend.empty())
@@ -451,6 +449,9 @@ private:
 			// Send first and remove
 			_pendingSend.front().send();
 			_pendingSend.pop_front();
+			
+			if(_pendingSend.empty())
+				_pendingSendUpdated = false;
 		}
 	}
 	
