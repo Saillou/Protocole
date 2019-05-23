@@ -59,17 +59,14 @@ public:
 		_isConnected = false;
 		_isAlive = false;
 		
-		std::cout << "join tcp" << std::endl;
 		if(_pRecvTcp)
 			if(_pRecvTcp->joinable())
 				_pRecvTcp->join();
 			
-		std::cout << "udp tcp" << std::endl;
 		if(_pRecvUdp)
 			if(_pRecvUdp->joinable())
 				_pRecvUdp->join();
 		
-		std::cout << "ok" << std::endl;
 		_udpSock.close();
 		_tcpSock.close();
 		
@@ -184,7 +181,7 @@ private:
 		pollfd fdRead 	= {0};
 		fdRead.fd 		= _udpSock.get();
 		fdRead.events 	= POLLIN;
-		const int TIMEOUT = 30 * 1000; // 30 sec
+		const int TIMEOUT = 1000; // 1 sec
 		
 		std::map<unsigned int, MessageBuffer> messagesBuffering;
 		std::map<unsigned int, uint64_t> messagesBufferingTs;
