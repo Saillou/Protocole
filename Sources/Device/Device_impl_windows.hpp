@@ -128,6 +128,10 @@ public:
 		return _format;
 	}
 	
+	const std::string& getPath() const {
+		return _path;
+	}
+	
 private:
 	// Members
 	std::string _path;

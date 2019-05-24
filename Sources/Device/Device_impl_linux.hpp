@@ -3,8 +3,6 @@
 
 #include "Device.hpp"
 
-#include <mutex>
-
 // Use v4l2
 #include <linux/videodev2.h>
 #include <errno.h>
@@ -29,7 +27,6 @@ public:
 		_buffer({(void*)nullptr, (size_t)0}) 
 	{
 		// Wait open
-		std::lock_guard<std::mutex> lockCbk(_mutFd);
 	}
 	~_Impl() {
 		if(_fd != -1)
@@ -38,7 +35,6 @@ public:
 	
 	// Methods
 	bool open() {
-		std::lock_guard<std::mutex> lockCbk(_mutFd);
 		_fd = ::open(_path.c_str(), O_RDWR | O_NONBLOCK, 0);
 		
 		if(_fd == -1 || !_initDevice() || !_initMmap()) {
@@ -52,8 +48,6 @@ public:
 		return true;		
 	}
 	bool close() {
-		std::lock_guard<std::mutex> lockCbk(_mutFd);
-		
 		// Stop capture
 		enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		if(_xioctl(_fd, VIDIOC_STREAMOFF, &type) == -1) {
@@ -78,8 +72,6 @@ public:
 	}
 	
 	bool grab() {
-		std::lock_guard<std::mutex> lockCbk(_mutFd);
-		
 		struct v4l2_buffer buf = {0};
 		buf.type 	= V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		buf.memory 	= V4L2_MEMORY_MMAP;
@@ -125,8 +117,6 @@ public:
 		return false;		
 	}
 	bool retrieve(Gb::Frame& frame) {
-		std::lock_guard<std::mutex> lockCbk(_mutFd);
-		
 		_rawData = Gb::Frame(
 			reinterpret_cast<unsigned char*>(_buffer.start), 
 			static_cast<unsigned long>(_buffer.length),
@@ -137,19 +127,24 @@ public:
 			
 		return _treat(frame);		
 	}
-	bool read(Gb::Frame& frame) {		
+	bool read(Gb::Frame& frame) {
 		return (grab() && retrieve(frame));
 	}
 	
 	// Setters
 	bool setFormat(int width, int height, PixelFormat formatPix) {
-		close();
+		bool io = _fd != -1;
+		if(io)
+			close();
 		
 		_format.width  = width;
 		_format.height = height;
 		_format.format = formatPix == MJPG ? V4L2_PIX_FMT_MJPEG : V4L2_PIX_FMT_YUYV;
 		
-		return open();
+		if(io)
+			open();
+		
+		return true;
 	}
 	bool set(Device::Param code, double value) {
 		struct v4l2_control control = {0};
@@ -241,6 +236,9 @@ public:
 	}
 	const FrameFormat getFormat() const {
 		return _format;
+	}
+	const std::string& getPath() const {
+		return _path;
 	}
 	
 private:		
@@ -393,7 +391,6 @@ private:
 	FrameFormat	_format;
 	FrameBuffer _buffer;
 	Gb::Frame 	_rawData;
-	std::mutex _mutFd;
 };
 
 #endif
