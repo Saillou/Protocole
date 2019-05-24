@@ -48,7 +48,6 @@ public:
 		return true;		
 	}
 	bool close() {
-		printf("Begin close \n");
 		// Stop capture
 		enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		if(_xioctl(_fd, VIDIOC_STREAMOFF, &type) == -1) {
@@ -66,7 +65,6 @@ public:
 			_fd = -1;
 		}
 		
-		printf("Closed \n");
 		return true;		
 	}
 	
@@ -238,7 +236,11 @@ private:
 		int r(-1);
 		do {
 			r = ioctl (fd, request, arg);
-		} while (r == -1 && EINTR == errno);
+			if(errno == EBUSY) {
+				printf("Busy");
+				Timer::wait(1);
+			}
+		} while (r == -1 && (errno == EINTR || errno == EBUSY));
 		
 		return r;	
 	}
