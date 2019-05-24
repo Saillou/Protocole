@@ -3,6 +3,8 @@
 
 #include "Device.hpp"
 
+#include <mutex>
+
 // Use v4l2
 #include <linux/videodev2.h>
 #include <errno.h>
@@ -27,6 +29,7 @@ public:
 		_buffer({(void*)nullptr, (size_t)0}) 
 	{
 		// Wait open
+		std::lock_guard<std::mutex> lockCbk(_mutFd);
 	}
 	~_Impl() {
 		if(_fd != -1)
@@ -35,6 +38,7 @@ public:
 	
 	// Methods
 	bool open() {
+		std::lock_guard<std::mutex> lockCbk(_mutFd);
 		_fd = ::open(_path.c_str(), O_RDWR | O_NONBLOCK, 0);
 		
 		if(_fd == -1 || !_initDevice() || !_initMmap()) {
@@ -48,6 +52,8 @@ public:
 		return true;		
 	}
 	bool close() {
+		std::lock_guard<std::mutex> lockCbk(_mutFd);
+		
 		// Stop capture
 		enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		if(_xioctl(_fd, VIDIOC_STREAMOFF, &type) == -1) {
@@ -62,7 +68,7 @@ public:
 		
 		if(_fd != -1) {
 			if(::close(_fd) == -1) {
-				printf("Closing fd: %n", errno);
+				_perror("Closing");
 				return false;
 			}
 		}
@@ -72,6 +78,8 @@ public:
 	}
 	
 	bool grab() {
+		std::lock_guard<std::mutex> lockCbk(_mutFd);
+		
 		struct v4l2_buffer buf = {0};
 		buf.type 	= V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		buf.memory 	= V4L2_MEMORY_MMAP;
@@ -117,6 +125,8 @@ public:
 		return false;		
 	}
 	bool retrieve(Gb::Frame& frame) {
+		std::lock_guard<std::mutex> lockCbk(_mutFd);
+		
 		_rawData = Gb::Frame(
 			reinterpret_cast<unsigned char*>(_buffer.start), 
 			static_cast<unsigned long>(_buffer.length),
@@ -127,7 +137,7 @@ public:
 			
 		return _treat(frame);		
 	}
-	bool read(Gb::Frame& frame) {
+	bool read(Gb::Frame& frame) {		
 		return (grab() && retrieve(frame));
 	}
 	
@@ -383,6 +393,7 @@ private:
 	FrameFormat	_format;
 	FrameBuffer _buffer;
 	Gb::Frame 	_rawData;
+	std::mutex _mutFd;
 };
 
 #endif
