@@ -40,6 +40,17 @@ int main(int argc, char* argv[]) {
 	ServerDevice device0(Globals::PATH_0, 5000);
 	ServerDevice device1(Globals::PATH_1, 6000);
 	
+	// // - Events
+	// device.onOpen([&]() {
+		// std::cout << "Device opened" << std::endl;
+	// });
+	// device.onFrame([&](const Gb::Frame& frame) {
+		// // nothing yet to do ..
+	// });
+	// device.onError([&](const Error& error) {
+		// std::cout << "Error occured" << std::endl;
+	// });
+	
 	
 	// -------- Main loop --------  
 	if(!device0.open() || !device1.open()) {
