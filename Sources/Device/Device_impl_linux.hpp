@@ -48,6 +48,7 @@ public:
 		return true;		
 	}
 	bool close() {
+		printf("Begin close \n");
 		// Stop capture
 		enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		if(_xioctl(_fd, VIDIOC_STREAMOFF, &type) == -1) {

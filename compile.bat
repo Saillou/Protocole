@@ -9,7 +9,7 @@ set launch=0
 
 if %compile%==1 (
 	call compileCode.bat Server mainServer
-	call compileCode.bat Client mainClient
+	REM call compileCode.bat Client mainClient
 )
 
 :: Launch on success
