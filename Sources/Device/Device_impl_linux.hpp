@@ -64,6 +64,8 @@ public:
 			::close(_fd);
 			_fd = -1;
 		}
+		
+		printf("Closed \n");
 		return true;		
 	}
 	
