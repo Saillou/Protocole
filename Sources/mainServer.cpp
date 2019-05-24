@@ -37,22 +37,12 @@ int main(int argc, char* argv[]) {
 	std::signal(SIGINT, sigintHandler);
 	
 	// - Device
-	ServerDevice device(Globals::PATH_0, Globals::PORT);
-	
-	// - Events
-	device.onOpen([&]() {
-		std::cout << "Device opened" << std::endl;
-	});
-	device.onFrame([&](const Gb::Frame& frame) {
-		// nothing yet to do ..
-	});
-	device.onError([&](const Error& error) {
-		std::cout << "Error occured" << std::endl;
-	});
+	ServerDevice device0(Globals::PATH_0, 5000);
+	ServerDevice device1(Globals::PATH_1, 6000);
 	
 	
 	// -------- Main loop --------  
-	if(!device.open()) {
+	if(!device0.open() || !device1.open()) {
 		std::cout << "Couldn't open device" << std::endl;
 		std::cout << "Press a key to continue..." << std::endl;
 		return std::cin.get();
@@ -63,7 +53,8 @@ int main(int argc, char* argv[]) {
 	}
 	
 	// -- End
-	device.close();
+	device0.close();
+	device1.close();
 	
 	std::cout << "Clean exit" << std::endl;
 	std::cout << "Press a key to continue..." << std::endl;

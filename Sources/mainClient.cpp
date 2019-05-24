@@ -38,9 +38,13 @@ namespace Globals {
 	
 	tjhandle decoder = nullptr;
 	
-	Gb::Frame dataFrame;
-	std::mutex mutFrame;
-	std::atomic<bool> updated = false;
+	Gb::Frame dataFrame0;
+	std::mutex mutFrame0;
+	std::atomic<bool> updated0 = false;
+	
+	Gb::Frame dataFrame1;
+	std::mutex mutFrame1;
+	std::atomic<bool> updated1 = false;
 }
 
 // --- Signals ---
@@ -57,25 +61,26 @@ int main(int argc, char* argv[]) {
 	std::signal(SIGINT, sigintHandler);
 	
 	// - Device
-	ClientDevice device(IAddress(Globals::IP_ADDRESS, Globals::PORT));
+	ClientDevice device0(IAddress(Globals::IP_ADDRESS, 5000));
+	ClientDevice device1(IAddress(Globals::IP_ADDRESS, 6000));
 	
 	// - Events
-	device.onOpen([&]() {
-		std::cout << "Device opened" << std::endl;
+	device0.onFrame([&](const Gb::Frame& frame) {
+		Globals::mutFrame0.lock();
+		Globals::dataFrame0 = frame;
+		Globals::mutFrame0.unlock();
+		Globals::updated0 = true;
 	});
-	device.onFrame([&](const Gb::Frame& frame) {
-		Globals::mutFrame.lock();
-		Globals::dataFrame = frame;
-		Globals::mutFrame.unlock();
-		Globals::updated = true;
-	});
-	device.onError([&](const Error& error) {
-		std::cout << "Error occured" << std::endl;
+	device1.onFrame([&](const Gb::Frame& frame) {
+		Globals::mutFrame1.lock();
+		Globals::dataFrame1 = frame;
+		Globals::mutFrame1.unlock();
+		Globals::updated1 = true;
 	});
 	
 	
 	// -------- Main loop --------  
-	if(!device.open()) {
+	if(!device0.open() || !device1.open()) {
 		std::cout << "Couldn't open device" << std::endl;
 		std::cout << "Press a key to continue..." << std::endl;
 		return std::cin.get();
@@ -83,33 +88,56 @@ int main(int argc, char* argv[]) {
 	
 	// Alloc
 	Globals::decoder = tjInitDecompress();
-	cv::Mat frameDisp = cv::Mat::zeros(480, 640, CV_8UC3);
+	
+	cv::Mat frameDisp0 = cv::Mat::zeros(480, 640, CV_8UC3);
+	cv::Mat frameDisp1 = cv::Mat::zeros(480, 640, CV_8UC3);
 	
 	// Loop
 	while(Globals::signalStatus != SIGINT && cv::waitKey(10) != 27) {
-		// Display
-		if(Globals::updated) {
-			Globals::updated = false;
+		// Display 0
+		if(Globals::updated0) {
+			Globals::updated0 = false;
 			
-			Globals::mutFrame.lock();
-			if(!Globals::dataFrame.empty()) {
+			Globals::mutFrame0.lock();
+			if(!Globals::dataFrame0.empty()) {
 				// Re-Allocatation
-				if(frameDisp.cols * frameDisp.rows != Globals::dataFrame.size.height * Globals::dataFrame.size.width)
-					frameDisp = cv::Mat::zeros(Globals::dataFrame.size.height, Globals::dataFrame.size.width, CV_8UC3);
+				if(frameDisp0.cols * frameDisp0.rows != Globals::dataFrame0.size.height * Globals::dataFrame0.size.width)
+					frameDisp0 = cv::Mat::zeros(Globals::dataFrame0.size.height, Globals::dataFrame0.size.width, CV_8UC3);
 				
 				// Decode
-				if(tjDecompress2(Globals::decoder, Globals::dataFrame.start(), Globals::dataFrame.length(), frameDisp.data, Globals::dataFrame.size.width, 0, Globals::dataFrame.size.height, TJPF_BGR, TJFLAG_FASTDCT) >= 0) {
-					if(!frameDisp.empty()) {
-						cv::imshow("Device", frameDisp);
+				if(tjDecompress2(Globals::decoder, Globals::dataFrame0.start(), Globals::dataFrame0.length(), frameDisp0.data, Globals::dataFrame0.size.width, 0, Globals::dataFrame0.size.height, TJPF_BGR, TJFLAG_FASTDCT) >= 0) {
+					if(!frameDisp0.empty()) {
+						cv::imshow("Device 0", frameDisp0);
 					}
 				}
 			}
-			Globals::mutFrame.unlock();
+			Globals::mutFrame0.unlock();
+		}
+		
+		// Display 1
+		if(Globals::updated0) {
+			Globals::updated0 = false;
+			
+			Globals::mutFrame1.lock();
+			if(!Globals::dataFrame1.empty()) {
+				// Re-Allocatation
+				if(frameDisp1.cols * frameDisp1.rows != Globals::dataFrame1.size.height * Globals::dataFrame1.size.width)
+					frameDisp1 = cv::Mat::zeros(Globals::dataFrame1.size.height, Globals::dataFrame1.size.width, CV_8UC3);
+				
+				// Decode
+				if(tjDecompress2(Globals::decoder, Globals::dataFrame1.start(), Globals::dataFrame1.length(), frameDisp1.data, Globals::dataFrame1.size.width, 0, Globals::dataFrame1.size.height, TJPF_BGR, TJFLAG_FASTDCT) >= 0) {
+					if(!frameDisp1.empty()) {
+						cv::imshow("Device 1", frameDisp1);
+					}
+				}
+			}
+			Globals::mutFrame1.unlock();
 		}
 	}
 	
 	// -- End
-	device.close();
+	device0.close();
+	device1.close();
 	tjDestroy(Globals::decoder);
 	cv::destroyAllWindows();
 	
