@@ -18,22 +18,18 @@ public:
 		HEADER		= (1<<3),
 		FRAGMENT		= (1<<4),
 		
-		DEVICE_FORMAT			= (1<<5),
-		DEVICE_PROPERTIES	= (1<<6),
+		FORMAT		= (1<<5),
+		PROPERTIES	= (1<<6),
 		
-		DEVICE_0						= (1<<8),
-		DEVICE_0_FORMAT			= DEVICE_0 | DEVICE_FORMAT,
-		DEVICE_0_PROPERTIES		= DEVICE_0 | DEVICE_PROPERTIES,
-		
-		DEVICE_1						= (1<<9),
-		DEVICE_1_FORMAT			= DEVICE_1 | DEVICE_FORMAT,
-		DEVICE_1_PROPERTIES		= DEVICE_1 | DEVICE_PROPERTIES,
+		DEVICE					= (1<<7),
+		DEVICE_FORMAT			= DEVICE | FORMAT,
+		DEVICE_PROPERTIES	= DEVICE | PROPERTIES,
 	};
 	
 public:
 	// - Constructors
 	// Serializator
-	Message(const std::string& message) {
+	Message(const std::string& message="") {
 		_serialize(TEXT, message.size(), message.data());
 	}
 	Message(const unsigned int code, const std::string& message) {

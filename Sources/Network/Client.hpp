@@ -75,12 +75,12 @@ public:
 		return false;
 	}
 	
-	void sendInfo(const Message& msg) const {
-		_send(_tcpSock, msg, "TCP send Error");
+	bool sendInfo(const Message& msg) const {
+		return _send(_tcpSock, msg, "TCP send Error");
 	}
 	
-	void sendData(const Message& msg) const {		
-		_send(_udpSock, msg, "UDP send Error");
+	bool sendData(const Message& msg) const {		
+		return _send(_udpSock, msg, "UDP send Error");
 	}
 	
 	// Getters
@@ -109,8 +109,7 @@ public:
 private:	
 	// Methods in threads
 	void _recvTcp() {
-		// const int BUFFER_SIZE = 2048; 
-		const int BUFFER_SIZE = 150000; 
+		const int BUFFER_SIZE = 2048; 
 		char buf[BUFFER_SIZE] = {0};
 		ssize_t recv_len = 0;
 		
@@ -301,12 +300,14 @@ private:
 			disconnect();
 	}
 
-	void _send(const Socket& connectSocked, const Message& msg, const std::string& msgOnError = "Send error") const {
+	bool _send(const Socket& connectSocked, const Message& msg, const std::string& msgOnError = "Send error") const {
 		if(!connectSocked.send(msg)) {
 			std::lock_guard<std::mutex> lockCbk(_mutCbk);
 			if(_cbkError) 
 				_cbkError(Error(wlc::getError(), msgOnError));
+			return false;
 		}
+		return true;
 	}
 	
 private:

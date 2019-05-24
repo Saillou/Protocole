@@ -35,6 +35,11 @@ public:
 		times.push_back(time);
 	}
 	
+	void clear() {
+		buffer.clear();
+		times.clear();
+	}
+	
 protected:
 	mutable std::mutex mut;
 	std::deque<T> buffer;
@@ -71,6 +76,28 @@ public:
 class DataBuffer : public VirtualBuffer<MessageFormat> {	
 public:
 	bool update(MessageFormat& message) {
+		if(size() > 1) {			
+			if(timer.elapsed_mus() >= timeToWait ) {
+				timer.beg();
+				
+				// Change messag disp
+				message = buffer.front();
+				timeToWait = 1000*((int64_t)times[1] - (int64_t)times[0])/2;
+				
+				// Change buffer
+				pop();
+				
+				return !message.str().empty();
+			}
+		}	
+		return false;
+	}
+};
+
+// --- For message ---
+class MsgBuffer : public VirtualBuffer<Message> {	
+public:
+	bool update(Message& message) {
 		if(size() > 1) {			
 			if(timer.elapsed_mus() >= timeToWait ) {
 				timer.beg();

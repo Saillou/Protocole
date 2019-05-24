@@ -93,7 +93,7 @@ public:
 	}
 	
 	// Getters
-	bool isOpened() {
+	bool isOpened() const {
 		return _running;
 	}
 	
@@ -103,7 +103,7 @@ public:
 		
 		return Device::FrameFormat {0,0,0};
 	}
-	double get(Device::Param code) {
+	double get(Device::Param code) const {
 		if(_pDevice)
 			return _pDevice->get(code);
 		

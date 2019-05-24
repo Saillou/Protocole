@@ -289,6 +289,25 @@ private:
 	
 };
 
+struct IAddress {
+	// Ctor
+	IAddress(const std::string& ipAddress, const int p) : 
+		ip(ipAddress), 
+		port(p) 
+	{
+		
+	}
+	
+	// Methods
+	const bool isValide() const {
+		return SocketTool::determineValide(ip) && (port > (1 << 1) && port < (1 << 16));
+	}
+	
+	// Members
+	std::string ip;
+	int port;
+};
+
 
 // ------------------------------ Socket ----------------------------
 struct Socket {

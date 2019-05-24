@@ -16,7 +16,7 @@ public:
 	// Constructors
 	explicit _Impl(const std::string& pathVideo) : 
 		_path(pathVideo), 
-		_format({0, 0, MJPG}),
+		_format({480, 640, MJPG}),
 		_PARAMS({(int)cv::IMWRITE_JPEG_QUALITY, 40}) {
 		// Wait for open
 	}
@@ -33,9 +33,8 @@ public:
 		else 
 			_cap.open(_path);
 		
-		if(_format.width > 0 && _format.height > 0) {
+		if(_format.width > 0 && _format.height > 0)
 			setFormat(_format.width, _format.height, (PixelFormat)_format.format);
-		}
 		
 		return _cap.isOpened();
 	}
