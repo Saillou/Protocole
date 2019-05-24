@@ -67,6 +67,8 @@ public:
 			}
 		}
 		
+		_buffer.start = nullptr;
+		_buffer.length = 0;
 		_fd = -1;
 		return true;		
 	}
@@ -135,14 +137,16 @@ public:
 	bool setFormat(int width, int height, PixelFormat formatPix) {
 		bool io = _fd != -1;
 		if(io)
-			close();
+			if(!close())
+				return false;
 		
+		Timer::wait(10000);
 		_format.width  = width;
 		_format.height = height;
 		_format.format = formatPix == MJPG ? V4L2_PIX_FMT_MJPEG : V4L2_PIX_FMT_YUYV;
 		
 		if(io)
-			open();
+			return open();
 		
 		return true;
 	}

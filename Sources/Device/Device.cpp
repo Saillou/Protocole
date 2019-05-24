@@ -51,14 +51,7 @@ bool Device::read(Gb::Frame& frame) {
 
 // Setters
 bool Device::setFormat(int width, int height, PixelFormat formatPix) {
-	// return _impl->setFormat(width, height, formatPix);
-	std::string path = _impl->getPath();
-	_impl->close();
-	delete _impl;
-	
-	_impl = new _Impl(path);
-	_impl->setFormat(width, height, formatPix);
-	return _impl->open();
+	return _impl->setFormat(width, height, formatPix);
 }
 bool Device::set(Param code, double value) {
 	return _impl->set(code, value);
