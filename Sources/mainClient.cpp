@@ -115,8 +115,8 @@ int main(int argc, char* argv[]) {
 		}
 		
 		// Display 1
-		if(Globals::updated0) {
-			Globals::updated0 = false;
+		if(Globals::updated1) {
+			Globals::updated1 = false;
 			
 			Globals::mutFrame1.lock();
 			if(!Globals::dataFrame1.empty()) {
