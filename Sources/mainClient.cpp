@@ -78,15 +78,6 @@ int main(int argc, char* argv[]) {
 		Globals::updated1 = true;
 	});
 	
-	device0.onOpen([&]() {
-		std::cout << "Device 0 opened" << std::endl;
-		device0.setFormat(1280, 720, Device::MJPG);
-	});
-	device1.onOpen([&]() {
-		std::cout << "Device 1 opened" << std::endl;
-		device1.setFormat(1280, 720, Device::MJPG);
-	});
-	
 	// -------- Main loop --------  
 	if(!device0.open() || !device1.open()) {
 		std::cout << "Couldn't open device" << std::endl;

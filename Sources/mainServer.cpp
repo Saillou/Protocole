@@ -58,6 +58,8 @@ int main(int argc, char* argv[]) {
 		std::cout << "Press a key to continue..." << std::endl;
 		return std::cin.get();
 	}
+	device0.setFormat(1280, 720, Device::MJPG);
+	device1.setFormat(1280, 720, Device::MJPG);
 	
 	for(Timer timer; Globals::signalStatus != SIGINT; timer.wait(100)) {
 		// ... Do other stuff ...
