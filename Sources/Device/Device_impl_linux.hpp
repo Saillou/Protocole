@@ -61,10 +61,13 @@ public:
 		}
 		
 		if(_fd != -1) {
-			::close(_fd);
-			_fd = -1;
+			if(::close(_fd) == -1) {
+				printf("Closing fd: %n", errno);
+				return false;
+			}
 		}
 		
+		_fd = -1;
 		return true;		
 	}
 	
@@ -236,11 +239,7 @@ private:
 		int r(-1);
 		do {
 			r = ioctl (fd, request, arg);
-			if(errno == EBUSY) {
-				printf("Busy");
-				Timer::wait(1);
-			}
-		} while (r == -1 && (errno == EINTR || errno == EBUSY));
+		} while (r == -1 && errno == EINTR);
 		
 		return r;	
 	}
