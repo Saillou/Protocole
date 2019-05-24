@@ -40,10 +40,15 @@ int main(int argc, char* argv[]) {
 	ServerDevice device0(Globals::PATH_0, 5000);
 	ServerDevice device1(Globals::PATH_1, 6000);
 	
-	// // - Events
-	// device.onOpen([&]() {
-		// std::cout << "Device opened" << std::endl;
-	// });
+	// - Events
+	device0.onOpen([&]() {
+		std::cout << "Device opened" << std::endl;
+		device0.setFormat(1280, 720, Device::MJPG);
+	});
+	device1.onOpen([&]() {
+		std::cout << "Device opened" << std::endl;
+		device1.setFormat(1280, 720, Device::MJPG);
+	});
 	// device.onFrame([&](const Gb::Frame& frame) {
 		// // nothing yet to do ..
 	// });
@@ -58,8 +63,6 @@ int main(int argc, char* argv[]) {
 		std::cout << "Press a key to continue..." << std::endl;
 		return std::cin.get();
 	}
-	device0.setFormat(1280, 720, Device::MJPG);
-	device1.setFormat(1280, 720, Device::MJPG);
 	
 	for(Timer timer; Globals::signalStatus != SIGINT; timer.wait(100)) {
 		// ... Do other stuff ...
