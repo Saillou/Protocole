@@ -80,9 +80,11 @@ int main(int argc, char* argv[]) {
 	
 	device0.onOpen([&]() {
 		std::cout << "Device 0 opened" << std::endl;
+		device0.setFormat(1280, 720, Device::MJPG);
 	});
 	device1.onOpen([&]() {
 		std::cout << "Device 1 opened" << std::endl;
+		device1.setFormat(1280, 720, Device::MJPG);
 	});
 	
 	// -------- Main loop --------  
