@@ -48,25 +48,26 @@ public:
 		return true;		
 	}
 	bool close() {
+		std::cout << "closing.." << std::endl;
 		// Stop capture
 		enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		if(_xioctl(_fd, VIDIOC_STREAMOFF, &type) == -1) {
 			_perror("Stop Capture");
 			return false;
 		}
-		
+		std::cout << "stop capture.." << std::endl;
 		if(munmap(_buffer.start, _buffer.length) == -1) {
 			_perror("Memory unmap");
 			return false;
 		}
-		
+		std::cout << "unmaped memory.." << std::endl;
 		if(_fd != -1) {
 			if(::close(_fd) == -1) {
 				_perror("Closing");
 				return false;
 			}
 		}
-		
+		std::cout << "clear buffer.." << std::endl;
 		_buffer.start = nullptr;
 		_buffer.length = 0;
 		_fd = -1;
@@ -135,16 +136,18 @@ public:
 	
 	// Setters
 	bool setFormat(int width, int height, PixelFormat formatPix) {
+		std::cout << "---- SET FORMAT ---- " << std::endl;
 		bool io = _fd != -1;
 		if(io)
 			if(!close())
 				return false;
 		
-		Timer::wait(10000);
+		std::cout << "---- CLOSED ---- " << std::endl;
 		_format.width  = width;
 		_format.height = height;
 		_format.format = formatPix == MJPG ? V4L2_PIX_FMT_MJPEG : V4L2_PIX_FMT_YUYV;
 		
+		std::cout << "---- RE-OPEN ---- " << std::endl;
 		if(io)
 			return open();
 		
