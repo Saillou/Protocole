@@ -185,7 +185,7 @@ public:
 		// Create threads
 		_isConnected = true;
 		
-		// _pSend 		= std::make_shared<std::thread>(&Server::_sendLoop, this);
+		_pSend 		= std::make_shared<std::thread>(&Server::_sendLoop, this);
 		_pRecvUdp4 	= std::make_shared<std::thread>(&Server::_recvUdp, this, std::ref(_udpSock4));
 		_pRecvUdp6 	= std::make_shared<std::thread>(&Server::_recvUdp, this, std::ref(_udpSock6));
 		_pHandleTcp4 = std::make_shared<std::thread>(&Server::_handleTcp, this, std::ref(_tcpSock4));
@@ -479,7 +479,7 @@ private:
 	
 	void _sendLoop() {
 		// FIFO
-		for(Timer timer; _isConnected; ) {
+		for(Timer timer; _isConnected; timer.waitMus(500)) {
 			if(!_pendingSendUpdated)
 				continue;
 			
