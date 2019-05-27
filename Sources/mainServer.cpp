@@ -78,7 +78,7 @@ int main(int argc, char* argv[]) {
 
 	std::string messageStr(60000, 'A');
 	
-	for(Timer timer; Globals::signalStatus != SIGINT; timer.wait(20)) {
+	for(Timer timer; Globals::signalStatus != SIGINT; timer.wait(10)) {
 		// Spam broadcast
 		for(auto& client: server.getClients()) {
 			if(client.connected) {

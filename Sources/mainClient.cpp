@@ -23,7 +23,7 @@ static void sigintHandler(int signal) {
 
 // --- Functions  ---
 bool waitClient(Client& client) {
-	while(Globals::signalStatus != SIGINT && !client.connectTo(Globals::IP_ADDRESS, 8888)) {
+	while(Globals::signalStatus != SIGINT && !client.connectTo(Globals::IP_ADDRESS, 6000)) {
 		std::cout << "Can reach server..." << std::endl;
 		Timer::wait(1000);
 	}
