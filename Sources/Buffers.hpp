@@ -1,6 +1,20 @@
 #pragma once
 
-#include <opencv2/core.hpp>	
+#ifdef __linux__
+	// Shall die
+
+#elif _WIN32
+	// Based on Opencv
+	#include <opencv2/core.hpp>	
+	#include <opencv2/videoio.hpp>	
+	#include <opencv2/highgui.hpp>
+	#include <opencv2/imgproc.hpp>
+	#include <opencv2/imgcodecs.hpp>
+	
+	// Decode jpg
+	#include <turbojpeg.h>
+	
+#endif
 
 #include <iostream>
 #include <csignal>
@@ -50,29 +64,6 @@ protected:
 	int64_t timeToWait = 0;
 };
 
-// --- For frame ---
-class FrameBuffer : public VirtualBuffer<cv::Mat> {
-public:	
-	bool update(cv::Mat& frame) override {
-		if(size() > 1) {			
-			if(timer.elapsed_mus() >= timeToWait ) {
-				timer.beg();
-				
-				// Change frame disp
-				buffer.front().copyTo(frame);
-				timeToWait = 1000*((int64_t)times[1] - (int64_t)times[0])/2;
-				
-				// Change buffer
-				pop();
-				
-				return !frame.empty();
-			}
-		}	
-		return false;
-	}
-};
-
-
 // --- For datas ---
 class DataBuffer : public VirtualBuffer<MessageFormat> {	
 public:
@@ -118,10 +109,10 @@ public:
 };
 
 
-// -- Multi threaded Gb::frames
+// -- Multi threaded Gb::frames : For decoding and displaying Gb::Frame (through turbojpg/opencv)
 class FrameMt {
 public:	
-	FrameMt() : _frame(), _updated(false) {
+	FrameMt() : _cvFrame(cv::Mat::zeros(480, 640, CV_8UC3)), _frame(), _updated(false) {
 	}
 	
 	void lock() const {
@@ -131,18 +122,41 @@ public:
 		_mut.unlock();
 	}
 	void setFrame(const Gb::Frame& frame) {
-		lock();
-		_frame = frame;
-		unlock();
+		std::lock_guard<std::mutex> lock(_mut);
 		
+		_frame = frame;
 		_updated = true;
 	}
 	
-	// Setters
-	void updated(bool u) {
-		_updated = u;
-	}	
-	
+	bool decode(const tjhandle& decoder) {
+		std::lock_guard<std::mutex> lock(_mut);
+		
+		if(!_updated || empty())
+			return false;
+		
+		// Anyway, this frame will be read : fail or not, we don't want to read again
+		_updated = false;
+		
+		// Re-Allocatation
+		if(_cvFrame.size().area() != area())
+			_cvFrame = cv::Mat::zeros(height(), width(), CV_8UC3);
+		
+		// Decode
+		return (
+			tjDecompress2 (
+				decoder, 
+				data(), length(), 
+				_cvFrame.data, 
+				width(), 0, height(), 
+				TJPF_BGR, TJFLAG_FASTDCT
+			) >= 0);
+	}
+	void show(const std::string& winName) {
+		std::lock_guard<std::mutex> lock(_mut);
+		
+		if(!_cvFrame.empty())
+			cv::imshow(winName, _cvFrame);	
+	}
 	
 	// Getters
 	const Gb::Frame& get() const {
@@ -171,6 +185,7 @@ public:
 	}
 	
 private:
+	cv::Mat _cvFrame;
 	Gb::Frame _frame;
 	std::atomic<bool> _updated;
 	mutable std::mutex _mut;
