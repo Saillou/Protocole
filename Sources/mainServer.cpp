@@ -30,7 +30,7 @@ static void sigintHandler(int signal) {
 
 // --- Functions  ---
 bool waitServer(Server& server) {
-	while(Globals::signalStatus != SIGINT && !server.connectAt(Globals::PORT)) {
+	while(Globals::signalStatus != SIGINT && !server.connectAt(8888)) {
 		std::cout << "Can create server" << std::endl;
 		Timer::wait(1000);
 	}
