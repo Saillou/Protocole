@@ -76,7 +76,7 @@ int main(int argc, char* argv[]) {
 		return std::cin.get();
 	}
 
-	std::string messageStr(50, 'A');
+	std::string messageStr(500, 'A');
 	
 	for(Timer timer; Globals::signalStatus != SIGINT; timer.wait(100)) {
 		// Spam broadcast

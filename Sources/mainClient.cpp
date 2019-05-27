@@ -41,6 +41,7 @@ int main(int argc, char* argv[]) {
 	
 	//-- Create client
 	Client client;
+	std::atomic<unsigned int> totalBytesRead = 0;
 	
 	// -------- Callbacks --------
 	client.onConnect([&]() {
@@ -51,11 +52,12 @@ int main(int argc, char* argv[]) {
 	});
 	
 	client.onData([&](const Message& message) {		
-		std::cout << "Datas : - code : [" << message.code() << "] - size : " << message.size()/1000.0 << "KB \n";
+		// std::cout << "Datas : - code : [" << message.code() << "] - size : " << message.size()/1000.0 << "KB \n";
+		totalBytesRead += 8*message.size();
 	});
 	
 	client.onInfo([&](const Message& message) {
-		std::cout << "Infos : - code : [" << message.code() << "] - size : " << message.size()/1000.0 << "KB \n";
+		// std::cout << "Infos : - code : [" << message.code() << "] - size : " << message.size()/1000.0 << "KB \n";
 	});
 	
 	client.onError([&](const Error& error) {
@@ -69,8 +71,12 @@ int main(int argc, char* argv[]) {
 	}
 	
 	// Loop
+	Timer t;
 	while(Globals::signalStatus != SIGINT) {
-		Timer::wait(100);
+		t.wait(1000);
+		std::cout << (1000.0*totalBytesRead) / t.elapsed_mus() << "Kb/s" << " - (Total: " << totalBytesRead << "b)" << std::endl;
+		totalBytesRead = 0;
+		t.beg();
 	}
 	
 	// -- End
