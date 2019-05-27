@@ -169,27 +169,27 @@ public:
 		if(!_tcpSock4.bind(address_v4, Proto_Tcp))
 			return disconnect();		
 		
-		// // Create server address
-		// SocketAddress address_v6;
+		// Create server address
+		SocketAddress address_v6;
 		
-		// if(!address_v6.create(Ip_v6, port+1))
-			// return disconnect();
+		if(!address_v6.create(Ip_v6, port+1))
+			return disconnect();
 		
-		// // Bind server sockets
-		// if(!_udpSock6.bind(address_v6, Proto_Udp))
-			// return disconnect();
+		// Bind server sockets
+		if(!_udpSock6.bind(address_v6, Proto_Udp))
+			return disconnect();
 		
-		// if(!_tcpSock6.bind(address_v6, Proto_Tcp))
-			// return disconnect();	
+		if(!_tcpSock6.bind(address_v6, Proto_Tcp))
+			return disconnect();	
 		
 		// Create threads
 		_isConnected = true;
 		
-		_pSend 		= std::make_shared<std::thread>(&Server::_sendLoop, this);
+		// _pSend 		= std::make_shared<std::thread>(&Server::_sendLoop, this);
 		_pRecvUdp4 	= std::make_shared<std::thread>(&Server::_recvUdp, this, std::ref(_udpSock4));
-		// _pRecvUdp6 	= std::make_shared<std::thread>(&Server::_recvUdp, this, std::ref(_udpSock6));
+		_pRecvUdp6 	= std::make_shared<std::thread>(&Server::_recvUdp, this, std::ref(_udpSock6));
 		_pHandleTcp4 = std::make_shared<std::thread>(&Server::_handleTcp, this, std::ref(_tcpSock4));
-		// _pHandleTcp6 = std::make_shared<std::thread>(&Server::_handleTcp, this, std::ref(_tcpSock6));
+		_pHandleTcp6 = std::make_shared<std::thread>(&Server::_handleTcp, this, std::ref(_tcpSock6));
 		
 		return true;
 	}
