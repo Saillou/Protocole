@@ -10,7 +10,8 @@
 
 namespace Globals {
 	// Constantes
-	const std::string IP_ADDRESS = "192.168.11.24"; 	// Barnacle V4
+	// const std::string IP_ADDRESS = "192.168.11.24"; 	// Barnacle V4
+	const std::string IP_ADDRESS = "fe80::b18:f81d:13a8:3a4"; 	// Barnacle V6
 	
 	// Variables
 	volatile std::sig_atomic_t signalStatus = 0;
@@ -23,7 +24,7 @@ static void sigintHandler(int signal) {
 
 // --- Functions  ---
 bool waitClient(Client& client) {
-	while(Globals::signalStatus != SIGINT && !client.connectTo(Globals::IP_ADDRESS, 6000)) {
+	while(Globals::signalStatus != SIGINT && !client.connectTo(Globals::IP_ADDRESS, 6001)) {
 		std::cout << "Can reach server..." << std::endl;
 		Timer::wait(1000);
 	}
