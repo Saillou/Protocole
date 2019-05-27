@@ -6,17 +6,15 @@
 
 #include "StreamDevice/ClientDevice.hpp"
 #include "Timer.hpp"
-#include "Buffers.hpp"
+#include "FrameMt.hpp"
 
 namespace Globals {
 	// Constantes
 	const std::string IP_ADDRESS = "192.168.11.24"; 	// Barnacle V4
 	// const std::string IP_ADDRESS = "127.0.0.1"; 	// localhost V4
-	const int PORT = 8888;										// Port v4
 	
-	// const std::string IP_ADDRESS = "fe80::b18:f81d:13a8:3a4"; 	// Barnacle V6
+	// const std::string IP_ADDRESS = "fe80::b18:f81d:13a8:3a4"; 		// Barnacle V6
 	// const std::string IP_ADDRESS = "::1"; 									// localhost V6
-	// const int PORT = 8889;															// Port v6
 	
 	// Variables
 	volatile std::sig_atomic_t signalStatus = 0;
