@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
 	std::signal(SIGINT, sigintHandler);
 	
 	// - Device
-	// ServerDevice device0(Globals::PATH_0, 5000);
+	ServerDevice device0(Globals::PATH_0, 5000);
 	// ServerDevice device1(Globals::PATH_1, 6000);
 	
 	// - Events
@@ -66,7 +66,7 @@ int main(int argc, char* argv[]) {
 	}
 	
 	// -- End
-	// device0.close();
+	device0.close();
 	// device1.close();
 	
 	std::cout << "Clean exit" << std::endl;
