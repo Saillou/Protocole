@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
 	
 	
 	// -------- Main loop --------  
-	// device0.open();
+	device0.open();
 	// device1.open();
 	
 	for(Timer timer; Globals::signalStatus != SIGINT; timer.wait(100)) {
