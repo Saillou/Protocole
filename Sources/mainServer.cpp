@@ -41,10 +41,10 @@ int main(int argc, char* argv[]) {
 	ServerDevice device1(Globals::PATH_1, 6000);
 	
 	// - Events
-	device0.onOpen([&]() {
-		std::cout << "Device opened 0" << std::endl;
-		// device0.setFormat(1280, 720, Device::MJPG);
-	});
+	// device0.onOpen([&]() {
+		// std::cout << "Device opened 0" << std::endl;
+		// // device0.setFormat(1280, 720, Device::MJPG);
+	// });
 	// device1.onOpen([&]() {
 		// std::cout << "Device opened 1" << std::endl;
 		// // device1.setFormat(1280, 720, Device::MJPG);
@@ -66,7 +66,7 @@ int main(int argc, char* argv[]) {
 	}
 	
 	// -- End
-	device0.close();
+	// device0.close();
 	// device1.close();
 	
 	std::cout << "Clean exit" << std::endl;
