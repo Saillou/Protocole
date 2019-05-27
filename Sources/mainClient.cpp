@@ -18,9 +18,6 @@ namespace Globals {
 	
 	// Variables
 	volatile std::sig_atomic_t signalStatus = 0;
-	
-	FrameMt frame0;
-	FrameMt frame1;
 }
 
 // --- Signals ---
@@ -33,17 +30,22 @@ int main(int argc, char* argv[]) {
 	// - Install signal handler
 	std::signal(SIGINT, sigintHandler);
 	
-	// - Devices
+	// --- Devices
+	FrameMt frame0;
 	ClientDevice device0(IAddress(Globals::IP_ADDRESS, 5000));
+	
+	FrameMt frame1;
 	ClientDevice device1(IAddress(Globals::IP_ADDRESS, 6000));
+	
 	
 	// ----- Events -----
 	device0.onFrame([&](const Gb::Frame& frame) {
-		Globals::frame0.setFrame(frame);
+		frame0.setFrame(frame);
 	});
 	device1.onFrame([&](const Gb::Frame& frame) {
-		Globals::frame1.setFrame(frame);
+		frame1.setFrame(frame);
 	});
+	
 	
 	// -------- Main loop --------  
 	if(!device0.open() || !device1.open()) {
@@ -52,16 +54,16 @@ int main(int argc, char* argv[]) {
 		return std::cin.get();
 	}
 	
-	// Alloc
+	// Alloc decoder
 	tjhandle decoder = tjInitDecompress();
 	
 	// Loop
 	while(Globals::signalStatus != SIGINT && cv::waitKey(10) != 27) {
-		if(Globals::frame0.decode(decoder))
-			Globals::frame0.show("Device 0");
+		if(frame0.decode(decoder))
+			frame0.show("Device 0");
 		
-		if(Globals::frame1.decode(decoder))
-			Globals::frame1.show("Device 1");
+		if(frame1.decode(decoder))
+			frame1.show("Device 1");
 	}
 	
 	// -- End
