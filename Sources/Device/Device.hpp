@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Timer.hpp"
+#include "../Tool/Timer.hpp"
 #include "structures.hpp"
 
 class Device {

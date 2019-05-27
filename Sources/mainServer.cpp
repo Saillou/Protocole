@@ -2,6 +2,7 @@
 #include <csignal>
 
 #include "StreamDevice/ServerDevice.hpp"
+#include "Tool/Timer.hpp"
 
 #ifdef __linux__
 	#define PATH_CAMERA_0 "/dev/video0"
@@ -15,7 +16,6 @@
 
 namespace Globals {
 	// Constantes
-	const int PORT = 8888;
 	const std::string PATH_0 = PATH_CAMERA_0;
 	const std::string PATH_1 = PATH_CAMERA_1;
 	

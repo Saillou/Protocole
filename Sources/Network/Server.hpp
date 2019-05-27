@@ -14,7 +14,7 @@
 #include "WinLinConversion.hpp"
 #include "SocketTool.hpp"
 #include "Message.hpp"
-#include "../Timer.hpp"
+#include "../Tool/Timer.hpp"
 
 class Server {
 	// -------------- Nested struct --------------

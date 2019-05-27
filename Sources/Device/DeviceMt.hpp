@@ -7,7 +7,7 @@
 
 #include "Device.hpp"
 #include "structures.hpp"
-#include "../Timer.hpp"
+#include "../Tool/Timer.hpp"
 
 // ------------ Device : Pull frames in a dedicated thread ------------
 class DeviceMt {	

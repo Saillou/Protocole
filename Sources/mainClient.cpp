@@ -5,8 +5,8 @@
 #include <deque>
 
 #include "StreamDevice/ClientDevice.hpp"
-#include "Timer.hpp"
-#include "FrameMt.hpp"
+#include "Tool/Timer.hpp"
+#include "Tool/FrameMt.hpp"
 
 namespace Globals {
 	// Constantes
