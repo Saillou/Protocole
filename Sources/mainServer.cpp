@@ -43,16 +43,6 @@ int main(int argc, char* argv[]) {
 	Server server;
 	server.connectAt(5000);
 	
-	server.onInfo([&](const Server::ClientInfo& client, const Message& message) {
-		std::cout << "info" << std::endl;
-	});
-	server.onClientConnect([&](const Server::ClientInfo& client) {
-		std::cout << "co" << std::endl;
-	});
-	server.onClientDisconnect([&](const Server::ClientInfo& client) {
-		std::cout << "deco" << std::endl;
-	});
-	
 	// - Events
 	// device0.onOpen([&]() {
 		// std::cout << "Device opened 0" << std::endl;
