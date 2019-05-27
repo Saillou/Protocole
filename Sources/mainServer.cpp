@@ -76,9 +76,15 @@ int main(int argc, char* argv[]) {
 		return std::cin.get();
 	}
 
+	std::string messageStr(50, 'A');
 	
 	for(Timer timer; Globals::signalStatus != SIGINT; timer.wait(100)) {
-		// ... Do other stuff ...
+		// Spam broadcast
+		for(auto& client: server.getClients()) {
+			if(client.connected) {
+				server.sendData(client, Message(messageStr));
+			}
+		}
 	}
 	
 	// -- End
