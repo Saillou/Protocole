@@ -67,7 +67,7 @@ int main(int argc, char* argv[]) {
 		// ... Do other stuff ...
 	}
 	
-	deviceMt0.close();
+	deviceMt0.release();
 	
 	// -- End
 	// device0.close();
