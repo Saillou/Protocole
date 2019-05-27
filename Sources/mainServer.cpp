@@ -28,6 +28,19 @@ static void sigintHandler(int signal) {
 	Globals::signalStatus = signal;
 }
 
+// --- Functions  ---
+bool waitServer(Server& server) {
+	while(Globals::signalStatus != SIGINT && !server.connectAt(Globals::PORT)) {
+		std::cout << "Can create server" << std::endl;
+		Timer::wait(1000);
+	}
+	
+	if( Globals::signalStatus == SIGINT) 
+		return false;
+	
+	return true;
+}
+
 // --- Entry point ---
 int main(int argc, char* argv[]) {
 	// - Install signal handler
