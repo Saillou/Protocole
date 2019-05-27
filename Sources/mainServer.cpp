@@ -39,8 +39,6 @@ int main(int argc, char* argv[]) {
 	// - Device
 	// ServerDevice device0(Globals::PATH_0, 5000);
 	// ServerDevice device1(Globals::PATH_1, 6000);
-	DeviceMt deviceMt0;
-	deviceMt0.open(Globals::PATH_0);
 	
 	// - Events
 	// device0.onOpen([&]() {
@@ -66,8 +64,6 @@ int main(int argc, char* argv[]) {
 	for(Timer timer; Globals::signalStatus != SIGINT; timer.wait(100)) {
 		// ... Do other stuff ...
 	}
-	
-	deviceMt0.release();
 	
 	// -- End
 	// device0.close();

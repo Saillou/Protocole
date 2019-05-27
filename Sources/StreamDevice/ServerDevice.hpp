@@ -100,7 +100,7 @@ private:
 	
 		// Set device events
 		_device.onFrame([&](const Gb::Frame& frame) {
-			this->_onDeviceFrame(frame);
+			// this->_onDeviceFrame(frame);
 		});
 		
 		
