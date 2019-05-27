@@ -7,6 +7,7 @@
 #include <map>
 #include <mutex>
 #include <string>
+#include <iostream>
 #include <functional>
 
 class ServerDevice {
@@ -17,14 +18,17 @@ public:
 		_pathDest(pathCamera)
 	{
 		// server
+		std::cout << "ctor()" << std::endl;
 	}
 	
 	~ServerDevice() {
+		std::cout << "~dtor()" << std::endl;
 		close();
 	}
 	
 	// -- Methods --
 	bool open(int timeoutMs = 0) {
+		std::cout << "open()" << std::endl;
 		if(!_device.open(_pathDest))
 			return false;
 		
@@ -40,6 +44,7 @@ public:
 		return false;
 	}
 	bool close() {
+		std::cout << "close()" << std::endl;
 		_device.release();
 		_server.disconnect();
 		
@@ -49,33 +54,41 @@ public:
 	
 	// -- Getters --
 	double get(Device::Param code) const {
+		std::cout << "get()" << std::endl;
 		return _device.get(code);
 	}
 	const Device::FrameFormat getFormat() const {
+		std::cout << "getF()" << std::endl;
 		return _device.getFormat();
 	}
 	bool isOpen() const {
+		std::cout << "is()" << std::endl;
 		return _device.isOpened();
 	}
 	
 	// -- Setters --
 	bool set(Device::Param code, double value) {
+		std::cout << "set()" << std::endl;
 		return _device.set(code, value);
 	}
 	bool setFormat(int width, int height, Device::PixelFormat formatPix) {
+		std::cout << "setF()" << std::endl;
 		return _device.setFormat(width, height, formatPix);
 	}
 	
 	// -- Events --
 	void onOpen(const std::function<void(void)>& cbkOpen) {
+		std::cout << "onOpen()" << std::endl;
 		std::lock_guard<std::mutex> lockCbk(_mutCbk);
 		_cbkOpen = cbkOpen;
 	}
 	void onFrame(const std::function<void(const Gb::Frame&)>& cbkFrame) {
+		std::cout << "onFrame()" << std::endl;
 		std::lock_guard<std::mutex> lockCbk(_mutCbk);
 		_cbkFrame = cbkFrame;
 	}
 	void onError(const std::function<void(const Error& error)>& cbkError) {
+		std::cout << "onError()" << std::endl;
 		std::lock_guard<std::mutex> lockCbk(_mutCbk);
 		_cbkError = cbkError;
 	}
@@ -85,6 +98,7 @@ private:
 	
 	// [Server is assumed connected.]
 	bool _initialization() {		
+		std::cout << "init()" << std::endl;
 		// Set server events
 		_server.onError(_cbkError);
 		
@@ -99,9 +113,9 @@ private:
 		});
 	
 		// Set device events
-		_device.onFrame([&](const Gb::Frame& frame) {
+		// _device.onFrame([&](const Gb::Frame& frame) {
 			// this->_onDeviceFrame(frame);
-		});
+		// });
 		
 		
 		// Callback
