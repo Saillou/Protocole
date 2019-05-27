@@ -38,18 +38,31 @@ namespace Globals {
 	
 	tjhandle decoder = nullptr;
 	
-	Gb::Frame dataFrame0;
-	std::mutex mutFrame0;
-	std::atomic<bool> updated0 = false;
-	
-	Gb::Frame dataFrame1;
-	std::mutex mutFrame1;
-	std::atomic<bool> updated1 = false;
+	FrameMt frame0;
+	FrameMt frame1;
 }
 
 // --- Signals ---
 static void sigintHandler(int signal) {
 	Globals::signalStatus = signal;
+}
+
+static bool decode(FrameMt& gbFrame, cv::Mat& cvFrame) {
+	gbFrame.updated(false);
+	
+	// Re-Allocatation
+	if(cvFrame.size().area() != gbFrame.area())
+		cvFrame = cv::Mat::zeros(gbFrame.height(), gbFrame.width(), CV_8UC3);
+	
+	// Decode
+	return (
+		tjDecompress2 (
+			Globals::decoder, 
+			gbFrame.data(), gbFrame.length(), 
+			cvFrame.data, 
+			gbFrame.width(), 0, gbFrame.height(), 
+			TJPF_BGR, TJFLAG_FASTDCT
+		) >= 0);
 }
 
 // --- Entry point ---
@@ -66,16 +79,10 @@ int main(int argc, char* argv[]) {
 	
 	// - Events
 	device0.onFrame([&](const Gb::Frame& frame) {
-		Globals::mutFrame0.lock();
-		Globals::dataFrame0 = frame;
-		Globals::mutFrame0.unlock();
-		Globals::updated0 = true;
+		Globals::frame0.setFrame(frame);
 	});
 	device1.onFrame([&](const Gb::Frame& frame) {
-		Globals::mutFrame1.lock();
-		Globals::dataFrame1 = frame;
-		Globals::mutFrame1.unlock();
-		Globals::updated1 = true;
+		Globals::frame1.setFrame(frame);
 	});
 	
 	// -------- Main loop --------  
@@ -94,43 +101,25 @@ int main(int argc, char* argv[]) {
 	// Loop
 	while(Globals::signalStatus != SIGINT && cv::waitKey(10) != 27) {
 		// Display 0
-		if(Globals::updated0) {
-			Globals::updated0 = false;
+		if(Globals::frame0.updated()) {			
+			Globals::frame0.lock();
 			
-			Globals::mutFrame0.lock();
-			if(!Globals::dataFrame0.empty()) {
-				// Re-Allocatation
-				if(frameDisp0.cols * frameDisp0.rows != Globals::dataFrame0.size.height * Globals::dataFrame0.size.width)
-					frameDisp0 = cv::Mat::zeros(Globals::dataFrame0.size.height, Globals::dataFrame0.size.width, CV_8UC3);
-				
-				// Decode
-				if(tjDecompress2(Globals::decoder, Globals::dataFrame0.start(), Globals::dataFrame0.length(), frameDisp0.data, Globals::dataFrame0.size.width, 0, Globals::dataFrame0.size.height, TJPF_BGR, TJFLAG_FASTDCT) >= 0) {
-					if(!frameDisp0.empty()) {
-						cv::imshow("Device 0", frameDisp0);
-					}
-				}
-			}
-			Globals::mutFrame0.unlock();
+			if(!Globals::frame0.empty()) 
+				if(decode(Globals::frame0, frameDisp0))
+					cv::imshow("Device 0", frameDisp0);
+			
+			Globals::frame0.unlock();
 		}
 		
 		// Display 1
-		if(Globals::updated1) {
-			Globals::updated1 = false;
+		if(Globals::frame1.updated()) {			
+			Globals::frame1.lock();
 			
-			Globals::mutFrame1.lock();
-			if(!Globals::dataFrame1.empty()) {
-				// Re-Allocatation
-				if(frameDisp1.cols * frameDisp1.rows != Globals::dataFrame1.size.height * Globals::dataFrame1.size.width)
-					frameDisp1 = cv::Mat::zeros(Globals::dataFrame1.size.height, Globals::dataFrame1.size.width, CV_8UC3);
-				
-				// Decode
-				if(tjDecompress2(Globals::decoder, Globals::dataFrame1.start(), Globals::dataFrame1.length(), frameDisp1.data, Globals::dataFrame1.size.width, 0, Globals::dataFrame1.size.height, TJPF_BGR, TJFLAG_FASTDCT) >= 0) {
-					if(!frameDisp1.empty()) {
-						cv::imshow("Device 1", frameDisp1);
-					}
-				}
-			}
-			Globals::mutFrame1.unlock();
+			if(!Globals::frame1.empty()) 
+				if(decode(Globals::frame1, frameDisp1))
+					cv::imshow("Device 1", frameDisp1);
+			
+			Globals::frame1.unlock();
 		}
 	}
 	

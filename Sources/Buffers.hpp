@@ -8,6 +8,7 @@
 #include <mutex>
 
 #include "Network/Message.hpp"
+#include "Device/structures.hpp"
 
 // Buffer
 template <typename T>
@@ -117,10 +118,10 @@ public:
 };
 
 
-// -- Multi threaded cv::frames
+// -- Multi threaded Gb::frames
 class FrameMt {
 public:	
-	FrameMt() : _frame(cv::Mat::zeros(1, 1, CV_8UC3)) {
+	FrameMt() : _frame(), _updated(false) {
 	}
 	
 	void lock() const {
@@ -129,28 +130,49 @@ public:
 	void unlock() const {
 		_mut.unlock();
 	}
-	void resetSize(int width, int height) {
-		_frame = cv::Mat::zeros(height, width, CV_8UC3);
+	void setFrame(const Gb::Frame& frame) {
+		lock();
+		_frame = frame;
+		unlock();
+		
+		_updated = true;
 	}
 	
-	const cv::Mat& get() const {
+	// Setters
+	void updated(bool u) {
+		_updated = u;
+	}	
+	
+	
+	// Getters
+	const Gb::Frame& get() const {
 		return _frame;
 	}
 	int width() const {
-		return _frame.cols;
+		return _frame.size.width;
 	}
 	int height() const {
-		return _frame.rows;
+		return _frame.size.height;
 	}
-	unsigned char* data() {
-		return _frame.data;
+	int area() const {
+		return width() * height();
+	}
+	const unsigned char* data() const {
+		return _frame.start();
+	}
+	unsigned long length() const {
+		return _frame.length();
 	}
 	bool empty() const {
 		return _frame.empty();
 	}
+	bool updated() const {
+		return _updated;
+	}
 	
 private:
-	cv::Mat _frame;
+	Gb::Frame _frame;
+	std::atomic<bool> _updated;
 	mutable std::mutex _mut;
 };
 
