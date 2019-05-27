@@ -37,11 +37,8 @@ int main(int argc, char* argv[]) {
 	std::signal(SIGINT, sigintHandler);
 	
 	// - Device
-	// ServerDevice device0(Globals::PATH_0, 5000);
-	// ServerDevice device1(Globals::PATH_1, 6000);
-	
-	Server server;
-	server.connectAt(5000);
+	ServerDevice device0(Globals::PATH_0, 5000);
+	ServerDevice device1(Globals::PATH_1, 6000);
 	
 	// - Events
 	// device0.onOpen([&]() {
@@ -61,18 +58,16 @@ int main(int argc, char* argv[]) {
 	
 	
 	// -------- Main loop --------  
-	// device0.open();
-	// device1.open();
+	device0.open();
+	device1.open();
 	
 	for(Timer timer; Globals::signalStatus != SIGINT; timer.wait(100)) {
 		// ... Do other stuff ...
 	}
 	
-	server.disconnect();
-	
 	// -- End
-	// device0.close();
-	// device1.close();
+	device0.close();
+	device1.close();
 	
 	std::cout << "Clean exit" << std::endl;
 	std::cout << "Press a key to continue..." << std::endl;
