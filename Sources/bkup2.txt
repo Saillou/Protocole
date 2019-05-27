@@ -1,16 +1,19 @@
 #include <iostream>
 #include <csignal>
-#include <atomic>
-#include <map>
 #include <deque>
 
-#include "StreamDevice/ClientDevice.hpp"
-#include "Tool/Timer.hpp"
-#include "Tool/FrameMt.hpp"
+#include "Timer.hpp"
+#include "Buffers.hpp"
+#include "Network/Client.hpp"
+#include "Network/Message.hpp"
 
+
+// -- Globals space --
 namespace Globals {
 	// Constantes
-	const std::string IP_ADDRESS = "192.168.11.24"; 	// Barnacle V4
+	// const std::string IP_ADDRESS = "192.168.11.24"; 	// Barnacle V4
+	const std::string IP_ADDRESS = "127.0.0.1"; 	// localhost V4
+	const int PORT = 8888;										// Port v4
 	
 	// Variables
 	volatile std::sig_atomic_t signalStatus = 0;
@@ -23,7 +26,7 @@ static void sigintHandler(int signal) {
 
 // --- Functions  ---
 bool waitClient(Client& client) {
-	while(Globals::signalStatus != SIGINT && !client.connectTo(Globals::IP_ADDRESS, 8888)) {
+	while(Globals::signalStatus != SIGINT && !client.connectTo(Globals::IP_ADDRESS, Globals::PORT)) {
 		std::cout << "Can reach server..." << std::endl;
 		Timer::wait(1000);
 	}
@@ -35,8 +38,8 @@ bool waitClient(Client& client) {
 }
 
 // --- Entry point ---
-int main(int argc, char* argv[]) {	
-	// - Install signal handler
+int main() {
+	// -- Install signal handler
 	std::signal(SIGINT, sigintHandler);
 	
 	//-- Create client
@@ -45,22 +48,27 @@ int main(int argc, char* argv[]) {
 	// -------- Callbacks --------
 	client.onConnect([&]() {
 		std::cout << "Connection to server success" << std::endl;
-		
-		client.sendData(Message("init data"));
-		client.sendInfo(Message("init info"));
+		client.sendData(Message("init"));
+		// client.sendInfo(Message("init"));
 	});
 	
+	unsigned long long t0 = 0;
 	client.onData([&](const Message& message) {		
-		std::cout << "Datas : - code : [" << message.code() << "] - size : " << message.size()/1000.0 << "KB \n";
+		// std::cout << "Datas : - code : [" << message.code() << "] - size : " << message.size()/1000.0 << "KB \n";
+		unsigned long long t1 = Timer::timestampMs();
+		client.sendData(Message("Ping"));
+		std::cout << "Udp ping: " << t1 - t0 << " ms. \n";
+		t0 = t1;
 	});
 	
 	client.onInfo([&](const Message& message) {
-		std::cout << "Infos : - code : [" << message.code() << "] - size : " << message.size()/1000.0 << "KB \n";
+		// std::cout << "Info received: [Code:" << message.code() << "] " << message.str() << std::endl;
 	});
 	
 	client.onError([&](const Error& error) {
 		std::cout << "Error: " << error.msg() << std::endl;
 	});
+	
 	
 	// Connect client
 	if(!waitClient(client)) {
@@ -68,14 +76,14 @@ int main(int argc, char* argv[]) {
 		return std::cin.get();
 	}
 	
-	// Loop
-	while(Globals::signalStatus != SIGINT) {
-		Timer::wait(100);
+	// -------- Main loop --------
+	for(Timer timer; Globals::signalStatus != SIGINT; timer.wait(100)) {
+		// .. Do something ..
 	}
-	
+
 	// -- End
 	client.disconnect();
-	
+
 	std::cout << "Clean exit" << std::endl;
 	std::cout << "Press a key to continue..." << std::endl;
 	return std::cin.get();

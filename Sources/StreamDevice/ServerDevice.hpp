@@ -28,8 +28,6 @@ public:
 		if(!_device.open(_pathDest))
 			return false;
 		
-		_device.setFormat(1280, 720, Device::MJPG);
-		
 		Timer timer;
 		
 		do {
