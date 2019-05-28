@@ -417,14 +417,14 @@ private:
 		Convert::yuv422ToYuv420(&_yuv422Frame[0], &_yuv420Frame[0], w, h);
 
 		// h264 encode : yuv420 -> h264 packet
-		Timer t;
+		// Timer t;
 		
 		if(_encoderH264.encodeYuv(&_yuv420Frame[0], frame.buffer))
 			frame.size = _rawData.size;		
 		else
 			frame.clear();
 		
-		std::cout << t.elapsed_mus()/1000.0 << std::endl;
+		// std::cout << t.elapsed_mus()/1000.0 << std::endl;
 		
 		return !frame.empty();
 	}
