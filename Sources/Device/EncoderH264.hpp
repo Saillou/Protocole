@@ -48,7 +48,9 @@ public:
 			return false;
 		
 		// Put yuvEncode in the _pic
+		std::cout << "cpy on" << std::endl;
 		memcpy(_pic.pData, dataEncode, _yuvBuffer.size());
+		std::cout << "cpy off" << std::endl;
 		
 		return _encodeH264(buffer);
 	}
