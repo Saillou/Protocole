@@ -61,6 +61,9 @@ void showDevice(const int port, cv::Mat& cvFrame, std::mutex& mutFrame) {
 			int oHeight = decInfo.UsrData.sSystemBuffer.iHeight;
 			
 			mutFrame.lock();
+			if(oWidth != cvFrame.cols || oHeight != cvFrame.rows)
+				cv::Mat::zeros(oHeight, oWidth, CV_8UC3);
+			
 			Convert::yuv420ToBgr24(yuvDecode, cvFrame.data, oStride, oWidth, oHeight);
 			mutFrame.unlock();
 		}
@@ -90,8 +93,8 @@ int main(int argc, char* argv[]) {
 	// - Install signal handler
 	std::signal(SIGINT, sigintHandler);
 	
-	cv::Mat cvFrame0(cv::Mat::zeros(720, 1280, CV_8UC3));
-	cv::Mat cvFrame1(cv::Mat::zeros(720, 1280, CV_8UC3));
+	cv::Mat cvFrame0(cv::Mat::zeros(1, 1, CV_8UC3));
+	cv::Mat cvFrame1(cv::Mat::zeros(1, 1, CV_8UC3));
 	std::mutex frameMut0;
 	std::mutex frameMut1;
 	

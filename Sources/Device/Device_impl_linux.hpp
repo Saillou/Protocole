@@ -26,7 +26,7 @@ public:
 	explicit _Impl(const std::string& pathVideo) :
 		_fd(-1), 
 		_path(pathVideo), 
-		_format({1280, 720, MJPG}),
+		_format({640, 480, MJPG}),
 		_buffer({(void*)nullptr, (size_t)0}),
 		_jpgDecompressor(tjInitDecompress())
 	{
