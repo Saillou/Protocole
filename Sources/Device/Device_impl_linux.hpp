@@ -376,46 +376,47 @@ private:
 	}
 	
 	bool _treat(Gb::Frame& frame) {
-		// -- Raw jpg
-		frame = _rawData.clone();
+		// // -- Raw jpg
+		// frame = _rawData.clone();
 
+		
+		// -- From jpg to h264:
 		int w = _rawData.size.width;
 		int h = _rawData.size.height;
 		int area = w*h;
 		
-		// // -- From jpg to h264:
-		// // jpg decompress : jpg422 -> yuv422
-		// int area = w*h;
-		// std::vector<unsigned char> yuv422Frame(area*2);
+		// jpg decompress : jpg422 -> yuv422
+		int area = w*h;
+		std::vector<unsigned char> yuv422Frame(area*2);
 		
-		// unsigned char* pYuv422[3] = {
-			// &yuv422Frame[0],
-			// &yuv422Frame[area],
-			// &yuv422Frame[area + area>>1]
-		// };
-		// int strides[3] = {
-			// w, w >> 1, w >> 1
-		// };
+		unsigned char* pYuv422[3] = {
+			&yuv422Frame[0],
+			&yuv422Frame[area],
+			&yuv422Frame[area + (area>>1)]
+		};
+		int strides[3] = {
+			w, (w >> 1), (w >> 1)
+		};
 		
-		// if(tjDecompressToYUVPlanes(
-				// _jpgDecompressor, 
-				// _rawData.start(), _rawData.length(), 
-				// pYuv422, 
-				// w, strides, h, 0) < 0) 
-		// {
-			// std::cout << tjGetErrorStr2(_jpgDecompressor) << std::endl;
-			// return false;
-		// }
+		if(tjDecompressToYUVPlanes(
+				_jpgDecompressor, 
+				_rawData.start(), _rawData.length(), 
+				pYuv422, 
+				w, strides, h, 0) < 0) 
+		{
+			std::cout << tjGetErrorStr2(_jpgDecompressor) << std::endl;
+			return false;
+		}
 		
-		// // yuv422 -> yuv420
-		// std::vector<unsigned char> yuv420Frame(area*3/2);
-		// Convert::yuv422ToYuv420(&yuv422Frame[0], &yuv420Frame[0], w, h);
+		// yuv422 -> yuv420
+		std::vector<unsigned char> yuv420Frame(area*3/2);
+		Convert::yuv422ToYuv420(&yuv422Frame[0], &yuv420Frame[0], w, h);
 		
-		// // h264 encode : yuv420 -> h264 packet
-		// if(_encoderH264.encodeYuv(&yuv420Frame[0], frame.buffer))
-			// frame.size = _rawData.size;		
-		// else
-			// frame.clear();
+		// h264 encode : yuv420 -> h264 packet
+		if(_encoderH264.encodeYuv(&yuv420Frame[0], frame.buffer))
+			frame.size = _rawData.size;		
+		else
+			frame.clear();
 		
 		return !frame.empty();
 	}
