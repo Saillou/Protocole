@@ -381,7 +381,9 @@ private:
 
 		// -- From jpg to h264:
 		// jpg decompress : jpg422 -> yuv420
-		std::vector<unsigned char> yuvFrame(_rawData.size.width*_rawData.size.height*3);
+		std::vector<unsigned char> yuvFrame(tjBufSize(_rawData.size.width, 4, _rawData.size.height, TJSAMP_422));
+		std::cout << yuvFrame.size() << std::endl;
+		
 		if(tjDecompressToYUV2 (
 				_jpgDecompressor, 
 				_rawData.start(), _rawData.length(), 
