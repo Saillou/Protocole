@@ -43,9 +43,9 @@ static void yuv422ToYuv420(unsigned char *yuv422, unsigned char *yuv420, size_t 
 	// Copy Y
 	memcpy(yuv420, yuv422, area);
 	
-	// Copy half U,V
+	// Copy half U, V
 	for(size_t ih = 0; ih < height/2; ih++) 
-		memcpy(yuv420 + area + ih*width, yuv422 + area + 2*ih*width, width);
+		memcpy(yuv420 + area + ih*width/2, yuv422 + area + ih*width, width/2);
 }
 
 static void bgr24ToYuv420(unsigned char *bgr, unsigned char **yuv, size_t width, size_t height) {		
