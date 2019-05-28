@@ -4,6 +4,7 @@
 #include <wels/codec_api.h>
 #include "convertColor.hpp"
 
+#include <atomic>
 #include <iostream>
 #include <vector>
 #include <cstring> // memset
@@ -53,7 +54,7 @@ public:
 		return _encodeH264(buffer);
 	}
 	
-	bool refresh() {
+	void refresh() {
 		_flagRefresh = true;
 	}
 	
@@ -170,7 +171,7 @@ private:
 	// Members
 	int _width;
 	int _height;
-	bool _flagRefresh;
+	std::atomic<bool> _flagRefresh;
 	ISVCEncoder* _encoder;
 	
 	SSourcePicture _pic;

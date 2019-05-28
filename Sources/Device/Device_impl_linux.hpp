@@ -80,6 +80,9 @@ public:
 		_fd = -1;
 		return true;		
 	}
+	void refresh() {
+		_encoderH264.refresh();
+	}
 	
 	bool grab() {
 		struct v4l2_buffer buf = {0};

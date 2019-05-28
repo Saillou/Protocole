@@ -49,6 +49,9 @@ public:
 		
 		return !_cap.isOpened();
 	}
+	void refresh() {
+		_encoderH264.refresh();
+	}
 	
 	bool grab() {
 		return _cap.grab();

@@ -115,6 +115,7 @@ private:
 	// Events
 	void _onClientConnect(const Server::ClientInfo& client) {
 		_clientPlayer[client.id()] = false;
+		_device.refresh();
 	}
 	void _onClientDisconnect(const Server::ClientInfo& client) {
 		_clientPlayer[client.id()] = false;

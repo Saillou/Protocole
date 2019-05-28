@@ -46,6 +46,10 @@ public:
 		
 		return true;
 	}
+	virtual void refresh() {
+		if(_pDevice)
+			_pDevice->refresh();
+	}
 	
 	// Set a callback
 	virtual void onFrame(const std::function<void(const Gb::Frame&)>& cbkFrame) {

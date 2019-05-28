@@ -37,6 +37,9 @@ bool Device::open() {
 bool Device::close() {
 	return _impl->close();
 }
+void Device::refresh() {
+	return _impl->refresh();
+}
 
 // Method
 bool Device::grab() {

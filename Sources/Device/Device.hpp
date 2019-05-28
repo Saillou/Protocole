@@ -47,10 +47,12 @@ public:
 	// Methods
 	bool open();
 	bool close();
+	void refresh();
 	
 	bool grab();
 	bool retrieve(Gb::Frame& frame);
 	bool read(Gb::Frame& frame);
+	
 	
 	// Setters
 	bool setFormat(int width, int height, PixelFormat formatPix);
