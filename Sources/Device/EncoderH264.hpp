@@ -87,8 +87,8 @@ private:
 		encoderParemeters.iPicWidth 			= spartialLayerConfiguration->iVideoWidth 			= _width;
 		encoderParemeters.iPicHeight 		= spartialLayerConfiguration->iVideoHeight 			= _height;
 		encoderParemeters.fMaxFrameRate 	= spartialLayerConfiguration->fFrameRate 			= 1/30.0f;
-		encoderParemeters.iTargetBitrate 	= spartialLayerConfiguration->iSpatialBitrate 	= 5000000;
-		encoderParemeters.iTargetBitrate 	= spartialLayerConfiguration->iMaxSpatialBitrate = 5000000;
+		encoderParemeters.iTargetBitrate 	= spartialLayerConfiguration->iSpatialBitrate 	= 100000;
+		encoderParemeters.iTargetBitrate 	= spartialLayerConfiguration->iMaxSpatialBitrate = 100000;
 		
 		// Color space
 		int videoFormat = videoFormatI420;
