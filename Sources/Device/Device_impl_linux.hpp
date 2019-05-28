@@ -386,7 +386,6 @@ private:
 		int area = w*h;
 		
 		// jpg decompress : jpg422 -> yuv422
-		int area = w*h;
 		std::vector<unsigned char> yuv422Frame(area*2);
 		
 		unsigned char* pYuv422[3] = {
