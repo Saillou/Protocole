@@ -376,42 +376,42 @@ private:
 	}
 	
 	bool _treat(Gb::Frame& frame) {
-		// // -- Raw jpg
-		// frame = _rawData.clone();
+		// -- Raw jpg
+		frame = _rawData.clone();
 
-		// -- From jpg to h264:
-		// jpg decompress : jpg422 -> yuv422
-		int area = _rawData.size.width*_rawData.size.height;
-		std::vector<unsigned char> yuv422Frame(area*2);
+		// // -- From jpg to h264:
+		// // jpg decompress : jpg422 -> yuv422
+		// int area = _rawData.size.width*_rawData.size.height;
+		// std::vector<unsigned char> yuv422Frame(area*2);
 		
-		unsigned char* pYuv[3] = {
-			&yuv422Frame[0],
-			&yuv422Frame[area],
-			&yuv422Frame[area + area>>1]
-		};
-		int strides[3] = {
-			_rawData.size.width, _rawData.size.width >> 1, _rawData.size.width >> 1
-		};
+		// unsigned char* pYuv[3] = {
+			// &yuv422Frame[0],
+			// &yuv422Frame[area],
+			// &yuv422Frame[area + area>>1]
+		// };
+		// int strides[3] = {
+			// _rawData.size.width, _rawData.size.width >> 1, _rawData.size.width >> 1
+		// };
 		
-		if(tjDecompressToYUVPlanes(
-				_jpgDecompressor, 
-				_rawData.start(), _rawData.length(), 
-				pYuv, 
-				_rawData.size.width, strides, _rawData.size.height, 0) < 0) 
-		{
-			std::cout << tjGetErrorStr2(_jpgDecompressor) << std::endl;
-			return false;
-		}
+		// if(tjDecompressToYUVPlanes(
+				// _jpgDecompressor, 
+				// _rawData.start(), _rawData.length(), 
+				// pYuv, 
+				// _rawData.size.width, strides, _rawData.size.height, 0) < 0) 
+		// {
+			// std::cout << tjGetErrorStr2(_jpgDecompressor) << std::endl;
+			// return false;
+		// }
 		
-		// yuv422 -> yuv420
-		std::vector<unsigned char> yuv420Frame(area*3/2);
-		Convert::yuv422ToYuv420(&yuv422Frame[0], &yuv420Frame[0], _rawData.size.width, _rawData.size.height);
+		// // yuv422 -> yuv420
+		// std::vector<unsigned char> yuv420Frame(area*3/2);
+		// Convert::yuv422ToYuv420(&yuv422Frame[0], &yuv420Frame[0], _rawData.size.width, _rawData.size.height);
 		
-		// h264 encode : yuv420 -> h264 packet
-		if(_encoderH264.encodeYuv(&yuv420Frame[0], frame.buffer))
-			frame.size = _rawData.size;		
-		else
-			frame.clear();
+		// // h264 encode : yuv420 -> h264 packet
+		// if(_encoderH264.encodeYuv(&yuv420Frame[0], frame.buffer))
+			// frame.size = _rawData.size;		
+		// else
+			// frame.clear();
 		
 		return !frame.empty();
 	}

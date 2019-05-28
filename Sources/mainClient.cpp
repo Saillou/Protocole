@@ -57,22 +57,67 @@ int main(int argc, char* argv[]) {
 	device0.onFrame([&](const Gb::Frame& frame) {
 		bitrate += frame.length();
 		
+		int w = frame.size.width;
+		int h = frame.size.height;
+		
 		// --- Decode ---
-		unsigned char* yuvDecode[3];
-		memset(yuvDecode, 0, sizeof (yuvDecode));
+		tjDecompress2(_jpgDecompressor, frame.start(), frame.length(), cvFrame0.data, w, 0, h, TJPF_BGR, 0);
 		
-		SBufferInfo decInfo;
-		memset(&decInfo, 0, sizeof (SBufferInfo));
+		// --- Decode ---
+		// // -- From jpg to h264:
+		// // jpg decompress : jpg422 -> yuv422
+		// int area = frame.size.width*frame.size.height;
+		// std::vector<unsigned char> yuv422Frame(area*2);
 		
-		int err = decoder->DecodeFrame2 (frame.start(), frame.length(), yuvDecode, &decInfo);
-		if(err == 0 && decInfo.iBufferStatus == 1) {					
-			int oStride = decInfo.UsrData.sSystemBuffer.iStride[0];
-			int oWidth 	= decInfo.UsrData.sSystemBuffer.iWidth;
-			int oHeight = decInfo.UsrData.sSystemBuffer.iHeight;
+		// unsigned char* pYuv[3] = {
+			// &yuv422Frame[0],
+			// &yuv422Frame[area],
+			// &yuv422Frame[area + area/2]
+		// };
+		// int strides[3] = {
+			// frame.size.width, frame.size.width /2, frame.size.width /2
+		// };
+		
+		// if(tjDecompressToYUVPlanes(
+				// _jpgDecompressor, 
+				// frame.start(), frame.length(), 
+				// pYuv, 
+				// frame.size.width, strides, frame.size.height, 0) < 0) 
+		// {
+			// return;
+		// }
+		
+		// // yuv422 -> yuv420
+		// std::vector<unsigned char> yuv420Frame(area*3/2);
+		// Convert::yuv422ToYuv420(&yuv422Frame[0], &yuv420Frame[0], frame.size.width, frame.size.height);
+		
+		// // yuv420 -> bgr24
+		// unsigned char* pYuv420[3] = {
+			// &yuv420Frame[0],
+			// &yuv420Frame[area],
+			// &yuv420Frame[area + area/4]
+		// };
+		// Convert::yuv420ToBgr24(pYuv420, cvFrame0.data, frame.size.width, frame.size.width, frame.size.height);
+		
+		
+		// // --- Decode ---
+		// unsigned char* yuvDecode[3];
+		// memset(yuvDecode, 0, sizeof (yuvDecode));
+		
+		// SBufferInfo decInfo;
+		// memset(&decInfo, 0, sizeof (SBufferInfo));
+		
+		// int err = decoder->DecodeFrame2 (frame.start(), frame.length(), yuvDecode, &decInfo);
+		// if(err == 0 && decInfo.iBufferStatus == 1) {					
+			// int oStride = decInfo.UsrData.sSystemBuffer.iStride[0];
+			// int oWidth 	= decInfo.UsrData.sSystemBuffer.iWidth;
+			// int oHeight = decInfo.UsrData.sSystemBuffer.iHeight;
 			
-			std::lock_guard<std::mutex> frameLock(frameMut0);
-			Convert::yuv420ToBgr24(yuvDecode, cvFrame0.data, oStride, oWidth, oHeight);
-		}
+			// std::lock_guard<std::mutex> frameLock(frameMut0);
+			// Convert::yuv420ToBgr24(yuvDecode, cvFrame0.data, oStride, oWidth, oHeight);
+			
+			// bitrate += frame.length();
+		// }
 	});
 	
 	// -------- Main loop --------  
