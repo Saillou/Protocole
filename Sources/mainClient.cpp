@@ -59,6 +59,7 @@ int main(int argc, char* argv[]) {
 		
 		int w = frame.size.width;
 		int h = frame.size.height;
+		
 		// --- Decode ---
 		tjDecompress2(_jpgDecompressor, frame.start(), frame.length(), cvFrame0.data, w, 0, h, TJPF_BGR, 0);
 		
