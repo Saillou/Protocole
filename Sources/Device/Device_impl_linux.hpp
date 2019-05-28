@@ -389,7 +389,7 @@ private:
 			&yuvFrame[area + area>>1]
 		};
 		
-		if(tjDecompressToYUVPlanes((
+		if(tjDecompressToYUVPlanes(
 				_jpgDecompressor, 
 				_rawData.start(), _rawData.length(), 
 				pYuv, 
