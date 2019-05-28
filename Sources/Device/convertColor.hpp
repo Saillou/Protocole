@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstring> // memcpy
+
 namespace Convert {
 /* Example image:
 		P00 P01 P02 P03 ..
@@ -31,6 +33,20 @@ namespace Convert {
 		G' = Y' − 0,39465*U − 0,58060*V
 		R' = Y' + 1,13983*V
 */
+
+static void yuv422ToYuv420(unsigned char *yuv422, unsigned char *yuv420, size_t width, size_t height) {		
+	// Y don't change.												size422 = size420 = area.
+	// U and V have width, but height is divided by 2. size422 = area /2 -> size420 = area /4
+	
+	size_t area = width * height;
+	
+	// Copy Y
+	memcpy(yuv420, yuv422, area);
+	
+	// Copy half U,V
+	for(size_t ih = 0; ih < height/2; ih++) 
+		memcpy(yuv420 + ih*width, yuv422 + 2*ih*width, width);
+}
 
 static void bgr24ToYuv420(unsigned char *bgr, unsigned char **yuv, size_t width, size_t height) {		
 	// Param

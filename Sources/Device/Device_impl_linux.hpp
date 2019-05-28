@@ -382,12 +382,12 @@ private:
 		// -- From jpg to h264:
 		// jpg decompress : jpg422 -> yuv422
 		int area = _rawData.size.width*_rawData.size.height;
-		std::vector<unsigned char> yuvFrame(area*2);
+		std::vector<unsigned char> yuv422Frame(area*2);
 		
 		unsigned char* pYuv[3] = {
-			&yuvFrame[0],
-			&yuvFrame[area],
-			&yuvFrame[area + area>>1]
+			&yuv422Frame[0],
+			&yuv422Frame[area],
+			&yuv422Frame[area + area>>1]
 		};
 		int strides[3] = {
 			_rawData.size.width, _rawData.size.width >> 1, _rawData.size.width >> 1
@@ -403,32 +403,12 @@ private:
 			return false;
 		}
 		
-		// std::vector<unsigned char> yuvFrame(tjBufSizeYUV2(_rawData.size.width, 4, _rawData.size.height, TJSAMP_422));
-		// if(tjDecompressToYUV2 (
-				// _jpgDecompressor, 
-				// _rawData.start(), _rawData.length(), 
-				// &yuvFrame[0], 
-				// _rawData.size.width, 4, _rawData.size.height, 
-				// 0
-		// ) < 0) {
-			// std::cout << tjGetErrorStr2(_jpgDecompressor) << std::endl;
-			// return false;
-		// }
+		// yuv422 -> yuv420
+		std::vector<unsigned char> yuv420Frame(area*3/2);
+		Convert::yuv422ToYuv420(&yuv422Frame[0], &yuv420Frame[0], _rawData.size.width, _rawData.size.height);
 		
-		// std::vector<unsigned char> bgrFrame(_rawData.size.width*_rawData.size.height*3);
-		// if(tjDecompress2 (
-				// _jpgDecompressor, 
-				// _rawData.start(), _rawData.length(), 
-				// &bgrFrame[0], 
-				// _rawData.size.width, 0, _rawData.size.height, 
-				// TJPF_BGR, TJFLAG_FASTDCT
-		// ) < 0) {
-			// std::cout << tjGetErrorStr2(_jpgDecompressor) << std::endl;
-			// return false;
-		// }
-		
-		// h264 encode : yuv422 -> h264 packet
-		if(_encoderH264.encodeYuv(&yuvFrame[0], frame.buffer))
+		// h264 encode : yuv420 -> h264 packet
+		if(_encoderH264.encodeYuv(&yuv420Frame[0], frame.buffer))
 			frame.size = _rawData.size;		
 		else
 			frame.clear();

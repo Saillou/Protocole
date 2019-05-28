@@ -47,8 +47,8 @@ public:
 		if(!_encoder)
 			return false;
 		
-		// Put yuvEncode in the buffer
-		memcpy(&_yuvBuffer[0], dataEncode, _yuvBuffer.size());
+		// Put yuvEncode in the _pic
+		memcpy(_pic.pData, dataEncode, _yuvBuffer.size());
 		
 		return _encodeH264(buffer);
 	}
@@ -91,7 +91,7 @@ private:
 		encoderParemeters.iTargetBitrate 	= spartialLayerConfiguration->iMaxSpatialBitrate = 100000;
 		
 		// Color space
-		int videoFormat = videoFormatYUY2;
+		int videoFormat = videoFormatI420;
 		_encoder->SetOption(ENCODER_OPTION_DATAFORMAT, &videoFormat);
 		
 		// Init
@@ -113,10 +113,10 @@ private:
 		
 		size_t area = _width*_height;
 		
-		_yuvBuffer.resize(area + area); 	// Y = area, U = area/4, area/4
+		_yuvBuffer.resize(area + (area>>1)); 	// Y = area, U = area/4, area/4
 		_pic.pData[0] 	= &_yuvBuffer[0];							// Begin array
 		_pic.pData[1] 	= &_yuvBuffer[area]; 					// End Y 
-		_pic.pData[2] 	= &_yuvBuffer[area + (area>>1)];	// End U (Y + U => area + area/4)
+		_pic.pData[2] 	= &_yuvBuffer[area + (area>>2)];	// End U (Y + U => area + area/4)
 		
 		return true;
 	}
