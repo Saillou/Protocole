@@ -383,18 +383,21 @@ private:
 		// jpg decompress : jpg422 -> yuv422
 		int area = _rawData.size.width*_rawData.size.height;
 		std::vector<unsigned char> yuvFrame(area*2);
+		
 		unsigned char* pYuv[3] = {
 			&yuvFrame[0],
 			&yuvFrame[area],
 			&yuvFrame[area + area>>1]
 		};
+		int strides[3] = {
+			_rawData.size.width, _rawData.size.width >> 1, _rawData.size.width >> 1
+		}
 		
 		if(tjDecompressToYUVPlanes(
 				_jpgDecompressor, 
 				_rawData.start(), _rawData.length(), 
 				pYuv, 
-				_rawData.size.width, 4, _rawData.size.height, 
-				0) < 0) 
+				_rawData.size.width, strides, _rawData.size.height, 0) < 0) 
 		{
 			std::cout << tjGetErrorStr2(_jpgDecompressor) << std::endl;
 			return false;
