@@ -115,6 +115,7 @@ int main(int argc, char* argv[]) {
 			cv::imshow("Camera 1", cvFrame1);	
 		frameMut1.unlock();
 	}
+	Globals::signalStatus = SIGINT;
 	
 	// Wait
 	if(thread0.joinable())
