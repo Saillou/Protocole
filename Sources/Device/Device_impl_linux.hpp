@@ -385,7 +385,7 @@ private:
 
 		if(tjDecompress2 (
 				_jpgDecompressor, 
-				&_rawData.buffer[0], _rawData.length(), 
+				_rawData.start(), _rawData.length(), 
 				&bgrFrame[0], 
 				_rawData.size.width, 0, _rawData.size.height, 
 				TJPF_BGR, TJFLAG_FASTDCT
@@ -393,8 +393,6 @@ private:
 			std::cout << tjGetErrorStr2(_jpgDecompressor) << std::endl;
 			return false;
 		}
-		
-		std::cout << "Decompress ok" << std::endl;
 		
 		// h264 encode : bgr24 -> yuv420 -> h264 packet
 		if(_encoderH264.encode(&bgrFrame[0], frame.buffer))
