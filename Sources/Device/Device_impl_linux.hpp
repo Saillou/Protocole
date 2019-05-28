@@ -387,7 +387,7 @@ private:
 		
 		// jpg decompress : jpg422 -> yuv422
 		if(_yuv422Frame.size() != area*2)
-			_yuv422Frame(area*2);
+			_yuv422Frame.resize(area*2);
 		
 		unsigned char* pYuv422[3] = {
 			&_yuv422Frame[0],
