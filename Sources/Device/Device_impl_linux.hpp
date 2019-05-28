@@ -380,18 +380,37 @@ private:
 		// frame = _rawData.clone();
 
 		// -- From jpg to h264:
-		// jpg decompress : jpg422 -> yuv420
-		std::vector<unsigned char> yuvFrame(tjBufSizeYUV2(_rawData.size.width, 4, _rawData.size.height, TJSAMP_422));
-		if(tjDecompressToYUV2 (
+		// jpg decompress : jpg422 -> yuv422
+		int area = _rawData.size.width*_rawData.size.height;
+		std::vector<unsigned char> yuvFrame(area*2);
+		unsigned char* pYuv[3] = {
+			&yuvFrame[0],
+			&yuvFrame[area],
+			&yuvFrame[area + area>>1]
+		};
+		
+		if(tjDecompressToYUVPlanes((
 				_jpgDecompressor, 
 				_rawData.start(), _rawData.length(), 
-				&yuvFrame[0], 
+				pYuv, 
 				_rawData.size.width, 4, _rawData.size.height, 
-				0
-		) < 0) {
+				0) < 0) 
+		{
 			std::cout << tjGetErrorStr2(_jpgDecompressor) << std::endl;
 			return false;
 		}
+		
+		// std::vector<unsigned char> yuvFrame(tjBufSizeYUV2(_rawData.size.width, 4, _rawData.size.height, TJSAMP_422));
+		// if(tjDecompressToYUV2 (
+				// _jpgDecompressor, 
+				// _rawData.start(), _rawData.length(), 
+				// &yuvFrame[0], 
+				// _rawData.size.width, 4, _rawData.size.height, 
+				// 0
+		// ) < 0) {
+			// std::cout << tjGetErrorStr2(_jpgDecompressor) << std::endl;
+			// return false;
+		// }
 		
 		// std::vector<unsigned char> bgrFrame(_rawData.size.width*_rawData.size.height*3);
 		// if(tjDecompress2 (
