@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <vector>
+#include <cstring> // memset
 
 class EncoderH264 {
 public:	

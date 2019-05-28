@@ -387,16 +387,16 @@ private:
 		std::vector<unsigned char> bgrFrame(_rawData.size.width*_rawData.size.height*3);
 		
 		if(tjDecompress2 (
-				decoder, 
-				&_rawData.buffer[0], _rawData.size.length, 
-				&bgrFrame.buffer[0], 
+				_jpgDecompressor, 
+				&_rawData.buffer[0], _rawData.size.length(), 
+				&bgrFrame[0], 
 				_rawData.size.width, 0, _rawData.size.height, 
 				TJPF_BGR, TJFLAG_FASTDCT
 			) < 0)
 		return false;
 		
 		// h264 encode : bgr24 -> yuv420 -> h264 packet
-		if(_encoderH264.encode(&bgrFrame.buffer[0], frame.buffer))
+		if(_encoderH264.encode(&bgrFrame[0], frame.buffer))
 			frame.size = _rawData.size;		
 		else
 			frame.clear();
