@@ -381,18 +381,18 @@ private:
 
 		// -- From jpg to h264:
 		// jpg decompress : jpg422 -> yuv420
-		std::cout << tjBufSizeYUV2(_rawData.size.width, 4, _rawData.size.height, TJSAMP_420) << std::endl;
-		// std::vector<unsigned char> yuvFrame(_rawData.size.width*_rawData.size.height*3);
-		// if(tjDecompress2 (
-				// _jpgDecompressor, 
-				// _rawData.start(), _rawData.length(), 
-				// &bgrFrame[0], 
-				// _rawData.size.width, 0, _rawData.size.height, 
-				// TJPF_BGR, TJFLAG_FASTDCT
-		// ) < 0) {
-			// std::cout << tjGetErrorStr2(_jpgDecompressor) << std::endl;
-			// return false;
-		// }
+		std::vector<unsigned char> yuvFrame(_rawData.size.width*_rawData.size.height*3/2);
+		if(tjDecompressToYUV2 (
+				_jpgDecompressor, 
+				_rawData.start(), _rawData.length(), 
+				&yuvFrame[0], 
+				_rawData.size.width, 0, _rawData.size.height, 
+				TJFLAG_FASTDCT
+		) < 0) {
+			std::cout << tjGetErrorStr2(_jpgDecompressor) << std::endl;
+			return false;
+		}
+		std::cout << "ok" << std::endl;
 		
 		// std::vector<unsigned char> bgrFrame(_rawData.size.width*_rawData.size.height*3);
 		// if(tjDecompress2 (
