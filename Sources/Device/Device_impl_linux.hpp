@@ -378,11 +378,11 @@ private:
 	bool _treat(Gb::Frame& frame) {
 		// -- Raw jpg
 		// frame = _rawData.clone();
-		std::cout << "Treat" << std::endl;
+
 		// -- From jpg to h264:
 		// jpg decompress : jpg422 -> bgr24
 		std::vector<unsigned char> bgrFrame(_rawData.size.width*_rawData.size.height*3);
-		
+		std::cout << _jpgDecompressor << " : " << _rawData.length() << " | " << _rawData.size.width << "x" << _rawData.size.height << std::endl;
 		if(tjDecompress2 (
 				_jpgDecompressor, 
 				&_rawData.buffer[0], _rawData.length(), 
