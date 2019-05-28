@@ -73,8 +73,8 @@ private:
 		encoderParemeters.bEnableFrameCroppingFlag = false;
 
 		encoderParemeters.iRCMode = RC_QUALITY_MODE;
-		encoderParemeters.iMinQp 	= 26;
-		encoderParemeters.iMaxQp 	= 42;
+		encoderParemeters.iMinQp 	= 12;
+		encoderParemeters.iMaxQp 	= 30;
 
 		encoderParemeters.bEnableBackgroundDetection 	= false;
 		encoderParemeters.bEnableFrameSkip 				= true;
@@ -87,8 +87,8 @@ private:
 		encoderParemeters.iPicWidth 			= spartialLayerConfiguration->iVideoWidth 			= _width;
 		encoderParemeters.iPicHeight 		= spartialLayerConfiguration->iVideoHeight 			= _height;
 		encoderParemeters.fMaxFrameRate 	= spartialLayerConfiguration->fFrameRate 			= 1/30.0f;
-		encoderParemeters.iTargetBitrate 	= spartialLayerConfiguration->iSpatialBitrate 	= 500000;
-		encoderParemeters.iTargetBitrate 	= spartialLayerConfiguration->iMaxSpatialBitrate = 500000;
+		encoderParemeters.iTargetBitrate 	= spartialLayerConfiguration->iSpatialBitrate 	= 5000000;
+		encoderParemeters.iTargetBitrate 	= spartialLayerConfiguration->iMaxSpatialBitrate = 5000000;
 		
 		// Color space
 		int videoFormat = videoFormatI420;
