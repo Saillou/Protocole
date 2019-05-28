@@ -29,7 +29,7 @@ public:
 	}
 	
 	// -- Methods --
-	bool open(int timeoutMs = 0) {
+	bool open(const int timeoutMs = 0) {
 		if(_running)
 			return true;
 		

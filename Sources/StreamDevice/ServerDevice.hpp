@@ -24,7 +24,7 @@ public:
 	}
 	
 	// -- Methods --
-	bool open(int timeoutMs = 0) {
+	bool open(const int timeoutMs = 0) {
 		if(!_device.open(_pathDest))
 			return false;
 		
@@ -35,7 +35,7 @@ public:
 				return _initialization();
 			
 			timer.wait(500);
-		}	while(timer.elapsed_mus()/1000 < timeoutMs);
+		}	while(timeoutMs < 0 || timer.elapsed_mus()/1000 < timeoutMs);
 		
 		return false;
 	}
