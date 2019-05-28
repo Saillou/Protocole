@@ -378,7 +378,7 @@ private:
 	bool _treat(Gb::Frame& frame) {
 		// -- Raw jpg
 		// frame = _rawData.clone();
-		
+		std::cout << "Treat" << std::endl;
 		// -- From jpg to h264:
 		// jpg decompress : jpg422 -> bgr24
 		std::vector<unsigned char> bgrFrame(_rawData.size.width*_rawData.size.height*3);
@@ -392,11 +392,15 @@ private:
 			) < 0)
 		return false;
 		
+		std::cout << "Decompress ok" << std::endl;
+		
 		// h264 encode : bgr24 -> yuv420 -> h264 packet
 		if(_encoderH264.encode(&bgrFrame[0], frame.buffer))
 			frame.size = _rawData.size;		
 		else
 			frame.clear();
+		
+		std::cout << "Frame: " << (frame.empty() ? " pas ok" : "ok") << std::endl;
 		
 		return !frame.empty();
 	}

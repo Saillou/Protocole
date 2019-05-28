@@ -37,9 +37,6 @@ int main(int argc, char* argv[]) {
 	ServerDevice device0(Globals::PATH_0, 8888);
 	
 	// - Events
-	device0.onFrame([&](const Gb::Frame& frame) {
-		std::cout << "pok" << std::endl;
-	});
 	
 	// -------- Main loop --------  
 	if(!device0.open()) {
