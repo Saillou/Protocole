@@ -300,7 +300,7 @@ private:
 			fmt.type 					= V4L2_BUF_TYPE_VIDEO_CAPTURE;
 			fmt.fmt.pix.width 		= _format.width;
 			fmt.fmt.pix.height 		= _format.height;
-			fmt.fmt.pix.pixelformat = _format.format;
+			fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
 			fmt.fmt.pix.field 		 = V4L2_FIELD_ANY;			
 		}
 		
