@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
 	std::signal(SIGINT, sigintHandler);
 	
 	// - Device
-	ServerDevice device0(Globals::PATH_0, 8888);
+	ServerDevice device0(Globals::PATH_1, 8888);
 	
 	// - Events
 	device0.onFrame([&](const Gb::Frame& frame) {
