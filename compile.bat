@@ -5,7 +5,7 @@ cd /d %~dp0
 set fRelease=%~dp0Release\
 set compile=1
 set commit=1
-set launch=0
+set launch=1
 
 if %compile%==1 (
 	REM call compileCode.bat Server mainServer
