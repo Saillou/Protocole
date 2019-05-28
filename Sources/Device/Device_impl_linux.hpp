@@ -391,7 +391,7 @@ private:
 		};
 		int strides[3] = {
 			_rawData.size.width, _rawData.size.width >> 1, _rawData.size.width >> 1
-		}
+		};
 		
 		if(tjDecompressToYUVPlanes(
 				_jpgDecompressor, 
