@@ -386,7 +386,7 @@ private:
 				_jpgDecompressor, 
 				_rawData.start(), _rawData.length(), 
 				&yuvFrame[0], 
-				_rawData.size.width, 0, _rawData.size.height, 
+				_rawData.size.width, 4, _rawData.size.height, 
 				TJFLAG_FASTDCT
 		) < 0) {
 			std::cout << tjGetErrorStr2(_jpgDecompressor) << std::endl;
