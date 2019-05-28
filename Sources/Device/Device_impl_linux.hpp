@@ -388,7 +388,7 @@ private:
 		
 		if(tjDecompress2 (
 				_jpgDecompressor, 
-				&_rawData.buffer[0], _rawData.size.length(), 
+				&_rawData.buffer[0], _rawData.length(), 
 				&bgrFrame[0], 
 				_rawData.size.width, 0, _rawData.size.height, 
 				TJPF_BGR, TJFLAG_FASTDCT
