@@ -378,8 +378,8 @@ private:
 	bool _treat(Gb::Frame& frame) {
 		// // -- Raw jpg
 		// frame = _rawData.clone();
-
-		
+		std::cout << "----" << std::endl;
+		Timer t;
 		// -- From jpg to h264:
 		int w = _rawData.size.width;
 		int h = _rawData.size.height;
@@ -407,6 +407,8 @@ private:
 			std::cout << tjGetErrorStr2(_jpgDecompressor) << std::endl;
 			return false;
 		}
+		std::cout << "jpg: " << t.elapsed_mus()/1000.0 << "mus" << std::endl;
+		t.beg();
 		
 		// yuv422 -> yuv420
 		if(_yuv420Frame.size() != area*3/2)
@@ -414,11 +416,17 @@ private:
 		
 		Convert::yuv422ToYuv420(&_yuv422Frame[0], &_yuv420Frame[0], w, h);
 		
+		std::cout << "420: " << t.elapsed_mus()/1000.0 << "mus" << std::endl;
+		t.beg();
+		
 		// h264 encode : yuv420 -> h264 packet
 		if(_encoderH264.encodeYuv(&_yuv420Frame[0], frame.buffer))
 			frame.size = _rawData.size;		
 		else
 			frame.clear();
+		
+		std::cout << "h264: " << t.elapsed_mus()/1000.0 << "mus" << std::endl;
+		t.beg();
 		
 		return !frame.empty();
 	}

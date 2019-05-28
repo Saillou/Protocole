@@ -70,11 +70,11 @@ private:
 
 		encoderParemeters.iUsageType 					= CAMERA_VIDEO_REAL_TIME;
 		encoderParemeters.iComplexityMode 				= LOW_COMPLEXITY; // LOW_, MEDIUM_, HIGH_
-		encoderParemeters.bEnableFrameCroppingFlag = false;
+		encoderParemeters.bEnableFrameCroppingFlag = true;
 
 		encoderParemeters.iRCMode = RC_QUALITY_MODE;
-		encoderParemeters.iMinQp 	= 40;
-		encoderParemeters.iMaxQp 	= 42;
+		encoderParemeters.iMinQp 	= 30;
+		encoderParemeters.iMaxQp 	= 40;
 
 		encoderParemeters.bEnableBackgroundDetection 	= false;
 		encoderParemeters.bEnableFrameSkip 				= true;
