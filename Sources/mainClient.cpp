@@ -69,10 +69,10 @@ int main(int argc, char* argv[]) {
 		unsigned char* pYuv[3] = {
 			&yuv422Frame[0],
 			&yuv422Frame[area],
-			&yuv422Frame[area + area>>1]
+			&yuv422Frame[area + (area>>1)]
 		};
 		int strides[3] = {
-			frame.size.width, w >> 1, w >> 1
+			w, (w >> 1), (w >> 1)
 		};
 		
 		if(tjDecompressToYUVPlanes(
