@@ -62,7 +62,7 @@ void showDevice(const int port, cv::Mat& cvFrame, std::mutex& mutFrame) {
 			
 			mutFrame.lock();
 			if(oWidth != cvFrame.cols || oHeight != cvFrame.rows)
-				cv::Mat::zeros(oHeight, oWidth, CV_8UC3);
+				cvFrame = cv::Mat::zeros(oHeight, oWidth, CV_8UC3);
 			
 			Convert::yuv420ToBgr24(yuvDecode, cvFrame.data, oStride, oWidth, oHeight);
 			mutFrame.unlock();
