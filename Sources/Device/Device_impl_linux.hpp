@@ -407,10 +407,10 @@ private:
 		// }
 		
 		// h264 encode : yuv420 -> h264 packet
-		if(_encoderH264.encodeYuv(&bgrFrame[0], frame.buffer))
-			frame.size = _rawData.size;		
-		else
-			frame.clear();
+		// if(_encoderH264.encodeYuv(&bgrFrame[0], frame.buffer))
+			// frame.size = _rawData.size;		
+		// else
+			// frame.clear();
 		
 		return !frame.empty();
 	}
