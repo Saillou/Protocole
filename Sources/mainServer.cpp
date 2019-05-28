@@ -42,7 +42,8 @@ int main(int argc, char* argv[]) {
 	});
 	
 	// -------- Main loop --------  
-	device0.open();
+	if(!device0.open())
+		return std::cin.get();
 	
 	for(Timer timer; Globals::signalStatus != SIGINT; timer.wait(100)) {
 		// ... Do other stuff ...

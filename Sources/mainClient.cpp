@@ -73,7 +73,8 @@ int main(int argc, char* argv[]) {
 	});
 	
 	// -------- Main loop --------  
-	device0.open();
+	if(!device0.open())
+		return std::cin.get();
 	
 	Timer t;
 	while(Globals::signalStatus != SIGINT && cv::waitKey(10) != 27) {
