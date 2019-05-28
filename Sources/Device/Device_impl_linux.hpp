@@ -17,20 +17,25 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+// Decode jpg
+#include <turbojpeg.h>
+
 struct Device::_Impl {	
 public:
 	// Constructors
 	explicit _Impl(const std::string& pathVideo) :
 		_fd(-1), 
 		_path(pathVideo), 
-		_format({0, 0, 0}),
-		_buffer({(void*)nullptr, (size_t)0}) 
+		_format({480, 640, MJPG}),
+		_buffer({(void*)nullptr, (size_t)0}),
+		_jpgDecompressor(tjInitDecompress())
 	{
 		// Wait open
 	}
 	~_Impl() {
 		if(_fd != -1)
 			close();		
+		tjDestroy(_jpgDecompressor);
 	}
 	
 	// Methods
@@ -66,6 +71,9 @@ public:
 				return false;
 			}
 		}
+		
+		_encoderH264.cleanup();
+		
 		
 		_buffer.start = nullptr;
 		_buffer.length = 0;
@@ -307,6 +315,11 @@ private:
 		strncpy(fourcc, (char *)&fmt.fmt.pix.pixelformat, 4);
 		printf( "  Format > \t Width: %d | Height: %d | PixFmt: %s \n",
 					fmt.fmt.pix.width, fmt.fmt.pix.height, fourcc);
+					
+		if(_encoderH264.setup(_format.width, _format.height)) {
+			_perror("Setting H264 encoder");
+			return false;
+		}
 
 		return true;		
 	}
@@ -366,7 +379,28 @@ private:
 	}
 	
 	bool _treat(Gb::Frame& frame) {
-		frame = _rawData.clone();
+		// -- Raw jpg
+		// frame = _rawData.clone();
+		
+		// -- From jpg to h264:
+		// jpg decompress : jpg422 -> bgr24
+		std::vector<unsigned char> bgrFrame(_rawData.size.width*_rawData.size.height*3);
+		
+		if(tjDecompress2 (
+				decoder, 
+				&_rawData.buffer[0], _rawData.size.length, 
+				&bgrFrame.buffer[0], 
+				_rawData.size.width, 0, _rawData.size.height, 
+				TJPF_BGR, TJFLAG_FASTDCT
+			) < 0)
+		return false;
+		
+		// h264 encode : bgr24 -> yuv420 -> h264 packet
+		if(_encoderH264.encode(&bgrFrame.buffer[0], frame.buffer))
+			frame.size = _rawData.size;		
+		else
+			frame.clear();
+		
 		return !frame.empty();
 	}
 	
@@ -397,6 +431,9 @@ private:
 	FrameFormat	_format;
 	FrameBuffer _buffer;
 	Gb::Frame 	_rawData;
+	
+	EncoderH264 _encoderH264;
+	tjhandle _jpgDecompressor;
 };
 
 #endif

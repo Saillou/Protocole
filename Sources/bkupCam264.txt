@@ -7,16 +7,14 @@
 #include "StreamDevice/ClientDevice.hpp"
 #include "Tool/Timer.hpp"
 #include "Tool/FrameMt.hpp"
+#include "Device/DeviceMt.hpp"
 
-#include <wels/codec_api.h>
+#include <codec_api.h>
 
 namespace Globals {
 	// Constantes
-	const std::string IP_ADDRESS = "192.168.11.24"; 	// Barnacle V4
-	// const std::string IP_ADDRESS = "127.0.0.1"; 	// localhost V4
-	
-	// const std::string IP_ADDRESS = "fe80::b18:f81d:13a8:3a4"; 		// Barnacle V6
-	// const std::string IP_ADDRESS = "::1"; 									// localhost V6
+	// const std::string IP_ADDRESS = "192.168.11.24"; 	// Barnacle V4
+	// const std::string IP_ADDRESS = "fe80::b18:f81d:13a8:3a4"; 	// Barnacle V6
 	
 	// Variables
 	volatile std::sig_atomic_t signalStatus = 0;
@@ -28,30 +26,33 @@ static void sigintHandler(int signal) {
 }
 
 // --- Entry point ---
-int main(int argc, char* argv[]) {	
+int main(int argc, char* argv[]) {
 	// - Install signal handler
 	std::signal(SIGINT, sigintHandler);
-	
-	// Alloc decoder
+
+	// ----- Init decoder ------	
 	ISVCDecoder *decoder;
-	WelsCreateDecoder(&decoder);
+	if(WelsCreateDecoder(&decoder) != 0) {
+		std::cout << "Couldn't create decoder" << std::endl;
+		return 0;
+	}
 	
 	SDecodingParam decParam;
 	memset(&decParam, 0, sizeof (SDecodingParam));
 	
 	decParam.sVideoProperty.eVideoBsType = VIDEO_BITSTREAM_DEFAULT;
-	decoder->Initialize(&decParam);
 	
-	// --- Devices
-	cv::Mat cvFrame0 = cv::Mat::zeros(480, 640, CV_8UC3);
-	std::mutex frameMut0;
-	ClientDevice device0(IAddress(Globals::IP_ADDRESS, 8888));
+	if(decoder->Initialize(&decParam) != 0) {
+		std::cout << "Couldn't init decoder" << std::endl;
+		return 0;
+	}
 	
-	std::atomic<size_t> bitrate = 0;
+	// ---- Device ----	
+	cv::Mat cvFrame = cv::Mat::zeros(480,640,CV_8UC3);
+	std::mutex frameMut;
+	DeviceMt device;
 	
-	
-	// ----- Events -----
-	device0.onFrame([&](const Gb::Frame& frame) {
+	device.onFrame([&](const Gb::Frame& frame){
 		// --- Decode ---
 		unsigned char* yuvDecode[3];
 		memset(yuvDecode, 0, sizeof (yuvDecode));
@@ -65,39 +66,29 @@ int main(int argc, char* argv[]) {
 			int oWidth 	= decInfo.UsrData.sSystemBuffer.iWidth;
 			int oHeight = decInfo.UsrData.sSystemBuffer.iHeight;
 			
-			std::lock_guard<std::mutex> frameLock(frameMut0);
-			Convert::yuv420ToBgr24(yuvDecode, cvFrame0.data, oStride, oWidth, oHeight);
-			
-			bitrate += frame.length();
+			std::lock_guard<std::mutex> frameLock(frameMut);
+			Convert::yuv420ToBgr24(yuvDecode, cvFrame.data, oStride, oWidth, oHeight);
 		}
 	});
 	
-	// -------- Main loop --------  
-	device0.open();
 	
-	Timer t;
-	while(Globals::signalStatus != SIGINT && cv::waitKey(10) != 27) {
-		std::lock_guard<std::mutex> frameLock(frameMut0);
-		if(!cvFrame0.empty())
-			cv::imshow("Camera", cvFrame0);
-		
-		if(t.elapsed_mus() > 1000000) {
-			std::cout << 8.0*bitrate/t.elapsed_mus() << "MB/s" << std::endl;
-			bitrate = 0;
-			t.beg();
-		}
+	device.open("0");
+	for(; Globals::signalStatus != SIGINT && cv::waitKey(30) != 27;) {
+		std::lock_guard<std::mutex> frameLock(frameMut);
+		if(!cvFrame.empty())
+			cv::imshow("Camera", cvFrame);
 	}
+	device.release();
 	
 	// -- End
-	device0.close();
 	cv::destroyAllWindows();
 	if (decoder) {
 		decoder->Uninitialize();
 		WelsDestroyDecoder(decoder);
 	}
 	
-	
 	std::cout << "Clean exit" << std::endl;
 	std::cout << "Press a key to continue..." << std::endl;
 	return std::cin.get();
 }
+

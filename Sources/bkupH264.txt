@@ -1,0 +1,195 @@
+#include <iostream>
+#include <csignal>
+#include <atomic>
+#include <map>
+#include <deque>
+
+#include "StreamDevice/ClientDevice.hpp"
+#include "Tool/Timer.hpp"
+#include "Tool/FrameMt.hpp"
+
+#include <codec_api.h>
+#include "Device/convertColor.hpp"
+
+namespace Globals {
+	// Constantes
+	// const std::string IP_ADDRESS = "192.168.11.24"; 	// Barnacle V4
+	// const std::string IP_ADDRESS = "fe80::b18:f81d:13a8:3a4"; 	// Barnacle V6
+	
+	// Variables
+	volatile std::sig_atomic_t signalStatus = 0;
+}
+
+// --- Signals ---
+static void sigintHandler(int signal) {
+	Globals::signalStatus = signal;
+}
+
+// --- Entry point ---
+int main(int argc, char* argv[]) {
+	// - Install signal handler
+	std::signal(SIGINT, sigintHandler);
+	
+	// --- Constantes ---
+	const int W = 640;			// pix
+	const int H = 480;			// pix
+	const int R = 25;				// pix
+	const double P2M = 1/200.0;	// pix/m
+	
+	const double G = 9.8; 		// m/s-2
+	const double TE = 1/40.0;	//s
+	const double FRICTION = 0.8;
+	
+	
+	// ----- Init encoder ------
+	ISVCEncoder* encoder;
+	if(WelsCreateSVCEncoder(&encoder) != 0) {
+		std::cout << "Couldn't create encoder" << std::endl;
+		return 0;
+	}
+	
+	int width 	= W;
+	int height 	= H;
+	
+    SEncParamExt encoderParemeters;
+
+    memset(&encoderParemeters, 0, sizeof(SEncParamExt));
+
+    encoder->GetDefaultParams(&encoderParemeters);
+
+    encoderParemeters.iUsageType 					= CAMERA_VIDEO_REAL_TIME;
+    encoderParemeters.iComplexityMode 				= HIGH_COMPLEXITY;
+    encoderParemeters.bEnableFrameCroppingFlag = true;
+
+    encoderParemeters.iRCMode = RC_QUALITY_MODE;
+    encoderParemeters.iMinQp 	= 12;
+    encoderParemeters.iMaxQp 	= 42;
+
+    encoderParemeters.bEnableBackgroundDetection 	= true;
+    encoderParemeters.bEnableFrameSkip 				= true;
+    encoderParemeters.bEnableLongTermReference 	= true;
+    encoderParemeters.iSpatialLayerNum 				= 1;
+
+
+    SSpatialLayerConfig *spartialLayerConfiguration = &encoderParemeters.sSpatialLayers[0];
+    spartialLayerConfiguration->uiProfileIdc = PRO_UNKNOWN;
+    encoderParemeters.iPicWidth 			= spartialLayerConfiguration->iVideoWidth 			= width;
+    encoderParemeters.iPicHeight 		= spartialLayerConfiguration->iVideoHeight 			= height;
+    encoderParemeters.fMaxFrameRate 	= spartialLayerConfiguration->fFrameRate 			= 1/TE;
+    encoderParemeters.iTargetBitrate 	= spartialLayerConfiguration->iSpatialBitrate 	= 500000;
+    encoderParemeters.iTargetBitrate 	= spartialLayerConfiguration->iMaxSpatialBitrate = 500000;
+	
+	int videoFormat = videoFormatI420;
+	encoder->SetOption(ENCODER_OPTION_DATAFORMAT, &videoFormat);
+	
+	if(encoder->InitializeExt(&encoderParemeters) != 0) {
+		std::cout << "Couldn't init encoder" << std::endl;
+		return 0;
+	}
+	
+	SSourcePicture pic;
+	memset (&pic, 0, sizeof(SSourcePicture));
+	
+	pic.iPicWidth 		= width;
+	pic.iPicHeight 	= height;
+	pic.iColorFormat	= videoFormat;
+	
+	pic.iStride[0] 	= pic.iPicWidth;
+	pic.iStride[1] 	= pic.iPicWidth >> 1;
+	pic.iStride[2] 	= pic.iPicWidth >> 1;
+	
+	std::vector<unsigned char> yuvEncode(width*height + ((width*height)>>1));
+	pic.pData[0] 		= &yuvEncode[0];
+	pic.pData[1] 		= &yuvEncode[width*height];
+	pic.pData[2] 		= &yuvEncode[width*height + ((width*height)>>2)];	
+	
+	
+	// ----- Init decoder ------	
+	ISVCDecoder *decoder;
+	if(WelsCreateDecoder(&decoder) != 0) {
+		std::cout << "Couldn't create decoder" << std::endl;
+		return 0;
+	}
+	
+	SDecodingParam decParam;
+	memset(&decParam, 0, sizeof (SDecodingParam));
+	
+	decParam.sVideoProperty.eVideoBsType = VIDEO_BITSTREAM_DEFAULT;
+	
+	if(decoder->Initialize(&decParam) != 0) {
+		std::cout << "Couldn't init decoder" << std::endl;
+		return 0;
+	}
+	
+	
+	// ---- Anime movie ----	
+	cv::Mat frameEncode = cv::Mat::zeros(height, width, CV_8UC3);
+	cv::Mat frameDecode = cv::Mat::zeros(height, width, CV_8UC3);
+	
+	cv::Point2d pos((W/2)* P2M, -R* P2M);	// m
+	cv::Point2d speed(0, 0);					// m/s
+	cv::Point2d accel(0, 0);					// m/s-2
+	
+	for(; Globals::signalStatus != SIGINT && cv::waitKey((int)(1000*TE)) != 27;) {
+		// Bdf
+		cv::Point2d f(0, G);
+		
+		// Integre
+		accel = f;
+		speed += accel * TE;
+		pos 	+= speed * TE;
+		
+		// Friction/Rebond
+		if(pos.y / P2M > H-R) {
+			pos.y = (H-R) * P2M;
+			speed.y *= -FRICTION;
+		}
+		
+		// Display
+		cv::rectangle(frameEncode, cv::Rect(0,0,W,H), cv::Scalar::all(0), -1);
+		cv::circle(frameEncode, pos / P2M, R, cv::Scalar(0,0,255), -1, 16);
+		cv::imshow("Ball - encode", frameEncode);
+		
+		// --- Encode ---
+		Convert::bgr24ToYuv420(frameEncode.data, pic.pData, width, height);
+		
+		SFrameBSInfo encInfo;
+		memset (&encInfo, 0, sizeof(SFrameBSInfo));
+		if(encoder->EncodeFrame(&pic, &encInfo) == 0) {		
+			if (encInfo.eFrameType != videoFrameTypeSkip && encInfo.eFrameType != videoFrameTypeInvalid) {
+				// --- Decode ---
+				unsigned char* yuvDecode[3];
+				memset(yuvDecode, 0, sizeof (yuvDecode));
+				
+				SBufferInfo decInfo;
+				memset(&decInfo, 0, sizeof (SBufferInfo));
+				
+				int err = decoder->DecodeFrame2 (encInfo.sLayerInfo->pBsBuf, encInfo.iFrameSizeInBytes, yuvDecode, &decInfo);
+				if(err == 0 && decInfo.iBufferStatus == 1) {					
+					int oStride = decInfo.UsrData.sSystemBuffer.iStride[0];
+					int oWidth 	= decInfo.UsrData.sSystemBuffer.iWidth;
+					int oHeight = decInfo.UsrData.sSystemBuffer.iHeight;
+					
+					Convert::yuv420ToBgr24(yuvDecode, frameDecode.data, oStride, oWidth, oHeight);
+					cv::imshow("Ball - decode", frameDecode);
+				}
+			}
+		}
+	}
+	
+	// -- End
+	cv::destroyAllWindows();
+	if (encoder) {
+		encoder->Uninitialize();
+		WelsDestroySVCEncoder(encoder);
+	}
+	if (decoder) {
+		decoder->Uninitialize();
+		WelsDestroyDecoder(decoder);
+	}
+	
+	std::cout << "Clean exit" << std::endl;
+	std::cout << "Press a key to continue..." << std::endl;
+	return std::cin.get();
+}
+

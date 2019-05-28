@@ -28,67 +28,25 @@ static void sigintHandler(int signal) {
 	Globals::signalStatus = signal;
 }
 
-// --- Functions  ---
-bool waitServer(Server& server) {
-	while(Globals::signalStatus != SIGINT && !server.connectAt(6000)) {
-		std::cout << "Can create server" << std::endl;
-		Timer::wait(1000);
-	}
-	
-	if( Globals::signalStatus == SIGINT) 
-		return false;
-	
-	return true;
-}
-
 // --- Entry point ---
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[]) {	
 	// - Install signal handler
 	std::signal(SIGINT, sigintHandler);
 	
-	// Variables
-	Server server;
+	// - Device
+	ServerDevice device0(Globals::PATH_0, 8888);
 	
-	// -- Events
-	server.onClientConnect([&](const Server::ClientInfo& client) {
-		std::cout << "New client, client_" << client.id() << std::endl;
-	});
-	server.onClientDisconnect([&](const Server::ClientInfo& client) {
-		std::cout << "Client quit, client_" << client.id() << std::endl;
-	});
-	server.onError([&](const Error& error) {
-		std::cout << "Error : " << error.msg() << " code: " << error.code() << std::endl;
-	});
+	// - Events
 	
-	server.onInfo([&](const Server::ClientInfo& client, const Message& message) {
-		std::cout << "Info received from client_" << client.id() << ": [Code:" << message.code() << "] " << message.str() << std::endl;
-		server.sendInfo(client, Message("Pong"));
-	});
+	// -------- Main loop --------  
+	device0.open();
 	
-	server.onData([&](const Server::ClientInfo& client, const Message& message) {
-		std::cout << "Data received from client_" << client.id() << ": [Code:" << message.code() << "] " << message.str() << std::endl;
-		server.sendData(client, Message("Pong"));
-	});
-	
-	// -- Create server --
-	if(!waitServer(server)) {
-		std::cout << "Press a key to continue..." << std::endl;
-		return std::cin.get();
-	}
-
-	std::string messageStr(60000, 'A');
-	
-	for(Timer timer; Globals::signalStatus != SIGINT; timer.wait(5)) {
-		// Spam broadcast
-		for(auto& client: server.getClients()) {
-			if(client.connected) {
-				server.sendData(client, Message(messageStr));
-			}
-		}
+	for(Timer timer; Globals::signalStatus != SIGINT; timer.wait(100)) {
+		// ... Do other stuff ...
 	}
 	
 	// -- End
-	server.disconnect();
+	device0.close();
 	
 	std::cout << "Clean exit" << std::endl;
 	std::cout << "Press a key to continue..." << std::endl;

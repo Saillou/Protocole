@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Tool/Timer.hpp"
+#include "EncoderH264.hpp"
 #include "structures.hpp"
 
 class Device {
