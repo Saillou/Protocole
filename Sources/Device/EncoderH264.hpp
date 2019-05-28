@@ -69,7 +69,7 @@ private:
 		_encoder->GetDefaultParams(&encoderParemeters); // Default
 
 		encoderParemeters.iUsageType 					= CAMERA_VIDEO_REAL_TIME;
-		encoderParemeters.iComplexityMode 				= MEDIUM_COMPLEXITY; // LOW_, MEDIUM_, HIGH_
+		encoderParemeters.iComplexityMode 				= LOW_COMPLEXITY; // LOW_, MEDIUM_, HIGH_
 		encoderParemeters.bEnableFrameCroppingFlag = true;
 
 		encoderParemeters.iRCMode = RC_QUALITY_MODE;
