@@ -392,7 +392,7 @@ private:
 		int strides[3] = {
 			_rawData.size.width, _rawData.size.width >> 1, _rawData.size.width >> 1
 		};
-		
+		std::cout << "Decompress" << std::endl;
 		if(tjDecompressToYUVPlanes(
 				_jpgDecompressor, 
 				_rawData.start(), _rawData.length(), 
