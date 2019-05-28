@@ -52,7 +52,6 @@ int main(int argc, char* argv[]) {
 	
 	// ----- Events -----
 	device0.onFrame([&](const Gb::Frame& frame) {
-		std::cout << frame.length() << std::endl;
 		// --- Decode ---
 		unsigned char* yuvDecode[3];
 		memset(yuvDecode, 0, sizeof (yuvDecode));
