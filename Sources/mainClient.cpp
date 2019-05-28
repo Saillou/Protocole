@@ -61,9 +61,6 @@ int main(int argc, char* argv[]) {
 		int h = frame.size.height;
 		
 		// --- Decode ---
-		// tjDecompress2(_jpgDecompressor, frame.start(), frame.length(), cvFrame0.data, w, 0, h, TJPF_BGR, 0);
-		
-		// --- Decode ---
 		// -- From jpg to h264:
 		// jpg decompress : jpg422 -> yuv422
 		int area = w*h;
@@ -72,10 +69,10 @@ int main(int argc, char* argv[]) {
 		unsigned char* pYuv[3] = {
 			&yuv422Frame[0],
 			&yuv422Frame[area],
-			&yuv422Frame[area + area/2]
+			&yuv422Frame[area + area>>1]
 		};
 		int strides[3] = {
-			frame.size.width, w /2, w /2
+			frame.size.width, w >> 1, w >> 1
 		};
 		
 		if(tjDecompressToYUVPlanes(

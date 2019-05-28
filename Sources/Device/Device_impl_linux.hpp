@@ -379,9 +379,13 @@ private:
 		// -- Raw jpg
 		frame = _rawData.clone();
 
+		int w = _rawData.size.width;
+		int h = _rawData.size.height;
+		int area = w*h;
+		
 		// // -- From jpg to h264:
 		// // jpg decompress : jpg422 -> yuv422
-		// int area = _rawData.size.width*_rawData.size.height;
+		// int area = w*h;
 		// std::vector<unsigned char> yuv422Frame(area*2);
 		
 		// unsigned char* pYuv422[3] = {
@@ -390,14 +394,14 @@ private:
 			// &yuv422Frame[area + area>>1]
 		// };
 		// int strides[3] = {
-			// _rawData.size.width, _rawData.size.width >> 1, _rawData.size.width >> 1
+			// w, w >> 1, w >> 1
 		// };
 		
 		// if(tjDecompressToYUVPlanes(
 				// _jpgDecompressor, 
 				// _rawData.start(), _rawData.length(), 
 				// pYuv422, 
-				// _rawData.size.width, strides, _rawData.size.height, 0) < 0) 
+				// w, strides, h, 0) < 0) 
 		// {
 			// std::cout << tjGetErrorStr2(_jpgDecompressor) << std::endl;
 			// return false;
@@ -405,7 +409,7 @@ private:
 		
 		// // yuv422 -> yuv420
 		// std::vector<unsigned char> yuv420Frame(area*3/2);
-		// Convert::yuv422ToYuv420(&yuv422Frame[0], &yuv420Frame[0], _rawData.size.width, _rawData.size.height);
+		// Convert::yuv422ToYuv420(&yuv422Frame[0], &yuv420Frame[0], w, h);
 		
 		// // h264 encode : yuv420 -> h264 packet
 		// if(_encoderH264.encodeYuv(&yuv420Frame[0], frame.buffer))
