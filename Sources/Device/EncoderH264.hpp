@@ -10,7 +10,7 @@
 
 class EncoderH264 {
 public:	
-	EncoderH264() : _width(0), _height(0), _encoder(nullptr)
+	EncoderH264() : _width(0), _height(0), _flagRefresh(false), _encoder(nullptr)
 	{
 		
 	}
@@ -51,6 +51,10 @@ public:
 		memcpy(&_yuvBuffer[0], dataEncode, _yuvBuffer.size());
 		
 		return _encodeH264(buffer);
+	}
+	
+	bool refresh() {
+		_flagRefresh = true;
 	}
 	
 private:
@@ -139,22 +143,34 @@ private:
 		SFrameBSInfo encInfo;
 		memset (&encInfo, 0, sizeof(SFrameBSInfo));
 		
-		if(_encoder->EncodeFrame(&_pic, &encInfo) == 0) {		
-			if (encInfo.eFrameType != videoFrameTypeSkip && encInfo.eFrameType != videoFrameTypeInvalid) {
-				// Create buffer result:
-				unsigned char* start = encInfo.sLayerInfo->pBsBuf;
-				int size 				= encInfo.iFrameSizeInBytes;
-				buffer = std::vector<unsigned char>(start, start + size);
-				
-				return true;
-			}
+		// Encode | Refresh
+		if(!_flagRefresh) {
+			if(_encoder->EncodeFrame(&_pic, &encInfo) != 0)
+				return false;
 		}
+		else {
+			_flagRefresh = false;
+			if(_encoder->ForceIntraFrame(&encInfo) != 0)
+				return false;
+		}
+		
+		// Then read infos
+		if (encInfo.eFrameType != videoFrameTypeSkip && encInfo.eFrameType != videoFrameTypeInvalid) {
+			// Create buffer result:
+			unsigned char* start = encInfo.sLayerInfo->pBsBuf;
+			int size 				= encInfo.iFrameSizeInBytes;
+			buffer = std::vector<unsigned char>(start, start + size);
+			
+			return true;
+		}
+		
 		return false;
 	}
 	
 	// Members
 	int _width;
 	int _height;
+	bool _flagRefresh;
 	ISVCEncoder* _encoder;
 	
 	SSourcePicture _pic;
