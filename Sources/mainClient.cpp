@@ -3,13 +3,13 @@
 #include <atomic>
 #include <map>
 #include <deque>
+#include <functional>
 
 #include "StreamDevice/ClientDevice.hpp"
 #include "Tool/Timer.hpp"
 #include "Tool/FrameMt.hpp"
 
 #include <wels/codec_api.h>
-#include <turbojpeg.h>
 
 namespace Globals {
 	// Constantes
@@ -28,11 +28,8 @@ static void sigintHandler(int signal) {
 	Globals::signalStatus = signal;
 }
 
-// --- Entry point ---
-int main(int argc, char* argv[]) {	
-	// - Install signal handler
-	std::signal(SIGINT, sigintHandler);
-	
+// --- Helper ----
+void showDevice(const int port, cv::Mat& cvFrame, std::mutex& mutFrame) {
 	// Alloc decoder
 	ISVCDecoder *decoder;
 	WelsCreateDecoder(&decoder);
@@ -43,20 +40,13 @@ int main(int argc, char* argv[]) {
 	decParam.sVideoProperty.eVideoBsType = VIDEO_BITSTREAM_DEFAULT;
 	decoder->Initialize(&decParam);
 	
-	// --- Devices
-	cv::Mat cvFrame0 = cv::Mat::zeros(480, 640, CV_8UC3);
-	std::mutex frameMut0;
 	
-	ClientDevice device0(IAddress(Globals::IP_ADDRESS, 8888));
+	// Device	
+	ClientDevice device(IAddress(Globals::IP_ADDRESS, port));
 	
-	std::atomic<size_t> bitrate = 0;
 	
-	// ----- Events -----
-	tjhandle _jpgDecompressor = tjInitDecompress();
-	
-	device0.onFrame([&](const Gb::Frame& frame) {
-		bitrate += frame.length();
-		
+	// ----- Events -----	
+	device.onFrame([&](const Gb::Frame& frame) {
 		// --- Decode ---
 		unsigned char* yuvDecode[3];
 		memset(yuvDecode, 0, sizeof (yuvDecode));
@@ -70,40 +60,67 @@ int main(int argc, char* argv[]) {
 			int oWidth 	= decInfo.UsrData.sSystemBuffer.iWidth;
 			int oHeight = decInfo.UsrData.sSystemBuffer.iHeight;
 			
-			std::lock_guard<std::mutex> frameLock(frameMut0);
-			Convert::yuv420ToBgr24(yuvDecode, cvFrame0.data, oStride, oWidth, oHeight);
+			mutFrame.lock();
+			Convert::yuv420ToBgr24(yuvDecode, cvFrame.data, oStride, oWidth, oHeight);
+			mutFrame.unlock();
 		}
 	});
 	
 	// -------- Main loop --------  
-	if(!device0.open(-1)) {
+	if(!device.open(-1)) {
 		std::cout << "Can't open device" << std::endl;
 		std::cout << "Press a key to continue..." << std::endl;
-		return std::cin.get();
+		return;
 	}
 	
-	Timer t;
-	while(Globals::signalStatus != SIGINT && cv::waitKey(10) != 27) {
-		std::lock_guard<std::mutex> frameLock(frameMut0);
-		if(!cvFrame0.empty())
-			cv::imshow("Camera", cvFrame0);
-		
-		if(t.elapsed_mus() > 1000000) {
-			std::cout << 8.0*bitrate/t.elapsed_mus() << "MB/s" << std::endl;
-			bitrate = 0;
-			t.beg();
-		}
+	while(Globals::signalStatus != SIGINT) {
+		Timer::wait(100);
 	}
 
 	// -- End
-	device0.close();
-	cv::destroyAllWindows();
+	device.close();
 	if (decoder) {
 		decoder->Uninitialize();
 		WelsDestroyDecoder(decoder);
 	}
+}
+
+// --- Entry point ---
+int main(int argc, char* argv[]) {	
+	// - Install signal handler
+	std::signal(SIGINT, sigintHandler);
 	
+	cv::Mat cvFrame0(cv::Mat::zeros(720, 1280, CV_8UC3));
+	cv::Mat cvFrame1(cv::Mat::zeros(720, 1280, CV_8UC3));
+	std::mutex frameMut0;
+	std::mutex frameMut1;
 	
+	std::thread thread0(showDevice, 6666, std::ref(cvFrame0), std::ref(frameMut0));
+	std::thread thread1(showDevice, 8888, std::ref(cvFrame1), std::ref(frameMut1));
+	
+	// --- Loop ----
+	while(Globals::signalStatus != SIGINT && cv::waitKey(10) != 27) {
+		// --- Frame 0 ----
+		frameMut0.lock();
+		if(!cvFrame0.empty())
+			cv::imshow("Camera 0", cvFrame0);
+		frameMut0.unlock();
+
+		// --- Frame 1 ----
+		frameMut1.lock();
+		if(!cvFrame1.empty())
+			cv::imshow("Camera 1", cvFrame1);	
+		frameMut1.unlock();
+	}
+	
+	// Wait
+	if(thread0.joinable())
+		thread0.join();
+	if(thread1.joinable())
+		thread1.join();
+	cv::destroyAllWindows();
+	
+	// --- End ----
 	std::cout << "Clean exit" << std::endl;
 	std::cout << "Press a key to continue..." << std::endl;
 	return std::cin.get();
