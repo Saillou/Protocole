@@ -412,7 +412,7 @@ private:
 		if(_yuv420Frame.size() != area*3/2)
 			_yuv420Frame.resize(area*3/2);
 		
-		Convert::yuv422ToYuv420(&yuv422Frame[0], &_yuv420Frame[0], w, h);
+		Convert::yuv422ToYuv420(&_yuv422Frame[0], &_yuv420Frame[0], w, h);
 		
 		// h264 encode : yuv420 -> h264 packet
 		if(_encoderH264.encodeYuv(&_yuv420Frame[0], frame.buffer))
