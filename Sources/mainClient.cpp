@@ -49,7 +49,6 @@ int main(int argc, char* argv[]) {
 	
 	std::atomic<size_t> bitrate = 0;
 	
-	
 	// ----- Events -----
 	device0.onFrame([&](const Gb::Frame& frame) {
 		// --- Decode ---
