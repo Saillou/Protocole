@@ -406,7 +406,7 @@ private:
 		// }
 		
 		// h264 encode : yuv422 -> h264 packet
-		if(_encoderH264.encodeYuv420(&bgrFrame[0], frame.buffer))
+		if(_encoderH264.encodeYuv(&bgrFrame[0], frame.buffer))
 			frame.size = _rawData.size;		
 		else
 			frame.clear();

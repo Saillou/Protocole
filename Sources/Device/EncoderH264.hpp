@@ -91,7 +91,7 @@ private:
 		encoderParemeters.iTargetBitrate 	= spartialLayerConfiguration->iMaxSpatialBitrate = 100000;
 		
 		// Color space
-		int videoFormat = videoFormatI422;
+		int videoFormat = videoFormatYUY2;
 		_encoder->SetOption(ENCODER_OPTION_DATAFORMAT, &videoFormat);
 		
 		// Init
