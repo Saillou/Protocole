@@ -386,12 +386,13 @@ private:
 		int area = w*h;
 		
 		// jpg decompress : jpg422 -> yuv422
-		std::vector<unsigned char> yuv422Frame(area*2);
+		if(_yuv422Frame.size() != area*2)
+			_yuv422Frame(area*2);
 		
 		unsigned char* pYuv422[3] = {
-			&yuv422Frame[0],
-			&yuv422Frame[area],
-			&yuv422Frame[area + (area>>1)]
+			&_yuv422Frame[0],
+			&_yuv422Frame[area],
+			&_yuv422Frame[area + (area>>1)]
 		};
 		int strides[3] = {
 			w, (w >> 1), (w >> 1)
@@ -401,18 +402,20 @@ private:
 				_jpgDecompressor, 
 				_rawData.start(), _rawData.length(), 
 				pYuv422, 
-				w, strides, h, 0) < 0) 
+				w, strides, h, TJFLAG_FASTDCT) < 0) 
 		{
 			std::cout << tjGetErrorStr2(_jpgDecompressor) << std::endl;
 			return false;
 		}
 		
 		// yuv422 -> yuv420
-		std::vector<unsigned char> yuv420Frame(area*3/2);
-		Convert::yuv422ToYuv420(&yuv422Frame[0], &yuv420Frame[0], w, h);
+		if(_yuv420Frame.size() != area*3/2)
+			_yuv420Frame.resize(area*3/2);
+		
+		Convert::yuv422ToYuv420(&yuv422Frame[0], &_yuv420Frame[0], w, h);
 		
 		// h264 encode : yuv420 -> h264 packet
-		if(_encoderH264.encodeYuv(&yuv420Frame[0], frame.buffer))
+		if(_encoderH264.encodeYuv(&_yuv420Frame[0], frame.buffer))
 			frame.size = _rawData.size;		
 		else
 			frame.clear();
@@ -448,6 +451,8 @@ private:
 	FrameBuffer _buffer;
 	Gb::Frame 	_rawData;
 	
+	std::vector<unsigned char> _yuv422Frame;
+	std::vector<unsigned char> _yuv420Frame;
 	EncoderH264 _encoderH264;
 	tjhandle _jpgDecompressor;
 };

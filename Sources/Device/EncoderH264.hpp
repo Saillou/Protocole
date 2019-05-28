@@ -73,8 +73,8 @@ private:
 		encoderParemeters.bEnableFrameCroppingFlag = false;
 
 		encoderParemeters.iRCMode = RC_QUALITY_MODE;
-		encoderParemeters.iMinQp 	= 12;
-		encoderParemeters.iMaxQp 	= 30;
+		encoderParemeters.iMinQp 	= 28;
+		encoderParemeters.iMaxQp 	= 42;
 
 		encoderParemeters.bEnableBackgroundDetection 	= false;
 		encoderParemeters.bEnableFrameSkip 				= true;
