@@ -408,10 +408,10 @@ private:
 		Convert::yuv422ToYuv420(&yuv422Frame[0], &yuv420Frame[0], _rawData.size.width, _rawData.size.height);
 		
 		// h264 encode : yuv420 -> h264 packet
-		if(_encoderH264.encodeYuv(&yuv420Frame[0], frame.buffer))
-			frame.size = _rawData.size;		
-		else
-			frame.clear();
+		// if(_encoderH264.encodeYuv(&yuv420Frame[0], frame.buffer))
+			// frame.size = _rawData.size;		
+		// else
+			// frame.clear();
 		
 		return !frame.empty();
 	}

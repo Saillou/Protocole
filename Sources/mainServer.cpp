@@ -34,12 +34,12 @@ int main(int argc, char* argv[]) {
 	std::signal(SIGINT, sigintHandler);
 	
 	// - Device
-	ServerDevice device0(Globals::PATH_1, 8890);
+	ServerDevice device0(Globals::PATH_1, 8888);
 	
-	// - Events
-	device0.onFrame([&](const Gb::Frame& frame) {
-		std::cout << frame.length() << std::endl;
-	});
+	// // - Events
+	// device0.onFrame([&](const Gb::Frame& frame) {
+		// std::cout << frame.length() << std::endl;
+	// });
 	
 	// -------- Main loop --------  
 	if(!device0.open(-1)) {
