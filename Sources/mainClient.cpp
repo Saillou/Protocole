@@ -73,8 +73,11 @@ int main(int argc, char* argv[]) {
 	});
 	
 	// -------- Main loop --------  
-	if(!device0.open())
+	if(!device0.open()) {
+		std::cout << "Can't open device" << std::endl;
+		std::cout << "Press a key to continue..." << std::endl;
 		return std::cin.get();
+	}
 	
 	Timer t;
 	while(Globals::signalStatus != SIGINT && cv::waitKey(10) != 27) {
