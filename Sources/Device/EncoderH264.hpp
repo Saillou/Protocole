@@ -77,7 +77,7 @@ private:
 		encoderParemeters.iMaxQp 	= 42;
 
 		encoderParemeters.bEnableBackgroundDetection 	= false;
-		encoderParemeters.bEnableFrameSkip 				= false;
+		encoderParemeters.bEnableFrameSkip 				= true;
 		encoderParemeters.bEnableLongTermReference 	= false;
 		encoderParemeters.iSpatialLayerNum 				= 1;
 

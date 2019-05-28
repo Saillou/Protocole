@@ -57,40 +57,46 @@ int main(int argc, char* argv[]) {
 	device0.onFrame([&](const Gb::Frame& frame) {
 		bitrate += frame.length();
 		
-		// --- Encode ---
-		// -- From jpg to h264:
-		// jpg decompress : jpg422 -> yuv422
-		int area = frame.size.width*frame.size.height;
-		std::vector<unsigned char> yuv422Frame(area*2);
+		int w = frame.size.width;
+		int h = frame.size.height;
+		// --- Decode ---
+		tjDecompress2(_jpgDecompressor, frame.start(), frame.length(), cvFrame0.data, w, 0, h, TJPF_BGR, 0);
 		
-		unsigned char* pYuv[3] = {
-			&yuv422Frame[0],
-			&yuv422Frame[area],
-			&yuv422Frame[area + area/2]
-		};
-		int strides[3] = {
-			frame.size.width, frame.size.width /2, frame.size.width /2
-		};
+		// --- Decode ---
+		// // -- From jpg to h264:
+		// // jpg decompress : jpg422 -> yuv422
+		// int area = frame.size.width*frame.size.height;
+		// std::vector<unsigned char> yuv422Frame(area*2);
 		
-		if(tjDecompressToYUVPlanes(
-				_jpgDecompressor, 
-				frame.start(), frame.length(), 
-				pYuv, 
-				frame.size.width, strides, frame.size.height, 0) < 0) 
-		{
-			return;
-		}
+		// unsigned char* pYuv[3] = {
+			// &yuv422Frame[0],
+			// &yuv422Frame[area],
+			// &yuv422Frame[area + area/2]
+		// };
+		// int strides[3] = {
+			// frame.size.width, frame.size.width /2, frame.size.width /2
+		// };
 		
-		// yuv422 -> yuv420
-		std::vector<unsigned char> yuv420Frame(area*3/2);
-		Convert::yuv422ToYuv420(&yuv422Frame[0], &yuv420Frame[0], frame.size.width, frame.size.height);
+		// if(tjDecompressToYUVPlanes(
+				// _jpgDecompressor, 
+				// frame.start(), frame.length(), 
+				// pYuv, 
+				// frame.size.width, strides, frame.size.height, 0) < 0) 
+		// {
+			// return;
+		// }
 		
-		unsigned char* pYuv420[3] = {
-			&yuv420Frame[0],
-			&yuv420Frame[area],
-			&yuv420Frame[area + area/4]
-		};
-		Convert::yuv420ToBgr24(pYuv420, cvFrame0.data, frame.size.width, frame.size.width, frame.size.height);
+		// // yuv422 -> yuv420
+		// std::vector<unsigned char> yuv420Frame(area*3/2);
+		// Convert::yuv422ToYuv420(&yuv422Frame[0], &yuv420Frame[0], frame.size.width, frame.size.height);
+		
+		// // yuv420 -> bgr24
+		// unsigned char* pYuv420[3] = {
+			// &yuv420Frame[0],
+			// &yuv420Frame[area],
+			// &yuv420Frame[area + area/4]
+		// };
+		// Convert::yuv420ToBgr24(pYuv420, cvFrame0.data, frame.size.width, frame.size.width, frame.size.height);
 		
 		
 		// // --- Decode ---
