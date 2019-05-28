@@ -382,7 +382,7 @@ private:
 		// -- From jpg to h264:
 		// jpg decompress : jpg422 -> yuv422
 		int area = _rawData.size.width*_rawData.size.height;
-		std::vector<unsigned char> yuvFrame(area*2);
+		std::vector<unsigned char> yuvFrame(area*4);
 		
 		unsigned char* pYuv[3] = {
 			&yuvFrame[0],
