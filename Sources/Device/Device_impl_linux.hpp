@@ -143,18 +143,15 @@ public:
 	
 	// Setters
 	bool setFormat(int width, int height, PixelFormat formatPix) {
-		std::cout << "---- SET FORMAT ---- " << std::endl;
 		bool io = _fd != -1;
 		if(io)
 			if(!close())
 				return false;
 		
-		std::cout << "---- CLOSED ---- " << std::endl;
 		_format.width  = width;
 		_format.height = height;
 		_format.format = formatPix == MJPG ? V4L2_PIX_FMT_MJPEG : V4L2_PIX_FMT_YUYV;
 		
-		std::cout << "---- RE-OPEN ---- " << std::endl;
 		if(io)
 			return open();
 		
@@ -316,7 +313,7 @@ private:
 		printf( "  Format > \t Width: %d | Height: %d | PixFmt: %s \n",
 					fmt.fmt.pix.width, fmt.fmt.pix.height, fourcc);
 					
-		if(_encoderH264.setup(_format.width, _format.height)) {
+		if(!_encoderH264.setup(_format.width, _format.height)) {
 			_perror("Setting H264 encoder");
 			return false;
 		}
