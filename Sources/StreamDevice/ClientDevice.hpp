@@ -40,7 +40,7 @@ public:
 				return _initialization();
 			
 			timer.wait(500);
-		}	while(timer.elapsed_mus()/1000 > timeoutMs);
+		}	while(timer.elapsed_mus()/1000 < timeoutMs);
 		
 		return false;
 	}

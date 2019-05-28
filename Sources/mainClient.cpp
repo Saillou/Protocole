@@ -45,6 +45,7 @@ int main(int argc, char* argv[]) {
 	// --- Devices
 	cv::Mat cvFrame0 = cv::Mat::zeros(480, 640, CV_8UC3);
 	std::mutex frameMut0;
+	
 	ClientDevice device0(IAddress(Globals::IP_ADDRESS, 8888));
 	
 	std::atomic<size_t> bitrate = 0;
@@ -86,7 +87,7 @@ int main(int argc, char* argv[]) {
 			t.beg();
 		}
 	}
-	
+
 	// -- End
 	device0.close();
 	cv::destroyAllWindows();
