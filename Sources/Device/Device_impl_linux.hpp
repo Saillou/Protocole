@@ -381,13 +381,13 @@ private:
 
 		// -- From jpg to h264:
 		// jpg decompress : jpg422 -> yuv420
-		std::vector<unsigned char> yuvFrame(_rawData.size.width*_rawData.size.height*3/2);
+		std::vector<unsigned char> yuvFrame(_rawData.size.width*_rawData.size.height*3);
 		if(tjDecompressToYUV2 (
 				_jpgDecompressor, 
 				_rawData.start(), _rawData.length(), 
 				&yuvFrame[0], 
 				_rawData.size.width, 4, _rawData.size.height, 
-				TJFLAG_FASTDCT
+				0
 		) < 0) {
 			std::cout << tjGetErrorStr2(_jpgDecompressor) << std::endl;
 			return false;
