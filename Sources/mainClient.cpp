@@ -85,6 +85,13 @@ int main(int argc, char* argv[]) {
 		std::vector<unsigned char> yuv420Frame(area*3/2);
 		Convert::yuv422ToYuv420(&yuv422Frame[0], &yuv420Frame[0], frame.size.width, frame.size.height);
 		
+		unsigned char* pYuv420[3] = {
+			&yuv420Frame[0],
+			&yuv420Frame[area],
+			&yuv420Frame[area + area/4]
+		};
+		Convert::yuv420ToBgr24(pYuv420, cvFrame0.data, frame.size.width, frame.size.width, frame.size.height);
+		
 		
 		// // --- Decode ---
 		// unsigned char* yuvDecode[3];
