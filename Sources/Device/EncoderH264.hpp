@@ -72,7 +72,7 @@ private:
 		encoderParemeters.iComplexityMode 				= LOW_COMPLEXITY; // LOW_, MEDIUM_, HIGH_
 		encoderParemeters.bEnableFrameCroppingFlag = false;
 
-		encoderParemeters.iRCMode = RC_QUALITY_MODE;
+		encoderParemeters.iRCMode = RC_BITRATE_MODE;
 		encoderParemeters.iMinQp 	= 28;
 		encoderParemeters.iMaxQp 	= 42;
 
