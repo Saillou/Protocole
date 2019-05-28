@@ -380,22 +380,34 @@ private:
 		// frame = _rawData.clone();
 
 		// -- From jpg to h264:
-		// jpg decompress : jpg422 -> bgr24
-		std::vector<unsigned char> bgrFrame(_rawData.size.width*_rawData.size.height*3);
-
-		if(tjDecompress2 (
-				_jpgDecompressor, 
-				_rawData.start(), _rawData.length(), 
-				&bgrFrame[0], 
-				_rawData.size.width, 0, _rawData.size.height, 
-				TJPF_BGR, TJFLAG_FASTDCT
-		) < 0) {
-			std::cout << tjGetErrorStr2(_jpgDecompressor) << std::endl;
-			return false;
-		}
+		// jpg decompress : jpg422 -> yuv420
+		std::cout << tjBufSizeYUV2(_rawData.size.width, 4, _rawData.size.height, TJSAMP_420) << std::endl;
+		// std::vector<unsigned char> yuvFrame(_rawData.size.width*_rawData.size.height*3);
+		// if(tjDecompress2 (
+				// _jpgDecompressor, 
+				// _rawData.start(), _rawData.length(), 
+				// &bgrFrame[0], 
+				// _rawData.size.width, 0, _rawData.size.height, 
+				// TJPF_BGR, TJFLAG_FASTDCT
+		// ) < 0) {
+			// std::cout << tjGetErrorStr2(_jpgDecompressor) << std::endl;
+			// return false;
+		// }
 		
-		// h264 encode : bgr24 -> yuv420 -> h264 packet
-		if(_encoderH264.encode(&bgrFrame[0], frame.buffer))
+		// std::vector<unsigned char> bgrFrame(_rawData.size.width*_rawData.size.height*3);
+		// if(tjDecompress2 (
+				// _jpgDecompressor, 
+				// _rawData.start(), _rawData.length(), 
+				// &bgrFrame[0], 
+				// _rawData.size.width, 0, _rawData.size.height, 
+				// TJPF_BGR, TJFLAG_FASTDCT
+		// ) < 0) {
+			// std::cout << tjGetErrorStr2(_jpgDecompressor) << std::endl;
+			// return false;
+		// }
+		
+		// h264 encode : yuv420 -> h264 packet
+		if(_encoderH264.encodeYuv(&bgrFrame[0], frame.buffer))
 			frame.size = _rawData.size;		
 		else
 			frame.clear();

@@ -59,7 +59,7 @@ public:
 			return false;
 		
 		// Compress to h264
-		if(!_encoderH264.encode(cvFrame.data, frame.buffer))
+		if(!_encoderH264.encodeBgr(cvFrame.data, frame.buffer))
 			return false;
 		
 		// Complete

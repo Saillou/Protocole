@@ -34,8 +34,23 @@ public:
 		_cleanEncoder();
 	}
 	
-	bool encode(unsigned char* dataEncode, std::vector<unsigned char>& buffer) {
-		return _encodeH264(dataEncode, buffer);
+	bool encodeBgr(unsigned char* dataEncode, std::vector<unsigned char>& buffer) {
+		if(!_encoder)
+			return false;
+		
+		// First need Yuv
+		Convert::bgr24ToYuv420(dataEncode, _pic.pData, _pic.iPicWidth, _pic.iPicHeight);
+		
+		return _encodeH264(buffer);
+	}
+	bool encodeYuv(unsigned char* dataEncode, std::vector<unsigned char>& buffer) {
+		if(!_encoder)
+			return false;
+		
+		// Put yuvEncode in the _pic
+		memcpy(_pic.pData, dataEncode, _yuvBuffer.size());
+		
+		return _encodeH264(buffer);
 	}
 	
 private:
@@ -116,16 +131,13 @@ private:
 		_yuvBuffer.clear();
 	}
 	
-	bool _encodeH264(unsigned char* dataEncode, std::vector<unsigned char>& buffer) {
+	bool _encodeH264(std::vector<unsigned char>& buffer) {
 		if(!_encoder)
 			return false;
 		
 		// Info about encoding result
 		SFrameBSInfo encInfo;
 		memset (&encInfo, 0, sizeof(SFrameBSInfo));
-		
-		// Need YUV420 planar
-		Convert::bgr24ToYuv420(dataEncode, _pic.pData, _pic.iPicWidth, _pic.iPicHeight);
 		
 		if(_encoder->EncodeFrame(&_pic, &encInfo) == 0) {		
 			if (encInfo.eFrameType != videoFrameTypeSkip && encInfo.eFrameType != videoFrameTypeInvalid) {
