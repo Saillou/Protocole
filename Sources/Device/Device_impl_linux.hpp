@@ -382,15 +382,17 @@ private:
 		// -- From jpg to h264:
 		// jpg decompress : jpg422 -> bgr24
 		std::vector<unsigned char> bgrFrame(_rawData.size.width*_rawData.size.height*3);
-		std::cout << _jpgDecompressor << " : " << _rawData.length() << " | " << _rawData.size.width << "x" << _rawData.size.height << std::endl;
+
 		if(tjDecompress2 (
 				_jpgDecompressor, 
 				&_rawData.buffer[0], _rawData.length(), 
 				&bgrFrame[0], 
 				_rawData.size.width, 0, _rawData.size.height, 
 				TJPF_BGR, TJFLAG_FASTDCT
-			) < 0)
-		return false;
+		) < 0) {
+			std::cout << tjGetErrorStr2(_jpgDecompressor) << std::endl;
+			return false;
+		}
 		
 		std::cout << "Decompress ok" << std::endl;
 		
