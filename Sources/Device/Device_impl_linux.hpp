@@ -382,7 +382,7 @@ private:
 		// -- From jpg to h264:
 		// jpg decompress : jpg422 -> yuv422
 		int area = _rawData.size.width*_rawData.size.height;
-		std::vector<unsigned char> yuvFrame(area*4);
+		std::vector<unsigned char> yuvFrame(area*2);
 		
 		unsigned char* pYuv[3] = {
 			&yuvFrame[0],
@@ -402,6 +402,7 @@ private:
 			std::cout << tjGetErrorStr2(_jpgDecompressor) << std::endl;
 			return false;
 		}
+		std::cout << "Decompress ok" << std::endl;
 		
 		// std::vector<unsigned char> yuvFrame(tjBufSizeYUV2(_rawData.size.width, 4, _rawData.size.height, TJSAMP_422));
 		// if(tjDecompressToYUV2 (
