@@ -413,8 +413,6 @@ private:
 		else
 			frame.clear();
 		
-		std::cout << (frame.empty() ? "not ok":"ok") << std::endl;
-		
 		return !frame.empty();
 	}
 	
