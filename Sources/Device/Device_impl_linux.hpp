@@ -400,8 +400,6 @@ private:
 		else
 			frame.clear();
 		
-		std::cout << "Frame: " << (frame.empty() ? " pas ok" : "ok") << std::endl;
-		
 		return !frame.empty();
 	}
 	
