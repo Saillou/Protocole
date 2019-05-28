@@ -70,15 +70,15 @@ private:
 
 		encoderParemeters.iUsageType 					= CAMERA_VIDEO_REAL_TIME;
 		encoderParemeters.iComplexityMode 				= LOW_COMPLEXITY; // LOW_, MEDIUM_, HIGH_
-		encoderParemeters.bEnableFrameCroppingFlag = true;
+		encoderParemeters.bEnableFrameCroppingFlag = false;
 
 		encoderParemeters.iRCMode = RC_QUALITY_MODE;
-		encoderParemeters.iMinQp 	= 12;
+		encoderParemeters.iMinQp 	= 26;
 		encoderParemeters.iMaxQp 	= 42;
 
-		encoderParemeters.bEnableBackgroundDetection 	= true;
-		encoderParemeters.bEnableFrameSkip 				= true;
-		encoderParemeters.bEnableLongTermReference 	= true;
+		encoderParemeters.bEnableBackgroundDetection 	= false;
+		encoderParemeters.bEnableFrameSkip 				= false;
+		encoderParemeters.bEnableLongTermReference 	= false;
 		encoderParemeters.iSpatialLayerNum 				= 1;
 
 		// Layer param
@@ -87,8 +87,8 @@ private:
 		encoderParemeters.iPicWidth 			= spartialLayerConfiguration->iVideoWidth 			= _width;
 		encoderParemeters.iPicHeight 		= spartialLayerConfiguration->iVideoHeight 			= _height;
 		encoderParemeters.fMaxFrameRate 	= spartialLayerConfiguration->fFrameRate 			= 1/30.0f;
-		encoderParemeters.iTargetBitrate 	= spartialLayerConfiguration->iSpatialBitrate 	= 100000;
-		encoderParemeters.iTargetBitrate 	= spartialLayerConfiguration->iMaxSpatialBitrate = 100000;
+		encoderParemeters.iTargetBitrate 	= spartialLayerConfiguration->iSpatialBitrate 	= 500000;
+		encoderParemeters.iTargetBitrate 	= spartialLayerConfiguration->iMaxSpatialBitrate = 500000;
 		
 		// Color space
 		int videoFormat = videoFormatI420;
