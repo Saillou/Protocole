@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
 	cv::Mat cvFrame0 = cv::Mat::zeros(480, 640, CV_8UC3);
 	std::mutex frameMut0;
 	
-	ClientDevice device0(IAddress(Globals::IP_ADDRESS, 8888));
+	ClientDevice device0(IAddress(Globals::IP_ADDRESS, 8890));
 	
 	std::atomic<size_t> bitrate = 0;
 	
