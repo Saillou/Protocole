@@ -48,7 +48,7 @@ public:
 			return false;
 		
 		// Put yuvEncode in the _pic
-		memcpy(_pic.pData, dataEncode, _yuvBuffer.size());
+		memcpy(&_yuvBuffer[0], dataEncode, _yuvBuffer.size());
 		
 		return _encodeH264(buffer);
 	}

@@ -382,7 +382,7 @@ private:
 		// -- From jpg to h264:
 		// jpg decompress : jpg422 -> yuv422
 		int area = _rawData.size.width*_rawData.size.height;
-		std::vector<unsigned char> yuv422Frame(area*2, 0);
+		std::vector<unsigned char> yuv422Frame(area*2);
 		
 		unsigned char* pYuv[3] = {
 			&yuv422Frame[0],
@@ -404,8 +404,8 @@ private:
 		}
 		
 		// yuv422 -> yuv420
-		std::vector<unsigned char> yuv420Frame(area*3/2, 0);
-		// Convert::yuv422ToYuv420(&yuv422Frame[0], &yuv420Frame[0], _rawData.size.width, _rawData.size.height);
+		std::vector<unsigned char> yuv420Frame(area*3/2);
+		Convert::yuv422ToYuv420(&yuv422Frame[0], &yuv420Frame[0], _rawData.size.width, _rawData.size.height);
 		
 		// h264 encode : yuv420 -> h264 packet
 		if(_encoderH264.encodeYuv(&yuv420Frame[0], frame.buffer))
