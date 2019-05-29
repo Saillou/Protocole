@@ -25,7 +25,8 @@ public:
 		_fd(-1), 
 		_path(pathVideo), 
 		_format({640, 480, MJPG}),
-		_buffer({(void*)nullptr, (size_t)0})
+		_buffer({(void*)nullptr, (size_t)0}),
+		_bufferQuery(false)
 	{
 		// Wait open
 	}
@@ -49,6 +50,9 @@ public:
 		return true;		
 	}
 	bool close() {
+		while(_bufferQuery)
+			Timer::wait(2);
+		
 		// Stop capture
 		enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		if(_xioctl(_fd, VIDIOC_STREAMOFF, &type) == -1) {
@@ -92,6 +96,7 @@ public:
 		fdp.events 		= POLLIN | POLLOUT; // inputs
 		fdp.revents		= 0; // outputs
 		
+		bool success = false;
 			
 		for(int error = 0; error < 100;) {
 			// Wait event on fd
@@ -110,7 +115,7 @@ public:
 					_perror("Timeout"); 
 				}
 				
-				return false;
+				break;
 			}
 		
 			// Grab frame
@@ -122,15 +127,16 @@ public:
 				}
 				
 				_perror("Grab Frame");
-				return false;
+				break;
 			}
 			
 			// Check size
 			_buffer.length = (buf.bytesused > 0) ? buf.bytesused : _buffer.length;	
-			return true;
+			success = true;
+			break;
 		}
-		
-		return false;		
+		_bufferQuery = false;
+		return success;		
 	}
 	bool retrieve(Gb::Frame& frame) {
 		_rawData = Gb::Frame(
@@ -346,14 +352,19 @@ private:
 		return true;		
 	}
 	bool _askFrame() {
+		if(_bufferQuery)
+			return true;
+		
 		struct v4l2_buffer buf = {0};
 		buf.type 	= V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		buf.memory 	= V4L2_MEMORY_MMAP;
 		
-		// if(_xioctl(_fd, VIDIOC_QBUF, &buf) == -1) {
-			// _perror("Query Buffer");
-			// return false;
-		// }
+		if(_xioctl(_fd, VIDIOC_QBUF, &buf) == -1) {
+			_perror("Query Buffer");
+			return false;
+		}
+		_bufferQuery = true;
+		
 		return true;	
 	}
 	
@@ -446,6 +457,7 @@ private:
 	FrameFormat	_format;
 	FrameBuffer _buffer;
 	Gb::Frame 	_rawData;
+	std::atomic<bool> _bufferQuery;
 	
 	std::vector<unsigned char> _yuv422Frame;
 	std::vector<unsigned char> _yuv420Frame;
