@@ -61,7 +61,6 @@ public:
 	bool retrieve(Gb::Frame& frame);
 	bool read(Gb::Frame& frame);
 	
-	
 	// Setters
 	bool setFormat(int width, int height, PixelFormat formatPix);
 	bool set(Param code, double value);
@@ -69,8 +68,6 @@ public:
 	// Getters
 	const FrameFormat getFormat() const;
 	double get(Param code);
-	
-
 	
 private:
 	// Private implementation - OS dependent
