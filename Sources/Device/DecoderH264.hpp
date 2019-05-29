@@ -46,6 +46,8 @@ private:
 		
 		if(_decoder->Initialize(&decParam) != 0)
 			return false;
+		
+		return true;
 	}
 	void _cleanDecoder() {
 		if (_decoder) {
