@@ -25,8 +25,7 @@ public:
 		_fd(-1), 
 		_path(pathVideo), 
 		_format({640, 480, MJPG}),
-		_buffer({(void*)nullptr, (size_t)0}),
-		_bufferQuery(false)
+		_buffer({(void*)nullptr, (size_t)0})
 	{
 		// Wait open
 	}
@@ -40,19 +39,13 @@ public:
 		_fd = ::open(_path.c_str(), O_RDWR | O_NONBLOCK, 0);
 		
 		if(_fd == -1 || !_initDevice() || !_initMmap()) {
-			_perror("Opening device");
-			if(_fd != -1) 
-				::close(_fd);
-				
+			close();
 			return false;
 		}
 		
 		return true;		
 	}
-	bool close() {
-		if(_bufferQuery)
-			grab();
-		
+	bool close() {		
 		// Stop capture
 		enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		if(_xioctl(_fd, VIDIOC_STREAMOFF, &type) == -1) {
@@ -66,7 +59,7 @@ public:
 		}
 		
 		if(_fd != -1) {
-			if(::close(_fd) == -1) {
+			if(::close(_fd) < 0) {
 				_perror("Closing");
 				return false;
 			}
@@ -87,6 +80,9 @@ public:
 	}
 	
 	bool grab() {
+		if(!_askFrame())
+			return false;
+		
 		struct v4l2_buffer buf = {0};
 		buf.type 	= V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		buf.memory 	= V4L2_MEMORY_MMAP;
@@ -137,7 +133,7 @@ public:
 			success = true;
 			break;
 		}
-		_bufferQuery = false;
+		
 		return success;		
 	}
 	bool retrieve(Gb::Frame& frame) {
@@ -147,8 +143,6 @@ public:
 			Gb::Size(_format.width, _format.height),
 			(_format.format == MJPG) ? Gb::FrameType::Jpg422 : Gb::FrameType::Yuv422
 		).clone();
-		
-		_askFrame();
 			
 		return _treat(frame);		
 	}
@@ -341,10 +335,7 @@ private:
 		}
 		printf("Buffer max: %f KB\n", _buffer.length/1000.0f);
 		
-		// Start capture
-		if(!_askFrame())
-			return false;
-	 
+		// Start capture	 
 		if(_xioctl(_fd, VIDIOC_STREAMON, &buf.type) == -1) {
 			_perror("Start Capture");
 			return false;
@@ -353,9 +344,6 @@ private:
 		return true;		
 	}
 	bool _askFrame() {
-		if(_bufferQuery)
-			return true;
-		
 		struct v4l2_buffer buf = {0};
 		buf.type 	= V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		buf.memory 	= V4L2_MEMORY_MMAP;
@@ -364,8 +352,7 @@ private:
 			_perror("Query Buffer");
 			return false;
 		}
-		_bufferQuery = true;
-		
+
 		return true;	
 	}
 	
@@ -458,7 +445,6 @@ private:
 	FrameFormat	_format;
 	FrameBuffer _buffer;
 	Gb::Frame 	_rawData;
-	std::atomic<bool> _bufferQuery;
 	
 	std::vector<unsigned char> _yuv422Frame;
 	std::vector<unsigned char> _yuv420Frame;
