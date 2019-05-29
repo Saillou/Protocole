@@ -381,11 +381,12 @@ private:
 		// Timer t;
 		bool success = false;
 		
+		int w = _rawData.size.width;
+		int h = _rawData.size.height;
+		int area = w*h;
+		
 		// -- From jpg to h264:
 		if(frame.type == Gb::FrameType::H264) {
-			int w = _rawData.size.width;
-			int h = _rawData.size.height;
-			int area = w*h;
 			
 			// jpg decompress : jpg422 -> yuv422
 			_decoderJpg.decode2yuv422(_rawData.buffer, _yuv422Frame, w, h);
@@ -404,11 +405,10 @@ private:
 		else if(frame.type == Gb::FrameType::Jpg420) { // -- From jpg to smaller jpg:
 			std::vector<unsigned char> bgrBuffer;
 			
-			std::cout << "Try encode smaller" << std::endl;
-			if(_decoderJpg.decode2bgr24(_rawData.buffer, bgrBuffer, frame.size.width, frame.size.height)) {
-				std::cout << "Decode ok" << std::endl;
-				if(_encoderJpg.encodeBgr24(bgrBuffer, frame.buffer, frame.size.width, frame.size.height, 10)) {
-					std::cout << "Re-encode ok" << std::endl;
+			// jpg decompress : jpg422 -> bgr24
+			if(_decoderJpg.decode2bgr24(_rawData.buffer, bgrBuffer, w, h)) {
+				// jpg compress : bgr24 -> jpg420
+				if(_encoderJpg.encodeBgr24(bgrBuffer, frame.buffer, w, h, 10)) {
 					success = true;
 				}
 			}
