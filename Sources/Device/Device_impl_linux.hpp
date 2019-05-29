@@ -408,7 +408,7 @@ private:
 			// jpg decompress : jpg422 -> bgr24
 			if(_decoderJpg.decode2bgr24(_rawData.buffer, bgrBuffer, w, h)) {
 				// jpg compress : bgr24 -> jpg420
-				if(_encoderJpg.encodeBgr24(bgrBuffer, frame.buffer, w, h, 10)) {
+				if(_encoderJpg.encodeBgr24(bgrBuffer, frame.buffer, w, h, 30)) {
 					success = true;
 				}
 			}
