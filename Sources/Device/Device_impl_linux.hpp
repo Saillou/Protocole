@@ -82,6 +82,7 @@ public:
 	bool grab() {
 		// if(!_askFrame())
 			// return false;
+		_askFrame();
 		return false;
 		
 		struct v4l2_buffer buf = {0};
