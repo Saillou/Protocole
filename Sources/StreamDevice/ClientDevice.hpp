@@ -2,6 +2,7 @@
 
 #include "../Network/Client.hpp"
 #include "../Device/DeviceMt.hpp"
+#include "../Device/DecoderH264.hpp"
 #include "../Tool/Timer.hpp"
 #include "../Tool/Buffers.hpp"
 
@@ -22,10 +23,12 @@ public:
 		_format({640,480,Device::MJPG})
 	{
 		// client
+		_decoder.setup();
 	}
 	
 	~ClientDevice() {
 		close();
+		_decoder.cleanup();
 	}
 	
 	// -- Methods --
@@ -136,13 +139,16 @@ private:
 			_buffer.unlock();
 			
 			// -- Send --
-			if(emitFrame) {
-				_mutCbk.lock();
-				if(_cbkFrame)
-					_cbkFrame(frame);
-				_mutCbk.unlock();
+			if(emitFrame) {	
+				Gb::Frame frameEmit;
+				frameEmit.size = frame.size;
 				
-				
+				if(_decoder.decode(frame.buffer, frameEmit.buffer)) {
+					_mutCbk.lock();
+					if(_cbkFrame)
+						_cbkFrame(frameEmit);
+					_mutCbk.unlock();	
+				}
 				emitFrame = false;
 			}
 		}
@@ -209,6 +215,9 @@ private:
 	void _treatDeviceProperties(const Message& message) {
 		// To do..
 	}
+	bool _treatFrame(const Gb::Frame& frameIn, Gb::Frame& frameOut) {
+	
+	}
 	
 	// -- Members --
 	std::atomic<bool> _running;
@@ -221,6 +230,7 @@ private:
 	
 	std::shared_ptr<std::thread> _pThreadBuffer;
 	MsgBuffer _buffer;
+	DecoderH264 _decoder;
 	
 	mutable std::mutex _mutFormat;
 	mutable std::mutex _mutCbk;

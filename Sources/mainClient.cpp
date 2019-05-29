@@ -30,43 +30,17 @@ static void sigintHandler(int signal) {
 
 // --- Helper ----
 void showDevice(const int port, cv::Mat& cvFrame, std::mutex& mutFrame) {
-	// Alloc decoder
-	ISVCDecoder *decoder;
-	WelsCreateDecoder(&decoder);
-	
-	SDecodingParam decParam;
-	memset(&decParam, 0, sizeof (SDecodingParam));
-	
-	decParam.sVideoProperty.eVideoBsType = VIDEO_BITSTREAM_DEFAULT;
-	decoder->Initialize(&decParam);
-	
-	
 	// Device	
 	ClientDevice device(IAddress(Globals::IP_ADDRESS, port));
 	
 	
 	// ----- Events -----	
 	device.onFrame([&](const Gb::Frame& frame) {
-		// --- Decode ---
-		unsigned char* yuvDecode[3];
-		memset(yuvDecode, 0, sizeof (yuvDecode));
-		
-		SBufferInfo decInfo;
-		memset(&decInfo, 0, sizeof (SBufferInfo));
-		
-		int err = decoder->DecodeFrame2 (frame.start(), frame.length(), yuvDecode, &decInfo);
-		if(err == 0 && decInfo.iBufferStatus == 1) {					
-			int oStride = decInfo.UsrData.sSystemBuffer.iStride[0];
-			int oWidth 	= decInfo.UsrData.sSystemBuffer.iWidth;
-			int oHeight = decInfo.UsrData.sSystemBuffer.iHeight;
-			
-			mutFrame.lock();
-			if(oWidth != cvFrame.cols || oHeight != cvFrame.rows)
-				cvFrame = cv::Mat::zeros(oHeight, oWidth, CV_8UC3);
-			
-			Convert::yuv420ToBgr24(yuvDecode, cvFrame.data, oStride, oWidth, oHeight);
-			mutFrame.unlock();
-		}
+		mutFrame.lock();
+		if(frame.size.width != cvFrame.cols || frame.size.height != cvFrame.rows)
+			cvFrame = cv::Mat::zeros(frame.size.height, frame.size.width, CV_8UC3);
+		memcpy(cvFrame.data, frame.start(), frame.length());
+		mutFrame.unlock();
 	});
 	
 	// -------- Main loop --------  
@@ -82,10 +56,6 @@ void showDevice(const int port, cv::Mat& cvFrame, std::mutex& mutFrame) {
 
 	// -- End
 	device.close();
-	if (decoder) {
-		decoder->Uninitialize();
-		WelsDestroyDecoder(decoder);
-	}
 }
 
 // --- Entry point ---
