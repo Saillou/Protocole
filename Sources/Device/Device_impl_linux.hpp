@@ -404,8 +404,11 @@ private:
 		else if(frame.type == Gb::FrameType::Jpg420) { // -- From jpg to smaller jpg:
 			std::vector<unsigned char> bgrBuffer;
 			
+			std::cout << "Try encode smaller" << std::endl;
 			if(_decoderJpg.decode2bgr24(_rawData.buffer, bgrBuffer, frame.size.width, frame.size.height)) {
+				std::cout << "Decode ok" << std::endl;
 				if(_encoderJpg.encodeBgr24(bgrBuffer, frame.buffer, frame.size.width, frame.size.height, 10)) {
+					std::cout << "Re-encode ok" << std::endl;
 					success = true;
 				}
 			}
