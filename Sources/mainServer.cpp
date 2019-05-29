@@ -41,12 +41,11 @@ int main() {
 	};
 	size_t k = 0;
 	
-	for(int i = 1; i < 1000; i++) {
+	for(int i = 1; i < 100; i++) {
 		device.grab();
 		device.retrieve(frame);
-		std::cout << i << " " << frame.length()/1000.0 << "KB" << std::endl;
 		
-		if(i%100 == 0) {
+		if(i%30 == 0) {
 			device.setFormat(fmtList[k].first, fmtList[k].second, Device::MJPG);
 			k = (k + 1) % fmtList.size();
 		}
