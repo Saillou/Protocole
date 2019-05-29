@@ -37,8 +37,8 @@ public:
 	
 	// Methods
 	bool open() {
-		_fd = ::open(_path.c_str(), O_RDWR | O_NONBLOCK, 0);
-		grab();
+		_fd = ::open(_path.c_str(), O_RDWR | O_NONBLOCK);
+		
 		std::cout << "Open " << _fd << std::endl;
 		if(_fd == -1 || !_initDevice() || !_initMmap() || !_askFrame()) {
 			close();
@@ -121,7 +121,7 @@ public:
 			// Grab frame
 			if(_xioctl(_fd, VIDIOC_DQBUF, &buf) == -1) {
 				if(EAGAIN == errno) {
-					Timer::wait(1);
+					Timer::wait(2);
 					error++;
 					continue;
 				}
