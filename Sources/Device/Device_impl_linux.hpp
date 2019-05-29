@@ -87,14 +87,16 @@ public:
 		buf.type 	= V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		buf.memory 	= V4L2_MEMORY_MMAP;
 				
+		struct pollfd fdp;
+		fdp.fd 			= _fd;
+		fdp.events 		= POLLIN | POLLOUT; // inputs
+		fdp.revents		= 0; // outputs
+		
 		for(;;) {
 			// Wait event on fd
-			struct pollfd fdp;
-			fdp.fd 			= _fd;
-			fdp.events 		= POLLIN | POLLOUT; // inputs
-			fdp.revents		= 0; // outputs
-			
-			int r = poll(&fdp, 1, 1000);
+			std::cout << "beg poll" << std::endl;
+			int r = poll(&fdp, 1, 1000); // 1s
+			std::cout << "end poll" << std::endl;
 			
 			// Error ?
 			if(r < 1) {
