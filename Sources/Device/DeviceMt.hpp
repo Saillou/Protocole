@@ -13,7 +13,7 @@
 class DeviceMt {	
 public:
 	// Constructor
-	DeviceMt() : _running(false), frameType(Gb::FrameType::Jpg420) {
+	DeviceMt() : _running(false), frameType(Gb::FrameType::H264) {
 		// Wait for open
 		// Possible types:
 		// frameType : Gb::FrameType::H264;

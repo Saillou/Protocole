@@ -153,6 +153,7 @@ private:
 			
 			// -- Send --
 			if(emitFrame) {	
+				std::cout << "rcv frame \n";
 				Gb::Frame frameEmit;
 				
 				// Decode 
@@ -171,6 +172,7 @@ private:
 				if(success) {
 					frameEmit.size = frame.size;
 					frameEmit.type = Gb::FrameType::Bgr24;	
+					std::cout << "emit frame \n";
 					
 					_mutCbk.lock();
 					if(_cbkFrame)
