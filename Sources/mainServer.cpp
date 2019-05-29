@@ -42,8 +42,7 @@ int main() {
 	size_t k = 0;
 	int i = 1;
 	for(; i <= 100; i++) {
-		if(!device.grab())
-			break;
+		device.grab();
 		device.retrieve(frame);
 		
 		if(i%30 == 0) {
