@@ -43,7 +43,7 @@ int main() {
 	int i = 1;
 	int N = 33;
 	for(; i <= N; i++) {
-		device.read(frame);
+		// device.read(frame);
 		
 		if(i%30 == 0) {
 			device.setFormat(fmtList[k].first, fmtList[k].second, Device::MJPG);
