@@ -101,6 +101,7 @@ public:
 	}
 	bool setFrameType(Gb::FrameType fType) {
 		std::lock_guard<std::mutex> lockFrame(_mutFrame);
+		refresh();
 		frameType = fType;
 		return true;
 	}
