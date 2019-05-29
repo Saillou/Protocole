@@ -28,7 +28,25 @@ static void sigintHandler(int signal) {
 	Globals::signalStatus = signal;
 }
 
+int main() {
+	Device device(Globals::PATH_0);
+	device.open();
+	
+	Gb::Frame& frame;
+	for(int i = 0; i < 100; i++) {
+		device.grab();
+		device.retrieve(frame);
+		std::cout << frame.length() << "B" << std::endl;
+	}
+	
+	device.close();
+	
+	std::cout << "ok" << std::endl;
+	return 0;
+}
+
 // --- Entry point ---
+/*
 int main(int argc, char* argv[]) {	
 	// - Install signal handler
 	std::signal(SIGINT, sigintHandler);
@@ -77,3 +95,4 @@ int main(int argc, char* argv[]) {
 	std::cout << "Press a key to continue..." << std::endl;
 	return std::cin.get();
 }
+*/
