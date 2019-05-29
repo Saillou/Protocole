@@ -150,12 +150,11 @@ public:
 	
 	// Setters
 	bool setFormat(int width, int height, PixelFormat formatPix) {
-		std::cout << "close: \n";
+		std::cout << "set: " << width << "x" << height << std::endl;
 		close();
 		_format.width  = width;
 		_format.height = height;
 		_format.height = formatPix;
-		std::cout << "open: \n";
 		return open();
 	}
 	bool set(Device::Param code, double value) {
