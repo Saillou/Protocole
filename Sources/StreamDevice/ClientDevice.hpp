@@ -90,6 +90,10 @@ public:
 			
 		return _client.sendInfo(Message(Message::DEVICE | Message::FORMAT, command.str()));
 	}
+	bool setFrameType(Gb::FrameType ftype) {
+		// Need to be done
+		return false;
+	}
 	
 	// -- Events --
 	void onOpen(const std::function<void(void)>& cbkOpen) {
@@ -141,7 +145,7 @@ private:
 					(unsigned char*)messageFrame.content(), 
 					(unsigned long)(messageFrame.size()), 
 					Gb::Size(_format.width, _format.height), 
-					Gb::FrameType::Jpg422
+					(Gb::FrameType)(messageFrame.code() >> 10)
 				);
 				emitFrame = true;
 			}
@@ -155,8 +159,12 @@ private:
 				if(frame.type == Gb::FrameType::H264) {
 					success = _decoderH264.decode(frame.buffer, frameEmit.buffer);
 				}
-				if(frame.type == Gb::FrameType::Jpg422) {
+				else if(frame.type == Gb::FrameType::Jpg422 || frame.type == Gb::FrameType::Jpg420) {
 					success = _decoderJpg.decode2bgr24(frame.buffer, frameEmit.buffer, frame.size.width, frame.size.height);
+				}
+				else if(frame.type == Gb::FrameType::Bgr24) {
+					frameEmit.buffer = frame.buffer;
+					success = true;
 				}
 				
 				// Emit
@@ -200,7 +208,7 @@ private:
 	}	
 	void _onClientData(const Message& message) {
 		// Store frame's data
-		if(message.code() == Message::DEVICE) {
+		if(message.code() & Message::DEVICE) {
 			_buffer.lock();
 			_buffer.push(message, message.timestamp());
 			_buffer.unlock();

@@ -13,8 +13,11 @@
 class DeviceMt {	
 public:
 	// Constructor
-	DeviceMt() : _running(false) {
+	DeviceMt() : _running(false), frameType(Gb::FrameType::Jpg420) {
 		// Wait for open
+		// frame.type = Gb::FrameType::H264;
+		// frame.type = Gb::FrameType::Jpg422;
+		// frame.type = Gb::FrameType::Jpg420;
 	}
 	
 	// Destructor
@@ -95,6 +98,11 @@ public:
 			return _pDevice->set(code, value);
 		return false;
 	}
+	bool setFrameType(Gb::FrameType fType) {
+		std::lock_guard<std::mutex> lockFrame(_mutFrame);
+		frameType = fType;
+		return true;
+	}
 	
 	// Getters
 	bool isOpened() const {
@@ -113,10 +121,14 @@ public:
 		
 		return false;
 	}
+	const Gb::FrameType getFrameType() const {
+		return frameType;
+	}
 	
 protected:
 	// - Members
 	Gb::Frame frame;
+	Gb::FrameType frameType;
 	std::string deviceName;
 
 	// - Methods	
@@ -137,9 +149,7 @@ private:
 			_pDevice->grab(); 				// Will wait until the camera is available
 			
 			_mutFrame.lock();
-			// frame.type = Gb::FrameType::H264;
-			// frame.type = Gb::FrameType::Jpg422;
-			frame.type = Gb::FrameType::Jpg420;
+			frame.type = frameType;
 			if(_pDevice->retrieve(frame))
 				_onFrame();
 			

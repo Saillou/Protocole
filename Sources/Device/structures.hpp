@@ -6,14 +6,14 @@
 #include <vector>
 
 namespace Gb {
-	enum FrameType {
-		Data,
-		Yuv420,
-		Yuv422,
-		Jpg420,
-		Jpg422,
-		Bgr24,
-		H264,
+	enum FrameType : unsigned int {
+		Data			= 0x0,
+		Yuv420		= 0x1,
+		Yuv422		= 0x2,
+		Jpg420		= 0x3,
+		Jpg422		= 0x4,
+		Bgr24			= 0x5,
+		H264			= 0x6,
 	};
 	
 	struct Size {

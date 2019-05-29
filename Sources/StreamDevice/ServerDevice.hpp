@@ -65,6 +65,9 @@ public:
 	bool setFormat(int width, int height, Device::PixelFormat formatPix) {
 		return _device.setFormat(width, height, formatPix);
 	}
+	bool setFrameType(Gb::FrameType ftype) {
+		return _device.setFrameType(ftype);
+	}
 	
 	// -- Events --
 	void onOpen(const std::function<void(void)>& cbkOpen) {
@@ -122,10 +125,12 @@ private:
 	}
 	
 	void _onDeviceFrame(const Gb::Frame& frame) {
+		unsigned int code = Message::DEVICE | (((int)(frame.type)) << 10);
+		
 		// Broadcast frame
 		for(auto& client: _server.getClients()) {
 			if(client.connected && _clientPlayer[client.id()]) {
-				_server.sendData(client, Message(Message::DEVICE, reinterpret_cast<const char*>(frame.start()), frame.length()));
+				_server.sendData(client, Message(code, reinterpret_cast<const char*>(frame.start()), frame.length()));
 			}
 		}
 		

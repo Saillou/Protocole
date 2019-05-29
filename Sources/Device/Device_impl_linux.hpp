@@ -387,7 +387,6 @@ private:
 		
 		// -- From jpg to h264:
 		if(frame.type == Gb::FrameType::H264) {
-			
 			// jpg decompress : jpg422 -> yuv422
 			_decoderJpg.decode2yuv422(_rawData.buffer, _yuv422Frame, w, h);
 
@@ -402,7 +401,8 @@ private:
 				success = true;
 		}
 		
-		else if(frame.type == Gb::FrameType::Jpg420) { // -- From jpg to smaller jpg:
+		// -- From jpg to smaller jpg
+		else if(frame.type == Gb::FrameType::Jpg420) { 
 			std::vector<unsigned char> bgrBuffer;
 			
 			// jpg decompress : jpg422 -> bgr24
@@ -416,7 +416,8 @@ private:
 		
 		// -- Raw
 		else {
-			frame = _rawData.clone();
+			frame.buffer = _rawData.buffer;
+			frame.type = _rawData.type;
 			success = true;
 		}
 		
