@@ -83,7 +83,6 @@ public:
 	}
 	
 	bool grab() {
-		std::cout << "-\n";
 		struct v4l2_buffer buf = {0};
 		buf.type 	= V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		buf.memory 	= V4L2_MEMORY_MMAP;
@@ -147,10 +146,12 @@ public:
 	
 	// Setters
 	bool setFormat(int width, int height, PixelFormat formatPix) {
+		std::cout << "close: \n";
 		close();
 		_format.width  = width;
 		_format.height = height;
 		_format.height = formatPix;
+		std::cout << "open: \n";
 		return open();
 	}
 	bool set(Device::Param code, double value) {
