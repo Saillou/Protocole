@@ -48,9 +48,7 @@ public:
 		
 		return true;		
 	}
-	bool close() {
-		grab();
-		
+	bool close() {		
 		// Stop capture
 		enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		if(_xioctl(_fd, VIDIOC_STREAMOFF, &type) == -1) {
@@ -85,6 +83,7 @@ public:
 	}
 	
 	bool grab() {
+		std::cout << "-\n";
 		struct v4l2_buffer buf = {0};
 		buf.type 	= V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		buf.memory 	= V4L2_MEMORY_MMAP;
@@ -123,6 +122,7 @@ public:
 				return false;
 			}
 			
+			std::cout << "|\n";
 			// Check size
 			_buffer.length = (buf.bytesused > 0) ? buf.bytesused : _buffer.length;	
 			return true;
@@ -344,10 +344,10 @@ private:
 		buf.type 	= V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		buf.memory 	= V4L2_MEMORY_MMAP;
 		
-		if(_xioctl(_fd, VIDIOC_QBUF, &buf) == -1) {
-			_perror("Query Buffer");
-			return false;
-		}
+		// if(_xioctl(_fd, VIDIOC_QBUF, &buf) == -1) {
+			// _perror("Query Buffer");
+			// return false;
+		// }
 		return true;	
 	}
 	
