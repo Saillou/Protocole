@@ -42,7 +42,8 @@ int main() {
 	size_t k = 0;
 	
 	for(int i = 1; i < 100; i++) {
-		device.grab();
+		if(!device.grab())
+			break;
 		device.retrieve(frame);
 		
 		if(i%30 == 0) {
@@ -52,8 +53,6 @@ int main() {
 	}
 	
 	device.close();
-	
-	std::cout << "ok" << std::endl;
 	return 0;
 }
 
