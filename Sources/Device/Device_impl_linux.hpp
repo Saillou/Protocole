@@ -50,10 +50,8 @@ public:
 		return true;		
 	}
 	bool close() {
-		while(_bufferQuery) {
-			std::cout << "-\n";
-			Timer::wait(2);
-		}
+		if(_bufferQuery)
+			grab();
 		
 		// Stop capture
 		enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
