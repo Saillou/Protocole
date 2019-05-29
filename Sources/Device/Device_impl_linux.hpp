@@ -40,10 +40,14 @@ public:
 		_fd = ::open(_path.c_str(), O_RDWR | O_NONBLOCK);
 		
 		std::cout << "Open " << _fd << std::endl;
-		if(_fd == -1 || !_initDevice() || !_initMmap() || !_askFrame()) {
+		if(_fd == -1 || !_initDevice() || !_initMmap() /*|| !_askFrame()*/) {
 			close();
 			return false;
 		}
+		
+		_askFrame();
+		_askFrame();
+		_askFrame();
 		
 		return true;		
 	}
@@ -353,8 +357,8 @@ private:
 	}
 	
 	bool _askFrame() {
-		if(_bufferQuery)
-			return true;
+		// if(_bufferQuery)
+			// return true;
 		
 		struct v4l2_buffer buf = {0};
 		buf.type 	= V4L2_BUF_TYPE_VIDEO_CAPTURE;
