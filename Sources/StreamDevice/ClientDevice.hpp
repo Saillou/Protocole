@@ -2,7 +2,7 @@
 
 #include "../Network/Client.hpp"
 #include "../Device/DeviceMt.hpp"
-#include "../Device/DecoderH264.hpp"
+#include "../Device/Decoder.hpp"
 #include "../Tool/Timer.hpp"
 #include "../Tool/Buffers.hpp"
 
@@ -23,12 +23,14 @@ public:
 		_format({640,480,Device::MJPG})
 	{
 		// client
-		_decoder.setup();
+		_decoderH264.setup();
+		_decoderJpg.setup();
 	}
 	
 	~ClientDevice() {
 		close();
-		_decoder.cleanup();
+		_decoderH264.cleanup();
+		_decoderJpg.cleanup();
 	}
 	
 	// -- Methods --
@@ -138,7 +140,7 @@ private:
 					(unsigned char*)messageFrame.content(), 
 					(unsigned long)(messageFrame.size()), 
 					Gb::Size(_format.width, _format.height), 
-					Gb::FrameType::H264
+					Gb::FrameType::Jpg422
 				);
 				emitFrame = true;
 			}
@@ -150,9 +152,10 @@ private:
 				
 				// Decode 
 				if(frame.type == Gb::FrameType::H264) {
-					if(_decoder.decode(frame.buffer, frameEmit.buffer)) {
-						success = true;
-					}
+					success = _decoderH264.decode(frame.buffer, frameEmit.buffer);
+				}
+				if(frame.type == Gb::FrameType::Jpg422) {
+					success = _decoderJpg.decode2bgr24(frame.buffer, frameEmit.buffer, frame.size.width, frame.size.height);
 				}
 				
 				// Emit
@@ -246,7 +249,8 @@ private:
 	
 	std::shared_ptr<std::thread> _pThreadBuffer;
 	MsgBuffer _buffer;
-	DecoderH264 _decoder;
+	DecoderH264 _decoderH264;
+	DecoderJpg _decoderJpg;
 	
 	mutable std::mutex _mutFormat;
 	mutable std::mutex _mutCbk;

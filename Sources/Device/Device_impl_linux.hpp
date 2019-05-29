@@ -2,6 +2,7 @@
 #ifdef __linux__
 
 #include "Device.hpp"
+#include "Decoder.hpp"
 
 // Use v4l2
 #include <linux/videodev2.h>
@@ -17,9 +18,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-// Decode jpg
-#include <turbojpeg.h>
-
 struct Device::_Impl {	
 public:
 	// Constructors
@@ -27,15 +25,13 @@ public:
 		_fd(-1), 
 		_path(pathVideo), 
 		_format({640, 480, MJPG}),
-		_buffer({(void*)nullptr, (size_t)0}),
-		_jpgDecompressor(tjInitDecompress())
+		_buffer({(void*)nullptr, (size_t)0})
 	{
 		// Wait open
 	}
 	~_Impl() {
 		if(_fd != -1)
-			close();		
-		tjDestroy(_jpgDecompressor);
+			close();
 	}
 	
 	// Methods
@@ -73,6 +69,7 @@ public:
 		}
 		
 		_encoderH264.cleanup();
+		_decoderJpg.cleanup();
 		
 		
 		_buffer.start = nullptr;
@@ -321,6 +318,7 @@ private:
 			_perror("Setting H264 encoder");
 			return false;
 		}
+		_decoderJpg.setup();
 
 		return true;		
 	}
@@ -389,27 +387,7 @@ private:
 			int area = w*h;
 			
 			// jpg decompress : jpg422 -> yuv422
-			if(_yuv422Frame.size() != area*2)
-				_yuv422Frame.resize(area*2);
-			
-			unsigned char* pYuv422[3] = {
-				&_yuv422Frame[0],
-				&_yuv422Frame[area],
-				&_yuv422Frame[area + (area>>1)]
-			};
-			int strides[3] = {
-				w, (w >> 1), (w >> 1)
-			};
-			
-			if(tjDecompressToYUVPlanes(
-					_jpgDecompressor, 
-					_rawData.start(), _rawData.length(), 
-					pYuv422, 
-					w, strides, h, TJFLAG_FASTDCT) < 0) 
-			{
-				std::cout << tjGetErrorStr2(_jpgDecompressor) << std::endl;
-				return false;
-			}
+			_decoderJpg.decode2yuv422(_rawData.buffer, _yuv422Frame, w, h);
 
 			// yuv422 -> yuv420
 			if(_yuv420Frame.size() != area*3/2)
@@ -464,7 +442,7 @@ private:
 	std::vector<unsigned char> _yuv422Frame;
 	std::vector<unsigned char> _yuv420Frame;
 	EncoderH264 _encoderH264;
-	tjhandle _jpgDecompressor;
+	DecoderJpg _decoderJpg;
 };
 
 #endif

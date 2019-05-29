@@ -1,13 +1,82 @@
 #pragma once
 
-// OpenH.264
-#include <wels/codec_api.h>
+#include <wels/codec_api.h> 	// OpenH.264
+#include <turbojpeg.h>				// Jpg
+
 #include "convertColor.hpp"
 
 #include <atomic>
 #include <iostream>
 #include <vector>
 #include <cstring> // memset
+
+class DecoderJpg {
+public:	
+	DecoderJpg() : _jpgDecompressor(nullptr)
+	{
+		
+	}
+	~DecoderJpg() {
+		cleanup();
+	}
+	
+	bool setup() {
+		if(_jpgDecompressor)
+			cleanup();
+		
+		_jpgDecompressor = tjInitDecompress();
+		
+		return _jpgDecompressor != nullptr;
+	}
+	void cleanup() {
+		tjDestroy(_jpgDecompressor);
+	}
+	
+	bool decode2yuv422(const std::vector<unsigned char>& dataIn, std::vector<unsigned char>& dataOut, int w, int h) {
+		if(!_jpgDecompressor)
+			return false;
+		
+		size_t area = w*h;
+		
+		if(dataOut.size() != area*2)
+			dataOut.resize(area*2);
+		
+		unsigned char* pYuv422[3] = {
+			&dataOut[0],
+			&dataOut[area],
+			&dataOut[area + (area>>1)]
+		};
+		int strides[3] = {
+			w, (w >> 1), (w >> 1)
+		};
+		
+		return tjDecompressToYUVPlanes(
+			_jpgDecompressor, 
+			dataIn.data(), (int)dataIn.size(), 
+			pYuv422, 
+			w, strides, h, TJFLAG_FASTDCT
+		) >= 0;
+	}	
+	bool decode2bgr24(const std::vector<unsigned char>& dataIn, std::vector<unsigned char>& dataOut, int width, int height) {
+		if(!_jpgDecompressor)
+			return false;
+		
+		size_t area = width*height;
+		if(dataOut.size() != area*3)
+			dataOut.resize(area*3);
+		
+		return tjDecompress2 (
+			_jpgDecompressor, 
+			dataIn.data(), (int)dataIn.size(), 
+			&dataOut[0], 
+			width, 0, height, 
+			TJPF_BGR, TJFLAG_FASTDCT
+		) >= 0;
+	}	
+	
+private:
+	tjhandle _jpgDecompressor;
+};
 
 class DecoderH264 {
 public:	
