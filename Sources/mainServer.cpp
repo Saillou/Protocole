@@ -52,7 +52,6 @@ int main(int argc, char* argv[]) {
 	
 	std::vector<Gb::FrameType> typeList = {
 		Gb::FrameType::Jpg420, 
-		Gb::FrameType::Jpg422, 
 		Gb::FrameType::H264
 	};
 	size_t i = 0;
