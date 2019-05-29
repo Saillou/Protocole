@@ -128,6 +128,7 @@ private:
 		Gb::Frame frame;
 		Message messageFrame;
 		bool emitFrame = false;
+		bool success = false;
 		
 		for(;_running; Timer::wait(2)) {
 			// -- Get frame --
@@ -141,13 +142,23 @@ private:
 			// -- Send --
 			if(emitFrame) {	
 				Gb::Frame frameEmit;
-				frameEmit.size = frame.size;
 				
-				if(_decoder.decode(frame.buffer, frameEmit.buffer)) {
+				// Decode 
+				if(frame.type == Gb::FrameType::H264) {
+					if(_decoder.decode(frame.buffer, frameEmit.buffer)) {
+						success = true;
+					}
+				}
+				
+				// Emit
+				if(success) {
+					frameEmit.size = frame.size;
+					frameEmit.type = Gb::FrameType::Bgr24;	
+					
 					_mutCbk.lock();
 					if(_cbkFrame)
 						_cbkFrame(frameEmit);
-					_mutCbk.unlock();	
+					_mutCbk.unlock();
 				}
 				emitFrame = false;
 			}

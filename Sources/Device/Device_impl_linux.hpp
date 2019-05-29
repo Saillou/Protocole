@@ -133,7 +133,8 @@ public:
 		_rawData = Gb::Frame(
 			reinterpret_cast<unsigned char*>(_buffer.start), 
 			static_cast<unsigned long>(_buffer.length),
-			Gb::Size(_format.width, _format.height)
+			Gb::Size(_format.width, _format.height),
+			(_format.format == MJPG) ? Gb::FormatType::Jpg422 : Gb::FormatType::Yuv422
 		).clone();
 		
 		_askFrame();
@@ -418,12 +419,12 @@ private:
 
 		// h264 encode : yuv420 -> h264 packet
 		// Timer t;
-		
-		if(_encoderH264.encodeYuv(&_yuv420Frame[0], frame.buffer))
+		if(_encoderH264.encodeYuv(&_yuv420Frame[0], frame.buffer)) {
 			frame.size = _rawData.size;		
+			frame.type = Gb::FrameType::H264;
+		}
 		else
 			frame.clear();
-		
 		// std::cout << t.elapsed_mus()/1000.0 << std::endl;
 		
 		return !frame.empty();

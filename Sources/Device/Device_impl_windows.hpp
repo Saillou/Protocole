@@ -67,6 +67,7 @@ public:
 		
 		// Complete
 		frame.size = Gb::Size(_format.width, _format.height);
+		frame.type = Gb::FrameType::H264;
 		return frame.size.area() > 0;
 	}
 	bool read(Gb::Frame& frame) {

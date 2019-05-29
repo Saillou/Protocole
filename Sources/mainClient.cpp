@@ -7,7 +7,13 @@
 
 #include "StreamDevice/ClientDevice.hpp"
 #include "Tool/Timer.hpp"
-#include "Tool/FrameMt.hpp"
+
+#ifdef _WIN32
+	// Based on Opencv
+	#include <opencv2/core.hpp>
+	#include <opencv2/highgui.hpp>
+	#include <opencv2/imgproc.hpp>
+#endif
 
 #include <wels/codec_api.h>
 
@@ -33,14 +39,16 @@ void showDevice(const int port, cv::Mat& cvFrame, std::mutex& mutFrame) {
 	// Device	
 	ClientDevice device(IAddress(Globals::IP_ADDRESS, port));
 	
-	
 	// ----- Events -----	
 	device.onFrame([&](const Gb::Frame& frame) {
-		mutFrame.lock();
+		std::lock_guard<std::mutex> lock(mutFrame);
+		
+		// Size
 		if(frame.size.width != cvFrame.cols || frame.size.height != cvFrame.rows)
 			cvFrame = cv::Mat::zeros(frame.size.height, frame.size.width, CV_8UC3);
+		
+		// Data
 		memcpy(cvFrame.data, frame.start(), frame.length());
-		mutFrame.unlock();
 	});
 	
 	// -------- Main loop --------  
