@@ -147,6 +147,7 @@ private:
 	// Threaded function : grab and retrieve frame
 	void _pullCapture() {
 		while(_running && _pDevice) {
+			std::cout << "lock" << std::endl;
 			std::lock_guard<std::mutex> lockDevice(_mutDevice);
 			if(_pDevice->grab()) { 											// Will wait until the camera is available
 			
@@ -160,6 +161,7 @@ private:
 			else 
 				break;
 		}
+		std::cout << "end pull" << std::endl;
 	}
 	
 	// Members	
