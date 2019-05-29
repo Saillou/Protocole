@@ -1,14 +1,5 @@
 #include "Device.hpp"
 
-// Standard
-#include <string>
-#include <iostream>
-#include <memory>
-#include <thread>
-#include <atomic>
-#include <mutex>
-#include <functional>
-
 // ----------  Implementation linux ----------
 #ifdef __linux__
 

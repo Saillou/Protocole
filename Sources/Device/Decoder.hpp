@@ -12,7 +12,7 @@
 
 class DecoderJpg {
 public:	
-	DecoderJpg() : _jpgDecompressor(nullptr)
+	DecoderJpg() : _jpgDecompressor(tjInitDecompress())
 	{
 		
 	}
@@ -26,12 +26,9 @@ public:
 		if(_jpgDecompressor)
 			cleanup();
 		
-		_jpgDecompressor = tjInitDecompress();
-		
 		return _jpgDecompressor != nullptr;
 	}
 	void cleanup() {
-		// tjDestroy(_jpgDecompressor);
 	}
 	
 	bool decode2yuv422(const std::vector<unsigned char>& dataIn, std::vector<unsigned char>& dataOut, int w, int h) {
@@ -56,7 +53,7 @@ public:
 			_jpgDecompressor, 
 			dataIn.data(), (int)dataIn.size(), 
 			pYuv422, 
-			w, strides, h, TJFLAG_FASTDCT
+			w, strides, h, TJFLAG_FASTDCT | TJFLAG_FASTUPSAMPLE
 		) >= 0;
 	}	
 	bool decode2bgr24(const std::vector<unsigned char>& dataIn, std::vector<unsigned char>& dataOut, int width, int height) {
@@ -72,7 +69,7 @@ public:
 			dataIn.data(), (int)dataIn.size(), 
 			&dataOut[0], 
 			width, 0, height, 
-			TJPF_BGR, TJFLAG_FASTDCT
+			TJPF_BGR, TJFLAG_FASTDCT | TJFLAG_FASTUPSAMPLE
 		) >= 0;
 	}	
 	

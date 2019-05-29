@@ -1,8 +1,16 @@
 #pragma once
 
-#include "../Tool/Timer.hpp"
-#include "EncoderH264.hpp"
+#include <string>
+#include <iostream>
+#include <memory>
+#include <thread>
+#include <atomic>
+#include <mutex>
+#include <functional>
+
+#include "Encoder.hpp"
 #include "structures.hpp"
+#include "../Tool/Timer.hpp"
 
 class Device {
 public:

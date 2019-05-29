@@ -1,13 +1,64 @@
 #pragma once
 
-// OpenH.264
-#include <wels/codec_api.h>
+#include <wels/codec_api.h> 	// OpenH.264
+#include <turbojpeg.h>				// Jpg
 #include "convertColor.hpp"
 
 #include <atomic>
 #include <iostream>
 #include <vector>
 #include <cstring> // memset
+
+class EncoderJpg {
+public:	
+	EncoderJpg() : _jpgCompressor(tjInitCompress())
+	{
+		
+	}
+	~EncoderJpg() {
+		cleanup();
+		if(_jpgCompressor)
+			tjDestroy(_jpgCompressor);
+	}
+	
+	bool setup() {
+		if(_jpgCompressor)
+			cleanup();
+		
+		return _jpgCompressor != nullptr;
+	}
+	void cleanup() {
+	}
+	
+	bool encodeBgr24(const std::vector<unsigned char>& dataIn, std::vector<unsigned char>& dataOut, int width, int height, int subsamp = TJSAMP_420, int quality = 70) {
+		if(!_jpgCompressor)
+			return false;
+		
+		unsigned char* bufferOut = nullptr;
+		unsigned long bufferSize = 0;
+		
+		if(tjCompress2 (
+			_jpgCompressor,
+			dataIn.data(), 
+			width, 0, height,
+			TJPF_BGR,
+			&bufferOut, &bufferSize,
+			subsamp, quality,
+			TJFLAG_FASTDCT
+		) >= 0) {
+				dataOut = std::vector<unsigned char>(bufferOut, bufferOut+bufferSize);
+		}
+		else {
+				dataOut.clear();
+		}
+		
+		return !dataOut.empty();
+	}	
+	
+private:
+	tjhandle _jpgCompressor;
+};
+
 
 class EncoderH264 {
 public:	
