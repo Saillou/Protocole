@@ -53,6 +53,7 @@ int main(int argc, char* argv[]) {
 	std::vector<std::pair<int,int>> fmtList = {
 		std::pair<int,int>(1280, 720), 
 		std::pair<int,int>(640, 480), 
+		std::pair<int,int>(320, 200), 
 	};
 	size_t i = 0;
 	

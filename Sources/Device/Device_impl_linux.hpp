@@ -150,7 +150,6 @@ public:
 	
 	// Setters
 	bool setFormat(int width, int height, PixelFormat formatPix) {
-		std::cout << "set: " << width << "x" << height << std::endl;
 		close();
 		_format.width  = width;
 		_format.height = height;
@@ -266,6 +265,8 @@ private:
 	// Methods
 	bool _initDevice() {
 		// -- Set format --
+		std::cout << "set: [" << _format.width << "x" << _format.height << "]" << std::endl;
+		
 		struct v4l2_format fmt = {0};
 		fmt.type 						= V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		fmt.fmt.pix.pixelformat 	= V4L2_PIX_FMT_MJPEG;
@@ -288,6 +289,7 @@ private:
 			_perror("Setting Pixel Format");
 			return false;
 		}
+		
 		printf( "Camera opening: Width: %d | Height: %d \n", fmt.fmt.pix.width, fmt.fmt.pix.height);
 					
 		// -- Tools
