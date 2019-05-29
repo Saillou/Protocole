@@ -32,7 +32,7 @@ int main() {
 	Device device(Globals::PATH_0);
 	device.open();
 	
-	Gb::Frame& frame;
+	Gb::Frame frame;
 	for(int i = 0; i < 100; i++) {
 		device.grab();
 		device.retrieve(frame);
