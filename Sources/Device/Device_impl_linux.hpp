@@ -50,8 +50,10 @@ public:
 		return true;		
 	}
 	bool close() {
-		while(_bufferQuery)
+		while(_bufferQuery) {
+			std::cout << "-\n";
 			Timer::wait(2);
+		}
 		
 		// Stop capture
 		enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -98,7 +100,7 @@ public:
 		
 		bool success = false;
 			
-		for(int error = 0; error < 100;) {
+		for(int error = 0; error < 10;) {
 			// Wait event on fd
 			int r = poll(&fdp, 1, 1000); // 1s
 			
@@ -107,6 +109,8 @@ public:
 				if(r == -1) {
 					if(EINTR == errno) { // Interrupted 
 						printf(".\n");
+						Timer::wait(1);
+						error++;
 						continue;
 					}
 					_perror("Waiting for Frame");
@@ -271,7 +275,7 @@ private:
 	// Methods
 	bool _initDevice() {
 		// -- Set format --
-		std::cout << "set: [" << _format.width << "x" << _format.height << "]" << std::endl;
+		std::cout << "Set: [" << _format.width << "x" << _format.height << "]" << std::endl;
 		
 		struct v4l2_format fmt = {0};
 		fmt.type 						= V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -337,8 +341,7 @@ private:
 			_perror("Mapping");
 			return false;    
 		}
-		printf("Length: %d\n", _buffer.length);
-		
+		printf("Buffer max: %f KB\n", _buffer.length/1000.0f);
 		
 		// Start capture
 		if(!_askFrame())
