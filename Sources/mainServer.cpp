@@ -40,8 +40,8 @@ int main() {
 		std::pair<int,int>(320, 200), 
 	};
 	size_t k = 0;
-	
-	for(int i = 1; i < 100; i++) {
+	int i = 1;
+	for(; i <= 100; i++) {
 		if(!device.grab())
 			break;
 		device.retrieve(frame);
@@ -51,7 +51,7 @@ int main() {
 			k = (k + 1) % fmtList.size();
 		}
 	}
-	
+	std::cout << i/100.0 << "%" << std::endl;
 	device.close();
 	return 0;
 }
