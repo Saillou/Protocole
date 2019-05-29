@@ -34,16 +34,16 @@ int main(int argc, char* argv[]) {
 	std::signal(SIGINT, sigintHandler);
 	
 	// - Device
-	// ServerDevice device0(Globals::PATH_0, 6666);
+	ServerDevice device0(Globals::PATH_0, 6666);
 	ServerDevice device1(Globals::PATH_1, 8888);
 
 	
 	// -------- Main loop --------  
-	// if(!device0.open(-1)) {
-		// std::cout << "Can't open device" << std::endl;
-		// std::cout << "Press a key to continue..." << std::endl;
-		// return std::cin.get();
-	// }
+	if(!device0.open(-1)) {
+		std::cout << "Can't open device" << std::endl;
+		std::cout << "Press a key to continue..." << std::endl;
+		return std::cin.get();
+	}
 	if(!device1.open(-1)) {
 		std::cout << "Can't open device" << std::endl;
 		std::cout << "Press a key to continue..." << std::endl;
@@ -60,6 +60,7 @@ int main(int argc, char* argv[]) {
 		// ... Do other stuff ...
 		if(timer.elapsed_mus() > 5000000) {
 			std::cout << "Change type" << std::endl;
+			device0.setFrameType(typeList[i]);
 			device1.setFrameType(typeList[i]);
 			i = (i + 1)%typeList.size();
 			timer.beg();
@@ -67,7 +68,7 @@ int main(int argc, char* argv[]) {
 	}
 	
 	// -- End
-	// device0.close();
+	device0.close();
 	device1.close();
 	
 	std::cout << "Clean exit" << std::endl;
