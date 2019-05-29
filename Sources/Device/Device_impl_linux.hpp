@@ -49,6 +49,8 @@ public:
 		return true;		
 	}
 	bool close() {
+		grab();
+		
 		// Stop capture
 		enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		if(_xioctl(_fd, VIDIOC_STREAMOFF, &type) == -1) {
@@ -75,6 +77,7 @@ public:
 		_buffer.start = nullptr;
 		_buffer.length = 0;
 		_fd = -1;
+		std::cout << "Device closed" << std::endl;
 		return true;		
 	}
 	void refresh() {
@@ -144,17 +147,11 @@ public:
 	
 	// Setters
 	bool setFormat(int width, int height, PixelFormat formatPix) {
-		
-		// if(io)
-			// return open();
-		
-		// return true;
-		std::cout << "set format" <<std::endl;
 		close();
 		_format.width  = width;
 		_format.height = height;
 		_format.height = formatPix;
-		return true;
+		return open();
 	}
 	bool set(Device::Param code, double value) {
 		struct v4l2_control control = {0};
