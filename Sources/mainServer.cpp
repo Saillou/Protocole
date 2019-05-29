@@ -41,7 +41,7 @@ int main() {
 	};
 	size_t k = 0;
 	int i = 1;
-	for(; i <= 50; i++) {
+	for(; i <= 35; i++) {
 		device.grab();
 		device.retrieve(frame);
 		
