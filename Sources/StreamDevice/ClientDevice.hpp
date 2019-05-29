@@ -134,7 +134,12 @@ private:
 			// -- Get frame --
 			_buffer.lock();
 			if(_buffer.update(messageFrame)) {
-				frame = Gb::Frame((unsigned char*)messageFrame.content(), (unsigned long)(messageFrame.size()), Gb::Size(_format.width, _format.height));
+				frame = Gb::Frame(
+					(unsigned char*)messageFrame.content(), 
+					(unsigned long)(messageFrame.size()), 
+					Gb::Size(_format.width, _format.height), 
+					Gb::FrameType::H264
+				);
 				emitFrame = true;
 			}
 			_buffer.unlock();

@@ -380,53 +380,56 @@ private:
 	}
 	
 	bool _treat(Gb::Frame& frame) {
-		// // -- Raw jpg
-		// frame = _rawData.clone();
-
-		// -- From jpg to h264:
-		int w = _rawData.size.width;
-		int h = _rawData.size.height;
-		int area = w*h;
-		
-		// jpg decompress : jpg422 -> yuv422
-		if(_yuv422Frame.size() != area*2)
-			_yuv422Frame.resize(area*2);
-		
-		unsigned char* pYuv422[3] = {
-			&_yuv422Frame[0],
-			&_yuv422Frame[area],
-			&_yuv422Frame[area + (area>>1)]
-		};
-		int strides[3] = {
-			w, (w >> 1), (w >> 1)
-		};
-		
-		if(tjDecompressToYUVPlanes(
-				_jpgDecompressor, 
-				_rawData.start(), _rawData.length(), 
-				pYuv422, 
-				w, strides, h, TJFLAG_FASTDCT) < 0) 
-		{
-			std::cout << tjGetErrorStr2(_jpgDecompressor) << std::endl;
-			return false;
-		}
-
-		// yuv422 -> yuv420
-		if(_yuv420Frame.size() != area*3/2)
-			_yuv420Frame.resize(area*3/2);
-		
-		Convert::yuv422ToYuv420(&_yuv422Frame[0], &_yuv420Frame[0], w, h);
-
-		// h264 encode : yuv420 -> h264 packet
 		// Timer t;
-		if(_encoderH264.encodeYuv(&_yuv420Frame[0], frame.buffer)) {
-			frame.size = _rawData.size;		
-			frame.type = Gb::FrameType::H264;
-		}
-		else
-			frame.clear();
-		// std::cout << t.elapsed_mus()/1000.0 << std::endl;
 		
+		// -- From jpg to h264:
+		if(frame.type == Gb::FrameType::H264) {
+			int w = _rawData.size.width;
+			int h = _rawData.size.height;
+			int area = w*h;
+			
+			// jpg decompress : jpg422 -> yuv422
+			if(_yuv422Frame.size() != area*2)
+				_yuv422Frame.resize(area*2);
+			
+			unsigned char* pYuv422[3] = {
+				&_yuv422Frame[0],
+				&_yuv422Frame[area],
+				&_yuv422Frame[area + (area>>1)]
+			};
+			int strides[3] = {
+				w, (w >> 1), (w >> 1)
+			};
+			
+			if(tjDecompressToYUVPlanes(
+					_jpgDecompressor, 
+					_rawData.start(), _rawData.length(), 
+					pYuv422, 
+					w, strides, h, TJFLAG_FASTDCT) < 0) 
+			{
+				std::cout << tjGetErrorStr2(_jpgDecompressor) << std::endl;
+				return false;
+			}
+
+			// yuv422 -> yuv420
+			if(_yuv420Frame.size() != area*3/2)
+				_yuv420Frame.resize(area*3/2);
+			
+			Convert::yuv422ToYuv420(&_yuv422Frame[0], &_yuv420Frame[0], w, h);
+
+			// h264 encode : yuv420 -> h264 packet
+			if(_encoderH264.encodeYuv(&_yuv420Frame[0], frame.buffer))
+				frame.size = _rawData.size;
+			else
+				frame.clear();
+		}
+		
+		// -- Raw
+		else {
+			frame = _rawData.clone();
+		}
+		
+		// std::cout << t.elapsed_mus()/1000.0 << std::endl;
 		return !frame.empty();
 	}
 	
