@@ -182,7 +182,7 @@ private:
 			Device::PixelFormat pixFmt 	= command.valueOf<Device::PixelFormat>("pixel", &exist);
 			
 			if(exist && width > 0 && height > 0) {
-				_device.setFormat(width, height, pixFmt);
+				setFormat(width, height, pixFmt);
 				
 				// Confirm change
 				_server.sendInfo(client, Message(Message::DEVICE | Message::FORMAT, msg));

@@ -70,7 +70,7 @@ public:
 		
 		_encoderH264.cleanup();
 		_decoderJpg.cleanup();
-		
+		_encoderJpg.cleanup();
 		
 		_buffer.start = nullptr;
 		_buffer.length = 0;
@@ -157,6 +157,7 @@ public:
 			// return open();
 		
 		// return true;
+		std::cout << "set format" <<std::endl;
 		close();
 		open();
 		std::cout << "ok" <<std::endl;
@@ -270,59 +271,38 @@ private:
 	
 	// Methods
 	bool _initDevice() {
-		// Format
-		struct v4l2_fmtdesc fmtdesc = {0};
-		fmtdesc.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-		
-		char fourcc[5] = {0};
-		char c, e;
-		int support_grbg10 = 0;
-		printf("  Camera opening \n--------------------\n");
-		while (_xioctl(_fd, VIDIOC_ENUM_FMT, &fmtdesc) == 0) {
-			strncpy(fourcc, (char *)&fmtdesc.pixelformat, 4);
-			if (fmtdesc.pixelformat == V4L2_PIX_FMT_SGRBG10)
-				support_grbg10 = 1;
-				
-			c = fmtdesc.flags & 1? 'C' : ' ';
-			e = fmtdesc.flags & 2? 'E' : ' ';
-			printf("  %s: %c%c %s\n", fourcc, c, e, fmtdesc.description);
-			fmtdesc.index++;
-		}
-		
+		// -- Set format --
 		struct v4l2_format fmt = {0};
+		fmt.type 						= V4L2_BUF_TYPE_VIDEO_CAPTURE;
+		fmt.fmt.pix.pixelformat 	= V4L2_PIX_FMT_MJPEG;
+		fmt.fmt.pix.field 			= V4L2_FIELD_ANY;
+		
 		if(_format.width == 0 || _format.height == 0) {
-			fmt.type 					= V4L2_BUF_TYPE_VIDEO_CAPTURE;
-			fmt.fmt.pix.width 		= 640;
-			fmt.fmt.pix.height 		= 480;
-			fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
-			fmt.fmt.pix.field 		= V4L2_FIELD_ANY;
+			fmt.fmt.pix.width 	= 640;
+			fmt.fmt.pix.height 	= 480;
 			
-			_format.width  = fmt.fmt.pix.width;
-			_format.height = fmt.fmt.pix.height;
-			_format.format = fmt.fmt.pix.pixelformat;
+			_format.width 		= fmt.fmt.pix.width;
+			_format.height	= fmt.fmt.pix.height;
+			_format.format	= MJPG;
 		}
 		else {
-			fmt.type 					= V4L2_BUF_TYPE_VIDEO_CAPTURE;
-			fmt.fmt.pix.width 		= _format.width;
-			fmt.fmt.pix.height 		= _format.height;
-			fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_MJPEG;
-			fmt.fmt.pix.field 		 = V4L2_FIELD_ANY;			
+			fmt.fmt.pix.width 	= _format.width;
+			fmt.fmt.pix.height 	= _format.height;
 		}
 		
 		if (_xioctl(_fd, VIDIOC_S_FMT, &fmt) == -1) {
 			_perror("Setting Pixel Format");
 			return false;
 		}
-	 
-		strncpy(fourcc, (char *)&fmt.fmt.pix.pixelformat, 4);
-		printf( "  Format > \t Width: %d | Height: %d | PixFmt: %s \n",
-					fmt.fmt.pix.width, fmt.fmt.pix.height, fourcc);
+		printf( "Camera opening: Width: %d | Height: %d \n", fmt.fmt.pix.width, fmt.fmt.pix.height);
 					
+		// -- Tools
 		if(!_encoderH264.setup(_format.width, _format.height)) {
 			_perror("Setting H264 encoder");
 			return false;
 		}
 		_decoderJpg.setup();
+		_encoderJpg.setup();
 
 		return true;		
 	}
