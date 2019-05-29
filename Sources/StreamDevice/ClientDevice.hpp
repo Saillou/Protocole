@@ -140,7 +140,7 @@ private:
 					(unsigned char*)messageFrame.content(), 
 					(unsigned long)(messageFrame.size()), 
 					Gb::Size(_format.width, _format.height), 
-					Gb::FrameType::Jpg422
+					Gb::FrameType::H264
 				);
 				emitFrame = true;
 			}
