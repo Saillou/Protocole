@@ -41,7 +41,7 @@ int main() {
 	};
 	size_t k = 0;
 	int i = 1;
-	for(; i <= 100; i++) {
+	for(; i <= 50; i++) {
 		device.grab();
 		device.retrieve(frame);
 		
@@ -50,7 +50,7 @@ int main() {
 			k = (k + 1) % fmtList.size();
 		}
 	}
-	std::cout << i/100.0 << "%" << std::endl;
+	std::cout << i << "%" << std::endl;
 	device.close();
 	return 0;
 }
