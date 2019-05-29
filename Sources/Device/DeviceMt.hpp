@@ -91,7 +91,7 @@ public:
 		if(_pDevice) {
 			release();
 			open(deviceName);
-			return _pDevice->setFormat(width, height, formatPix);
+			// return _pDevice->setFormat(width, height, formatPix);
 		}
 		return false;
 	}
