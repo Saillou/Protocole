@@ -139,7 +139,7 @@ private:
 			_mutFrame.lock();
 			// frame.type = Gb::FrameType::H264;
 			// frame.type = Gb::FrameType::Jpg422;
-			frame.type = Gb::FrameType::Jpg422;
+			frame.type = Gb::FrameType::Jpg420;
 			if(_pDevice->retrieve(frame))
 				_onFrame();
 			
