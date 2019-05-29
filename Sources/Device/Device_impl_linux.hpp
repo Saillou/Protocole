@@ -80,8 +80,9 @@ public:
 	}
 	
 	bool grab() {
-		if(!_askFrame())
-			return false;
+		// if(!_askFrame())
+			// return false;
+		return false;
 		
 		struct v4l2_buffer buf = {0};
 		buf.type 	= V4L2_BUF_TYPE_VIDEO_CAPTURE;
