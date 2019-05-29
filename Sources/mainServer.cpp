@@ -39,11 +39,11 @@ int main(int argc, char* argv[]) {
 
 	
 	// -------- Main loop --------  
-	if(!device0.open(-1)) {
-		std::cout << "Can't open device" << std::endl;
-		std::cout << "Press a key to continue..." << std::endl;
-		return std::cin.get();
-	}
+	// if(!device0.open(-1)) {
+		// std::cout << "Can't open device" << std::endl;
+		// std::cout << "Press a key to continue..." << std::endl;
+		// return std::cin.get();
+	// }
 	if(!device1.open(-1)) {
 		std::cout << "Can't open device" << std::endl;
 		std::cout << "Press a key to continue..." << std::endl;
@@ -51,8 +51,8 @@ int main(int argc, char* argv[]) {
 	}
 	
 	std::vector<std::pair<int,int>> fmtList = {
-		std::pair<int,int>(640, 480), 
 		std::pair<int,int>(1280, 720), 
+		std::pair<int,int>(640, 480), 
 	};
 	size_t i = 0;
 	
@@ -60,7 +60,7 @@ int main(int argc, char* argv[]) {
 		// // ... Do other stuff ...
 		if(timer.elapsed_mus() > 10000000) {
 			std::cout << "Change format" << std::endl;
-			device0.setFormat(fmtList[i].first, fmtList[i].second, Device::MJPG);
+			// device0.setFormat(fmtList[i].first, fmtList[i].second, Device::MJPG);
 			device1.setFormat(fmtList[i].first, fmtList[i].second, Device::MJPG);
 			
 			i = (i + 1) % fmtList.size();
@@ -69,7 +69,7 @@ int main(int argc, char* argv[]) {
 	}
 	
 	// -- End
-	device0.close();
+	// device0.close();
 	device1.close();
 	
 	std::cout << "Clean exit" << std::endl;

@@ -71,12 +71,12 @@ int main(int argc, char* argv[]) {
 	// - Install signal handler
 	std::signal(SIGINT, sigintHandler);
 	
-	cv::Mat cvFrame0(cv::Mat::zeros(1, 1, CV_8UC3));
-	cv::Mat cvFrame1(cv::Mat::zeros(1, 1, CV_8UC3));
+	cv::Mat cvFrame0;
+	cv::Mat cvFrame1;
 	std::mutex frameMut0;
 	std::mutex frameMut1;
 	
-	std::thread thread0(showDevice, 6666, std::ref(cvFrame0), std::ref(frameMut0));
+	// std::thread thread0(showDevice, 6666, std::ref(cvFrame0), std::ref(frameMut0));
 	std::thread thread1(showDevice, 8888, std::ref(cvFrame1), std::ref(frameMut1));
 	
 	// --- Loop ----
@@ -96,8 +96,8 @@ int main(int argc, char* argv[]) {
 	Globals::signalStatus = SIGINT;
 	
 	// Wait
-	if(thread0.joinable())
-		thread0.join();
+	// if(thread0.joinable())
+		// thread0.join();
 	if(thread1.joinable())
 		thread1.join();
 	cv::destroyAllWindows();
