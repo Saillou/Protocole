@@ -39,7 +39,7 @@ public:
 	bool open() {
 		_fd = ::open(_path.c_str(), O_RDWR | O_NONBLOCK, 0);
 		
-		if(_fd == -1 || !_initDevice() || !_initMmap()) {
+		if(_fd == -1 || !_initDevice() || !_initMmap() || !_askFrame()) {
 			close();
 			return false;
 		}
@@ -47,8 +47,11 @@ public:
 		return true;		
 	}
 	bool close() {
-		if(_bufferQuery)
-			grab();
+		struct pollfd fdp;
+		fdp.fd 			= _fd;
+		fdp.events 		= POLLIN | POLLOUT; // inputs
+		fdp.revents		= 0; // outputs
+		poll(&fdp, 1, 1000);
 		
 		// Stop capture
 		enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -348,11 +351,9 @@ private:
 			return false;
 		}
 		
-		if(!_askFrame())
-			return false;
-		
 		return true;		
 	}
+	
 	bool _askFrame() {
 		if(_bufferQuery)
 			return true;
