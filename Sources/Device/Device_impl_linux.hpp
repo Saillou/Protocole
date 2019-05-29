@@ -94,9 +94,6 @@ public:
 		fdp.revents		= 0; // outputs
 		
 		bool success = false;
-		
-		if(!_bufferQuery)
-			_askFrame();
 			
 		for(int error = 0; error < 10;) {
 			// Wait event on fd

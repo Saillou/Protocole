@@ -51,7 +51,7 @@ int main() {
 			k = (k + 1) % fmtList.size();
 		}
 	}
-	std::cout << 100.0*i/N << "%" << std::endl;
+	
 	device.close();
 	return 0;
 }
