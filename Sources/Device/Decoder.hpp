@@ -18,6 +18,8 @@ public:
 	}
 	~DecoderJpg() {
 		cleanup();
+		if(_jpgDecompressor)
+			tjDestroy(_jpgDecompressor);
 	}
 	
 	bool setup() {
@@ -29,7 +31,7 @@ public:
 		return _jpgDecompressor != nullptr;
 	}
 	void cleanup() {
-		tjDestroy(_jpgDecompressor);
+		// tjDestroy(_jpgDecompressor);
 	}
 	
 	bool decode2yuv422(const std::vector<unsigned char>& dataIn, std::vector<unsigned char>& dataOut, int w, int h) {
