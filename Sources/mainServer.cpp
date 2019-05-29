@@ -52,14 +52,13 @@ int main(int argc, char* argv[]) {
 	
 	std::vector<Gb::FrameType> typeList = {
 		Gb::FrameType::Jpg420, 
-		Gb::FrameType::Jpg422, 
 		Gb::FrameType::H264
 	};
 	size_t i = 0;
 	
 	for(Timer timer; Globals::signalStatus != SIGINT; timer.wait(100)) {
 		// ... Do other stuff ...
-		if(timer.elapsed_mus() > 5000000) {
+		if(timer.elapsed_mus() > 10000000) {
 			std::cout << "Change type" << std::endl;
 			device0.setFrameType(typeList[i]);
 			device1.setFrameType(typeList[i]);
