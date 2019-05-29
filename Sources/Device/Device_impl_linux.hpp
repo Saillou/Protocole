@@ -39,7 +39,6 @@ public:
 	bool open() {
 		_fd = ::open(_path.c_str(), O_RDWR | O_NONBLOCK);
 		
-		std::cout << "Open " << _fd << std::endl;
 		if(_fd == -1 || !_initDevice() || !_initMmap() /*|| !_askFrame()*/) {
 			close();
 			return false;
