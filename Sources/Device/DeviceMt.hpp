@@ -89,7 +89,8 @@ public:
 	// Setters
 	bool setFormat(int width, int height, Device::PixelFormat formatPix) {
 		if(_pDevice) {
-			std::lock_guard<std::mutex> lockDevice(_mutDevice);
+			release();
+			open(deviceName);
 			return _pDevice->setFormat(width, height, formatPix);
 		}
 		return false;
