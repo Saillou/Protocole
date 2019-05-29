@@ -144,18 +144,22 @@ public:
 	
 	// Setters
 	bool setFormat(int width, int height, PixelFormat formatPix) {
-		bool io = _fd != -1;
-		if(io)
-			if(!close())
-				return false;
+		// bool io = _fd != -1;
+		// if(io)
+			// if(!close())
+				// return false;
 		
-		_format.width  = width;
-		_format.height = height;
-		_format.format = formatPix == MJPG ? V4L2_PIX_FMT_MJPEG : V4L2_PIX_FMT_YUYV;
+		// _format.width  = width;
+		// _format.height = height;
+		// _format.format = formatPix == MJPG ? V4L2_PIX_FMT_MJPEG : V4L2_PIX_FMT_YUYV;
 		
-		if(io)
-			return open();
+		// if(io)
+			// return open();
 		
+		// return true;
+		close();
+		open();
+		std::cout << "ok" <<std::endl;
 		return true;
 	}
 	bool set(Device::Param code, double value) {
