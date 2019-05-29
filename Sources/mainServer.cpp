@@ -63,7 +63,7 @@ int main(int argc, char* argv[]) {
 			device0.setFormat(fmtList[i].first, fmtList[i].second, Device::MJPG);
 			device1.setFormat(fmtList[i].first, fmtList[i].second, Device::MJPG);
 			
-			i = (i + 1) % typeList.size();
+			i = (i + 1) % fmtList.size();
 			timer.beg();
 		}
 	}
