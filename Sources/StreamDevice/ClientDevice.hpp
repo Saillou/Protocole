@@ -128,6 +128,7 @@ private:
 	
 	void _bufferRead() {
 		Gb::Frame frame;
+		
 		Message messageFrame;
 		bool emitFrame = false;
 		bool success = false;
@@ -140,7 +141,7 @@ private:
 					(unsigned char*)messageFrame.content(), 
 					(unsigned long)(messageFrame.size()), 
 					Gb::Size(_format.width, _format.height), 
-					Gb::FrameType::H264
+					Gb::FrameType::Jpg422
 				);
 				emitFrame = true;
 			}
