@@ -134,7 +134,7 @@ public:
 			reinterpret_cast<unsigned char*>(_buffer.start), 
 			static_cast<unsigned long>(_buffer.length),
 			Gb::Size(_format.width, _format.height),
-			(_format.format == MJPG) ? Gb::FormatType::Jpg422 : Gb::FormatType::Yuv422
+			(_format.format == MJPG) ? Gb::FrameType::Jpg422 : Gb::FrameType::Yuv422
 		).clone();
 		
 		_askFrame();
