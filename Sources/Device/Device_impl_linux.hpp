@@ -414,6 +414,14 @@ private:
 			}
 		}
 		
+		// -- From jpg to bgr
+		else if(frame.type == Gb::FrameType::Bgr24) { 
+			// jpg decompress : jpg422 -> bgr24
+			if(_decoderJpg.decode2bgr24(_rawData.buffer, frame.buffer, w, h)) {
+				success = true;
+			}
+		}
+		
 		// -- Raw
 		else {
 			frame.buffer = _rawData.buffer;

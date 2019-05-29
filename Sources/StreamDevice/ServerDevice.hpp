@@ -45,7 +45,9 @@ public:
 		
 		return true;
 	}
-	
+	bool refresh() {
+		_device.refresh();
+	}
 	
 	// -- Getters --
 	double get(Device::Param code) const {
@@ -118,7 +120,7 @@ private:
 	// Events
 	void _onClientConnect(const Server::ClientInfo& client) {
 		_clientPlayer[client.id()] = false;
-		_device.refresh();
+		refresh();
 	}
 	void _onClientDisconnect(const Server::ClientInfo& client) {
 		_clientPlayer[client.id()] = false;
@@ -149,6 +151,9 @@ private:
 		
 		if(message.code() & Message::PROPERTIES)
 			_treatProperties(client, msg);
+		
+		if(message.code() & Message::TEXT)
+			_treatTextMessage(client, msg);
 		
 		if(message.code() & Message::HANDSHAKE)
 			_clientPlayer[client.id()] = (msg == "Start");
@@ -219,6 +224,11 @@ private:
 			if(exist)
 				set(Device::AutoExposure, autoExposure);
 		}	
+	}
+	void _treatTextMessage(const Server::ClientInfo& client, const std::string& msg) {
+		if(msg == "refresh") {
+			refresh();
+		}
 	}
 	
 	

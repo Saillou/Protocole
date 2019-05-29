@@ -20,7 +20,8 @@ public:
 		_running(false),
 		_port(address.port),
 		_pathDest(address.ip),
-		_format({640,480,Device::MJPG})
+		_format({640,480,Device::MJPG}),
+		_errCount(0)
 	{
 		// client
 		_decoderH264.setup();
@@ -60,7 +61,10 @@ public:
 		
 		return true;
 	}
-	
+	bool refresh() {
+		std::cout << "Refresh" << std::endl;
+		return _client.sendInfo(Message(Message::DEVICE | Message::TEXT, "refresh"));
+	}
 	
 	// -- Getters --
 	double get(Device::Param code) {
@@ -153,7 +157,6 @@ private:
 			
 			// -- Send --
 			if(emitFrame) {	
-				std::cout << "rcv frame \n";
 				Gb::Frame frameEmit;
 				
 				// Decode 
@@ -172,12 +175,19 @@ private:
 				if(success) {
 					frameEmit.size = frame.size;
 					frameEmit.type = Gb::FrameType::Bgr24;	
-					std::cout << "emit frame \n";
+					_errCount = 0;
 					
 					_mutCbk.lock();
 					if(_cbkFrame)
 						_cbkFrame(frameEmit);
 					_mutCbk.unlock();
+				}
+				else {
+					_errCount++;
+					if(_errCount > 10) {
+						refresh();
+						_errCount = 0;
+					}
 				}
 				emitFrame = false;
 			}
@@ -260,6 +270,8 @@ private:
 	
 	std::shared_ptr<std::thread> _pThreadBuffer;
 	MsgBuffer _buffer;
+	int _errCount;
+	
 	DecoderH264 _decoderH264;
 	DecoderJpg _decoderJpg;
 	
