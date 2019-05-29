@@ -153,7 +153,7 @@ public:
 		close();
 		_format.width  = width;
 		_format.height = height;
-		_format.height = formatPix;
+		_format.format = formatPix;
 		return open();
 	}
 	bool set(Device::Param code, double value) {
