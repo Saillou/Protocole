@@ -89,8 +89,6 @@ public:
 	// Setters
 	bool setFormat(int width, int height, Device::PixelFormat formatPix) {
 		if(_pDevice) {
-			// release();
-			// open(deviceName);
 			std::lock_guard<std::mutex> lockDevice(_mutDevice);
 			return _pDevice->setFormat(width, height, formatPix);
 		}
@@ -150,14 +148,17 @@ private:
 	void _pullCapture() {
 		while(_running && _pDevice) {
 			std::lock_guard<std::mutex> lockDevice(_mutDevice);
-			_pDevice->grab(); 				// Will wait until the camera is available
+			if(_pDevice->grab()) { 											// Will wait until the camera is available
 			
-			_mutFrame.lock();
-			frame.type = frameType;
-			if(_pDevice->retrieve(frame))
-				_onFrame();
-			
-			_mutFrame.unlock();			
+				_mutFrame.lock();
+				frame.type = frameType;
+				if(_pDevice->retrieve(frame))
+					_onFrame();
+				
+				_mutFrame.unlock();			
+			}
+			else 
+				break;
 		}
 	}
 	

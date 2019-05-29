@@ -144,14 +144,6 @@ public:
 	
 	// Setters
 	bool setFormat(int width, int height, PixelFormat formatPix) {
-		// bool io = _fd != -1;
-		// if(io)
-			// if(!close())
-				// return false;
-		
-		// _format.width  = width;
-		// _format.height = height;
-		// _format.format = formatPix == MJPG ? V4L2_PIX_FMT_MJPEG : V4L2_PIX_FMT_YUYV;
 		
 		// if(io)
 			// return open();
@@ -159,8 +151,9 @@ public:
 		// return true;
 		std::cout << "set format" <<std::endl;
 		close();
-		open();
-		std::cout << "ok" <<std::endl;
+		_format.width  = width;
+		_format.height = height;
+		_format.height = formatPix;
 		return true;
 	}
 	bool set(Device::Param code, double value) {
@@ -323,7 +316,7 @@ private:
 		buf.memory 	= V4L2_MEMORY_MMAP;
 		buf.index 	= 0;
 		
-		if(-1 == _xioctl(_fd, VIDIOC_QUERYBUF, &buf)) {
+		if(_xioctl(_fd, VIDIOC_QUERYBUF, &buf) == -1) {
 			_perror("Querying Buffer");
 			return false;
 		}
