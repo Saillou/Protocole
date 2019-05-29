@@ -45,10 +45,6 @@ public:
 			return false;
 		}
 		
-		_askFrame();
-		_askFrame();
-		_askFrame();
-		
 		return true;		
 	}
 	bool close() {
@@ -357,8 +353,8 @@ private:
 	}
 	
 	bool _askFrame() {
-		// if(_bufferQuery)
-			// return true;
+		if(_bufferQuery)
+			return true;
 		
 		struct v4l2_buffer buf = {0};
 		buf.type 	= V4L2_BUF_TYPE_VIDEO_CAPTURE;
