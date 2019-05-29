@@ -15,9 +15,10 @@ public:
 	// Constructor
 	DeviceMt() : _running(false), frameType(Gb::FrameType::Jpg420) {
 		// Wait for open
-		// frame.type = Gb::FrameType::H264;
-		// frame.type = Gb::FrameType::Jpg422;
-		// frame.type = Gb::FrameType::Jpg420;
+		// Possible types:
+		// frameType : Gb::FrameType::H264;
+		// frameType : Gb::FrameType::Jpg422;
+		// frameType : Gb::FrameType::Jpg420;
 	}
 	
 	// Destructor
