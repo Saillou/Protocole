@@ -33,10 +33,23 @@ int main() {
 	device.open();
 	
 	Gb::Frame frame;
-	for(int i = 0; i < 100; i++) {
+	
+	std::vector<std::pair<int,int>> fmtList = {
+		std::pair<int,int>(1280, 720), 
+		std::pair<int,int>(640, 480), 
+		std::pair<int,int>(320, 200), 
+	};
+	size_t k = 0;
+	
+	for(int i = 1; i < 1000; i++) {
 		device.grab();
 		device.retrieve(frame);
-		std::cout << frame.length() << "B" << std::endl;
+		std::cout << i << " " << frame.length()/1000.0 << "KB" << std::endl;
+		
+		if(i%100 == 0) {
+			device.setFormat(fmtList[k].first, fmtList[k].second, Device::MJPG);
+			k = (k + 1) % fmtList.size();
+		}
 	}
 	
 	device.close();
