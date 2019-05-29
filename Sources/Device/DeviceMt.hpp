@@ -88,11 +88,21 @@ public:
 	
 	// Setters
 	bool setFormat(int width, int height, Device::PixelFormat formatPix) {
+		_running = false;
+		if(_pThread)
+			if(_pThread->joinable())
+				_pThread->join();
+		_pThread.reset();
+		
 		if(_pDevice) {
 			std::lock_guard<std::mutex> lockDevice(_mutDevice);
-			return _pDevice->setFormat(width, height, formatPix);
+			_pDevice->setFormat(width, height, formatPix);
 		}
-		return false;
+		
+		_running = true;
+		_pThread = std::make_shared<std::thread>(&DeviceMt::_pullCapture, this);
+		
+		return true;
 	}
 	bool set(Device::Param code, double value) {
 		if(_pDevice)

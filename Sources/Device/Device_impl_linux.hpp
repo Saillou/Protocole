@@ -47,11 +47,8 @@ public:
 		return true;		
 	}
 	bool close() {
-		struct pollfd fdp;
-		fdp.fd 			= _fd;
-		fdp.events 		= POLLIN | POLLOUT; // inputs
-		fdp.revents		= 0; // outputs
-		poll(&fdp, 1, 1000);
+		if(_bufferQuery)
+			grab();
 		
 		// Stop capture
 		enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
