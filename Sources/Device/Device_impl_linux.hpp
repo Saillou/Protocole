@@ -48,7 +48,7 @@ public:
 		
 		return true;		
 	}
-	bool close() {		
+	bool close() {
 		// Stop capture
 		enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		if(_xioctl(_fd, VIDIOC_STREAMOFF, &type) == -1) {
@@ -92,11 +92,10 @@ public:
 		fdp.events 		= POLLIN | POLLOUT; // inputs
 		fdp.revents		= 0; // outputs
 		
-		for(;;) {
+			
+		for(int error = 0; error < 100;) {
 			// Wait event on fd
-			std::cout << "beg poll" << std::endl;
 			int r = poll(&fdp, 1, 1000); // 1s
-			std::cout << "end poll" << std::endl;
 			
 			// Error ?
 			if(r < 1) {
@@ -116,18 +115,21 @@ public:
 		
 			// Grab frame
 			if(_xioctl(_fd, VIDIOC_DQBUF, &buf) == -1) {
-				if(EAGAIN == errno)
+				if(EAGAIN == errno) {
+					Timer::wait(1);
+					error++;
 					continue;
-					
+				}
+				
 				_perror("Grab Frame");
 				return false;
 			}
 			
-			std::cout << "|\n";
 			// Check size
 			_buffer.length = (buf.bytesused > 0) ? buf.bytesused : _buffer.length;	
 			return true;
 		}
+		
 		return false;		
 	}
 	bool retrieve(Gb::Frame& frame) {
