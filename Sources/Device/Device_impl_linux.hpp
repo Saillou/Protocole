@@ -405,7 +405,7 @@ private:
 			std::vector<unsigned char> bgrBuffer;
 			
 			if(_decoderJpg.decode2bgr24(_rawData.buffer, bgrBuffer, frame.size.width, frame.size.height)) {
-				if(_encoderJpg.encodeBgr24(bgrBuffer, frame.buffer, frame.size.width, frame.size.height)) {
+				if(_encoderJpg.encodeBgr24(bgrBuffer, frame.buffer, frame.size.width, frame.size.height, 10)) {
 					success = true;
 				}
 			}
