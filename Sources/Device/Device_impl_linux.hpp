@@ -379,6 +379,7 @@ private:
 	
 	bool _treat(Gb::Frame& frame) {
 		// Timer t;
+		bool success = false;
 		
 		// -- From jpg to h264:
 		if(frame.type == Gb::FrameType::H264) {
@@ -397,18 +398,33 @@ private:
 
 			// h264 encode : yuv420 -> h264 packet
 			if(_encoderH264.encodeYuv(&_yuv420Frame[0], frame.buffer))
-				frame.size = _rawData.size;
-			else
-				frame.clear();
+				success = true;
+		}
+		
+		else if(frame.type == Gb::FrameType::Jpg420) { // -- From jpg to smaller jpg:
+			std::vector<unsigned char> bgrBuffer;
+			
+			if(_decoderJpg.decode2bgr24(_rawData.buffer, bgrBuffer, frame.size.width, frame.size.height)) {
+				if(_encoderJpg.encodeBgr24(bgrBuffer, frame.buffer, frame.size.width, frame.size.height)) {
+					success = true;
+				}
+			}
 		}
 		
 		// -- Raw
 		else {
 			frame = _rawData.clone();
+			success = true;
 		}
 		
+		// -- Set final info
+		if(success) 
+			frame.size = _rawData.size;
+		else 
+			frame.clear();
+		
 		// std::cout << t.elapsed_mus()/1000.0 << std::endl;
-		return !frame.empty();
+		return success;
 	}
 	
 	int _isControl(int control, struct v4l2_queryctrl* queryctrl) {
@@ -442,6 +458,7 @@ private:
 	std::vector<unsigned char> _yuv422Frame;
 	std::vector<unsigned char> _yuv420Frame;
 	EncoderH264 _encoderH264;
+	EncoderJpg _encoderJpg;
 	DecoderJpg _decoderJpg;
 };
 

@@ -30,7 +30,7 @@ public:
 	void cleanup() {
 	}
 	
-	bool encodeBgr24(const std::vector<unsigned char>& dataIn, std::vector<unsigned char>& dataOut, int width, int height, int subsamp = TJSAMP_420, int quality = 70) {
+	bool encodeBgr24(const std::vector<unsigned char>& dataIn, std::vector<unsigned char>& dataOut, int width, int height, int quality = 70, int subsamp = TJSAMP_420) {
 		if(!_jpgCompressor)
 			return false;
 		
