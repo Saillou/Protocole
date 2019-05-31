@@ -143,11 +143,11 @@ public:
 				break;
 			else if(err < 0) // Error
 				return false;
-				
-			printf("%d iterations \n", iteration);
 		}
+		if(fdp.revents != POLLIN)
+			return false;
 		
-		std::cout << fdp.revents << std::endl;
+		std::cout << "pok" << std::endl;
 	
 		// Grab frame
 		_bufferQueued = false;
