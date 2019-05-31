@@ -38,10 +38,48 @@ public:
 	
 	// Methods
 	bool open() {
-		if(hvl::openfd(_fd, _path) && _initDevice() && _initMmap())
-			return true;
+		// -- Init file descriptor --
+		if(!hvl::openfd(_fd, _path))
+			goto failed;
 		
-		// Failed
+		// -- Set format --
+		if(_format.width == 0 || _format.height == 0) {
+			_format.width 		= 640;
+			_format.height	= 480;
+			_format.format	= MJPG;
+		}
+		printf("Seting: [%d x %d] \n",  _format.width,  _format.height);
+		
+		if(!hvl::setFormat(_fd,  _format.width,  _format.height))
+			goto failed;
+					
+		// -- Init buffers --
+		struct v4l2_buffer buf = {0};
+		if(!hvl::requestBuffer(_fd) || !hvl::queryBuffer(_fd, buf))
+			goto failed;
+	 
+		// Link memory
+		if(!hvl::memoryMap(_fd, buf, _buffer.start, _buffer.length))
+			goto failed;
+		
+		printf("Buffer max: %f KB\n", _buffer.length/1000.0f);
+		
+		// -- Init encoder/decoder
+		_encoderJpg.setup();		
+		_decoderJpg.setup();
+		if(!_encoderH264.setup(_format.width, _format.height))
+			goto failed;
+		
+		
+		// Start	 
+		if(!hvl::startCapture(_fd))
+			return false;
+
+		// ----- Success -----
+		return true;		
+	
+		// ----- Failed -----
+	failed:
 		close();
 		return false;		
 	}
@@ -197,48 +235,6 @@ public:
 	
 private:
 	// Methods
-	bool _initDevice() {
-		// -- Set format --
-		if(_format.width == 0 || _format.height == 0) {
-			_format.width 		= 640;
-			_format.height	= 480;
-			_format.format	= MJPG;
-		}
-		printf("Seting: [%d x %d] \n",  _format.width,  _format.height);
-		
-		if(!hvl::setFormat(_fd,  _format.width,  _format.height))
-			return false;
-					
-		// -- Tools
-		if(!_encoderH264.setup(_format.width, _format.height)) {
-			printf("Error while setting H264 encoder \n");
-			return false;
-		}
-		_decoderJpg.setup();
-		_encoderJpg.setup();
-
-		return true;		
-	}
-	bool _initMmap() {
-		// Init buffers
-		struct v4l2_buffer buf = {0};
-		if(!hvl::requestBuffer(_fd) || !hvl::queryBuffer(_fd, buf))
-			return false;
-	 
-		// Link memory
-		if(!hvl::memoryMap(_fd, buf, _buffer.start, _buffer.length))
-			return false;
-		
-		printf("Buffer max: %f KB\n", _buffer.length/1000.0f);
-		
-		// Start	 
-		if(!hvl::startCapture(_fd))
-			return false;
-
-		// Everything ok
-		return true;		
-	}
-	
 	bool _askFrame() {
 		// Already queued
 		if(_bufferQueued)

@@ -29,9 +29,14 @@ static void sigintHandler(int signal) {
 }
 
 int main() {
+	// Open device
 	Device device(Globals::PATH_0);
-	device.open();
+	if(!device.open()) {
+		std::cout << "Failed to open device" << std::endl;
+		return 0;
+	}
 	
+	// Init task
 	Gb::Frame frame;
 	
 	std::vector<std::pair<int,int>> fmtList = {
@@ -39,6 +44,8 @@ int main() {
 		std::pair<int,int>(640, 480), 
 		std::pair<int,int>(320, 200), 
 	};
+	
+	// Loop
 	size_t k = 0;
 	int i = 1;
 	int N = 33;
@@ -53,6 +60,7 @@ int main() {
 		// }
 	}
 	
+	// Close
 	device.close();
 	return 0;
 }
