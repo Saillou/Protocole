@@ -91,7 +91,7 @@ public:
 		// if(!hvl::closefd(_fd))
 			// goto failed;
 		std::cout << "Before Closing : " << _fd << std::endl;
-		::close(fd);
+		::close(_fd);
 		std::cout << "After Closing : " << _fd << std::endl;
 		
 		_encoderH264.cleanup();
