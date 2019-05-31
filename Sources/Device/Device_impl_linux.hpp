@@ -91,6 +91,8 @@ public:
 		return false;		
 	}
 	bool close() {
+		struct v4l2_buffer buf = {0};
+			
 		if(_fd == -1)
 			return true;
 		
@@ -102,8 +104,10 @@ public:
 		if(!hvl::memoryUnmap(_fd, &_buffer.start, _buffer.length))
 			goto failed;
 		
-		if(!hvl::freeBuffer(_fd))
+		if(!hvl::queryBuffer(_fd, buf))
 			goto failed;
+		
+		printf("Query: %d", buf.count);
 		
 		if(!hvl::closefd(_fd))
 			goto failed;
