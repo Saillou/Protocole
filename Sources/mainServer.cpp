@@ -36,31 +36,11 @@ int main() {
 		return 0;
 	}
 	
-	// Init task
+	// Test
 	Gb::Frame frame;
-	
-	std::vector<std::pair<int,int>> fmtList = {
-		std::pair<int,int>(1280, 720), 
-		std::pair<int,int>(640, 480), 
-		std::pair<int,int>(320, 200), 
-	};
-	
-	// Loop
-	size_t k = 0;
-	int i = 1;
-	int N = 33;
-	for(; i <= N; i++) {
-		device.read(frame);
-		std::cout << i << " " << frame.length() << std::endl;
-		
-		if(i%30 == 0) {
-			std::cout << " ------------------------------ changing format -------------------------------- " << std::endl;
-			device.setFormat(fmtList[k].first, fmtList[k].second, Device::MJPG);
-			k = (k + 1) % fmtList.size();
-		}
-	}
-	
-	// Close
+	device.open();
+	device.read(frame);
+	std::cout << "Length: " << frame.length() << "B." <<std::endl;
 	device.close();
 	return 0;
 }
