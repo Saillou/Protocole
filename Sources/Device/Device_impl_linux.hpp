@@ -46,7 +46,7 @@ public:
 		return false;		
 	}
 	bool close() {
-		if(hvl::stopCapture(_fd) && hvl::memoryUnmap(_fd, _buffer.start, _buffer.length) && hvl::closefd(_fd) {
+		if(hvl::stopCapture(_fd) && hvl::memoryUnmap(_fd, _buffer.start, _buffer.length) && hvl::closefd(_fd)) {
 			_encoderH264.cleanup();
 			_decoderJpg.cleanup();
 			_encoderJpg.cleanup();
