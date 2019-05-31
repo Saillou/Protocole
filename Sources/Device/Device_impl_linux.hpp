@@ -90,9 +90,8 @@ public:
 			goto failed;
 		// if(!hvl::closefd(_fd))
 			// goto failed;
-		std::cout << "Before Closing : " << _fd << std::endl;
 		::close(_fd);
-		std::cout << "After Closing : " << _fd << std::endl;
+		hvl::stopCapture(_fd);
 		
 		_encoderH264.cleanup();
 		_decoderJpg.cleanup();
