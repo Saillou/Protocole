@@ -27,7 +27,8 @@ public:
 		_path(pathVideo), 
 		_format({640, 480, MJPG}),
 		_buffer({(void*)nullptr, (size_t)0}),
-		_bufferQueued(false)
+		_bufferQueued(false),
+		_test(false)
 	{
 		// Wait open
 	}
@@ -56,7 +57,12 @@ public:
 			goto failed;
 					
 		// -- Init buffers --
-		if(!hvl::requestBuffer(_fd) || !hvl::queryBuffer(_fd, buf))
+		if(!_test) {
+			if(!hvl::requestBuffer(_fd))
+				goto failed;
+			_test = true;
+		}
+		if(!hvl::queryBuffer(_fd, buf))
 			goto failed;
 	 
 		// Link memory
@@ -90,9 +96,7 @@ public:
 			goto failed;
 		if(!hvl::closefd(_fd))
 			goto failed;
-		if(!hvl::freeBuffer(_fd))
-			goto failed;
-		_fd = -1;
+
 		_encoderH264.cleanup();
 		_decoderJpg.cleanup();
 		_encoderJpg.cleanup();
@@ -333,6 +337,8 @@ private:
 	EncoderH264 _encoderH264;
 	EncoderJpg _encoderJpg;
 	DecoderJpg _decoderJpg;
+	
+	bool _test;
 };
 
 #endif
