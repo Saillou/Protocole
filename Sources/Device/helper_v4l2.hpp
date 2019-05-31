@@ -17,11 +17,13 @@
 
 namespace hvl {
 	// ---------- Tools ----------
+	// Print error with errno
 	void printError(int fd, const std::string& message) {
 		std::string mes = "[" + std::to_string(fd) + "] " + message + " - Errno: " +  std::to_string(errno);
 		perror(mes.c_str());	
 	}
 	
+	// Make a ioctl request 
 	int xioctl(int fd, int request, void *arg) {
 		int r(-1);
 		do {
@@ -31,6 +33,7 @@ namespace hvl {
 		return r;	
 	}
 	
+	// Combine ioctl and perror
 	bool ioctlAct(int fd, int request, void *arg, const std::string& errorMsg = "") {
 		if(xioctl(fd, request, arg) == -1) {
 			printError(fd, errorMsg);
@@ -115,7 +118,11 @@ namespace hvl {
 		req.type 	= V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		req.memory 	= V4L2_MEMORY_MMAP;
 		
-		return ioctlAct(fd, VIDIOC_REQBUFS,  &req, "Requesting Buffer");	
+		if(ioctlAct(fd, VIDIOC_REQBUFS,  &req, "Requesting Buffer")) {
+			std::cout << req.capabilities << " => orphaned: " << (req.capabilities & V4L2_BUF_CAP_SUPPORTS_ORPHANED_BUFS != 0) << std::endl;
+			return true;
+		}
+		return false;
 	}
 	
 	// Check status of buffer (use for querying the size)

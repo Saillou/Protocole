@@ -88,10 +88,8 @@ public:
 			goto failed;
 		if(!hvl::memoryUnmap(_fd, _buffer.start, _buffer.length))
 			goto failed;
-		// if(!hvl::closefd(_fd))
-			// goto failed;
-		::close(_fd);
-		hvl::stopCapture(_fd);
+		if(!hvl::closefd(_fd))
+			goto failed;
 		
 		_encoderH264.cleanup();
 		_decoderJpg.cleanup();
