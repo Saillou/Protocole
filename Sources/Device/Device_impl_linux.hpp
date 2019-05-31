@@ -123,7 +123,7 @@ public:
 		return true;		
 	}
 	bool retrieve(Gb::Frame& frame) {
-		std::cout << "Retrieve: " << _buffer.length << std::endl;
+		std::cout << "Retrieve: " << _buffer.length << "B" << std::endl;
 		
 		_rawData = Gb::Frame(
 			reinterpret_cast<unsigned char*>(_buffer.start), 
@@ -131,6 +131,8 @@ public:
 			Gb::Size(_format.width, _format.height),
 			(_format.format == MJPG) ? Gb::FrameType::Jpg422 : Gb::FrameType::Yuv422
 		).clone();
+		
+		std::cout << "Clone ok" << std::endl;
 		
 		// _askFrame();
 			
