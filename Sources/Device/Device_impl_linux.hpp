@@ -69,7 +69,7 @@ public:
 		if(!hvl::memoryMap(_fd, buf, &_buffer.start, _buffer.length))
 			goto failed;
 		
-		printf("Buffer max: %f KB\n", _buffer.length/1000);
+		printf("Buffer max: %d KB\n", _buffer.length/1000);
 		
 		// -- Init encoder/decoder
 		_encoderJpg.setup();		
@@ -78,9 +78,12 @@ public:
 			goto failed;
 		
 		// Start	 
+		if(!_askFrame())
+			goto failed;
+		
 		if(!hvl::startCapture(_fd))
-			return false;
-
+			goto failed;
+		
 		// ----- Success -----
 		_open = true;
 		return true;		
@@ -123,9 +126,6 @@ public:
 	
 	bool grab() {
 		if(!_open)
-			return false;
-		
-		if(!_askFrame())
 			return false;
 		
 		struct v4l2_buffer buf = {0};
