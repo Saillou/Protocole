@@ -146,6 +146,8 @@ public:
 				
 			printf("%d iterations \n", iteration);
 		}
+		
+		std::cout << fdp.revents << std::endl;
 	
 		// Grab frame
 		if(!hvl::dequeueBuffer(_fd, buf)) 
