@@ -133,7 +133,7 @@ public:
 		struct v4l2_buffer buf = {0};
 		struct pollfd fdp;
 		fdp.fd 			= _fd;
-		fdp.events 		= POLLIN | POLLOUT; // inputs
+		fdp.events 		= POLLIN; // inputs
 		fdp.revents		= 0; // outputs
 		
 		// Wait event on fd
@@ -147,13 +147,13 @@ public:
 			printf("%d iterations \n", iteration);
 		}
 		
-		std::cout << (fdp.revents & POLLIN > 0) << " " << (fdp.revents & POLLOUT > 0) << std::endl;
+		std::cout << (fdp.revents & POLLIN > 0) << " " << (fdp.revents & POLLERR > 0) << std::endl;
 	
 		// Grab frame
+		_bufferQueued = false;
+		
 		if(!hvl::dequeueBuffer(_fd, buf)) 
 			return false;
-
-		_bufferQueued = false;
 		
 		// Check size
 		_buffer.length = (buf.bytesused > 0) ? buf.bytesused : _buffer.length;			
