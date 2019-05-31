@@ -173,7 +173,7 @@ public:
 	}
 	
 	// Setters
-	bool setFormat(int width, int height, PixelFormat formatPix = MJPG) {
+	bool setFormat(int width, int height, PixelFormat formatPix) {
 		// close();
 		_format.width  = width;
 		_format.height = height;
