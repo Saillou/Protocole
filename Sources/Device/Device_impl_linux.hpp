@@ -99,7 +99,7 @@ public:
 		hvl::stopCapture(_fd);
 		hvl::setFormat(_fd,  640, 480);
 		hvl::queryBuffer(_fd, buf);
-		hvl::startCapture(_fd)
+		hvl::startCapture(_fd);
 		printf("end test \n");
 		
 		if(_fd == -1)
