@@ -28,51 +28,13 @@ static void sigintHandler(int signal) {
 	Globals::signalStatus = signal;
 }
 
-void pok() {
-	Gb::Frame frame;
-		
-	// Open device
-	Device device(Globals::PATH_0);
-	device.open();
-	
-	device.read(frame);
-	std::cout << frame.length() << "B" << std::endl;
-	
-	device.setFormat(1280, 720, Device::MJPG);
-	
-	device.read(frame);
-	std::cout << frame.length() << "B" << std::endl;
-	
-	device.read(frame);
-	std::cout << frame.length() << "B" << std::endl;
-
-	device.read(frame);
-	std::cout << frame.length() << "B" << std::endl;
-	
-	device.read(frame);
-	std::cout << frame.length() << "B" << std::endl;
-	
-	device.read(frame);
-	std::cout << frame.length() << "B" << std::endl;
-
-	device.read(frame);
-	std::cout << frame.length() << "B" << std::endl;
-}
-
-int main() {
-	pok();	
-	
-	return 0;
-}
-
 // --- Entry point ---
-/*
 int main(int argc, char* argv[]) {	
 	// - Install signal handler
 	std::signal(SIGINT, sigintHandler);
 	
 	// - Device
-	ServerDevice device0(Globals::PATH_0, 6666);
+	// ServerDevice device0(Globals::PATH_0, 6666);
 	ServerDevice device1(Globals::PATH_1, 8888);
 
 	
@@ -115,4 +77,3 @@ int main(int argc, char* argv[]) {
 	std::cout << "Press a key to continue..." << std::endl;
 	return std::cin.get();
 }
-*/
