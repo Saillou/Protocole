@@ -29,7 +29,7 @@ static void sigintHandler(int signal) {
 }
 
 void pok() {
-		Gb::Frame frame;
+	Gb::Frame frame;
 		
 	// Open device
 	Device device(Globals::PATH_0);

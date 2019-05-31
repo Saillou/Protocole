@@ -145,8 +145,8 @@ public:
 			else if(err < 0) // Error
 				return false;
 		}
-		if(fdp.revents != POLLIN)
-			return false;
+		// if(fdp.revents != POLLIN)
+			// return false;
 	
 		// Grab frame
 		_bufferQueued = false;
