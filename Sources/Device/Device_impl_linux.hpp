@@ -133,12 +133,15 @@ public:
 		fdp.fd 			= _fd;
 		fdp.events 		= POLLIN | POLLOUT; // inputs
 		fdp.revents		= 0; // outputs
-		int err;
 		
 		// Wait event on fd : return : 1 => ok, 0 => timeout, -1 => error
-		if((err = poll(&fdp, 1, 1000)) <= 0) {
+		for(int err = 0; err <= 0;) {
+			err = poll(&fdp, 1, 1000);
 			printf("poll : %d \n", err);
-			return false;
+			if(err == 0) // timeout
+				Timer::wait(1);
+			else if(err < 0) // Error
+				return false;
 		}
 	
 		// Grab frame
