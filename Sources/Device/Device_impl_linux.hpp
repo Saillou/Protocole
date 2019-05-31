@@ -24,10 +24,11 @@ public:
 	// Constructors
 	explicit _Impl(const std::string& pathVideo) :
 		_fd(-1), 
+		_open(false),
 		_path(pathVideo), 
 		_format({640, 480, MJPG}),
 		_buffer({(void*)nullptr, (size_t)0}),
-		_bufferQueued(false)
+		_bufferQueued(false),
 	{
 		// Wait open
 	}
@@ -79,6 +80,7 @@ public:
 			return false;
 
 		// ----- Success -----
+		_open = true;
 		return true;		
 	
 		// ----- Failed -----
@@ -87,6 +89,8 @@ public:
 		return false;		
 	}
 	bool close() {
+		_open = false;
+		
 		if(!hvl::stopCapture(_fd))
 			goto failed;
 		
@@ -115,6 +119,9 @@ public:
 	}
 	
 	bool grab() {
+		if(!_open)
+			return false;
+		
 		if(!_askFrame())
 			return false;
 		
@@ -139,6 +146,9 @@ public:
 		return true;		
 	}
 	bool retrieve(Gb::Frame& frame) {
+		if(!_open)
+			return false;
+		
 		_rawData.buffer 	= std::vector<unsigned char>((unsigned char*)_buffer.start, (unsigned char*)_buffer.start + _buffer.length);
 		_rawData.size 		= Gb::Size(_format.width, _format.height);
 		_rawData.type 		= (_format.format == MJPG) ? Gb::FrameType::Jpg422 : Gb::FrameType::Yuv422;
@@ -158,6 +168,9 @@ public:
 		return open();
 	}
 	bool set(Device::Param code, double value) {
+		if(!_open)
+			return false;
+		
 		struct v4l2_control control = {0};
 		struct v4l2_queryctrl queryctrl = {0};
 		
@@ -204,6 +217,9 @@ public:
 	
 	// Getters
 	double get(Device::Param code) {
+		if(!_open)
+			return 0.0;
+		
 		struct v4l2_control control = {0};
 		struct v4l2_queryctrl queryctrl = {0};
 		
@@ -247,6 +263,9 @@ public:
 private:
 	// Methods
 	bool _askFrame() {
+		if(!_open)
+			return false;
+		
 		// Already queued
 		if(_bufferQueued)
 			return true;
@@ -323,6 +342,7 @@ private:
 	
 	// Members
 	int _fd;
+	bool _open;
 	std::string _path;
 	FrameFormat	_format;
 	FrameBuffer _buffer;
