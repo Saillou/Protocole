@@ -133,20 +133,25 @@ public:
 		
 		struct v4l2_buffer buf = {0};
 		struct pollfd fdp;
-		fdp.fd 			= _fd;
-		fdp.events 		= POLLIN; // inputs
-		fdp.revents		= 0; // outputs
+		fdp.fd = _fd;
 		
 		// Wait event on fd
 		for(int iteration = 0; iteration < 50; Timer::wait(1)) {
+			fdp.events 		= POLLIN; // inputs
+			fdp.revents		= 0; // outputs
+			
 			int err = poll(&fdp, 1, 1000);
+			if(errno == 11) {
+				printf(".\n");
+				continue;
+			}
 			if(err > 0) // Success
 				break;
 			else if(err < 0) // Error
 				return false;
 		}
-		// if(fdp.revents != POLLIN)
-			// return false;
+		if(fdp.revents != POLLIN)
+			return false;
 	
 		// Grab frame
 		_bufferQueued = false;
