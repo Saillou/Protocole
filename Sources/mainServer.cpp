@@ -28,22 +28,25 @@ static void sigintHandler(int signal) {
 	Globals::signalStatus = signal;
 }
 
-int main() {
+int pok() {
 	// Open device
 	Device device(Globals::PATH_0);
+	device.open();
 	
 	// Test
 	Gb::Frame frame;
 	
-	device.open();
 	device.read(frame);
-	std::cout << "Length: " << frame.length() << "B." <<std::endl;
+	
+	// Close device
 	device.close();
 	
-	device.open();
-	device.read(frame);
-	std::cout << "Length: " << frame.length() << "B." <<std::endl;
-	device.close();
+	return frame.length();
+}
+
+int main() {
+	pok();
+	pok();
 	
 	return 0;
 }
