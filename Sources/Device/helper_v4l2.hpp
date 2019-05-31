@@ -16,6 +16,28 @@
 #include <unistd.h>
 
 namespace hvl {
+	// ---------- Tools ----------
+	void printError(int fd, const std::string& message) const {
+		std::string mes = "[" + std::to_string(fd) + "] " + message + " - Errno: " +  std::to_string(errno);
+		perror(mes.c_str());	
+	}
+	
+	int xioctl(int fd, int request, void *arg) {
+		int r(-1);
+		do {
+			r = ioctl (fd, request, arg);
+		} while (r == -1 && errno == EINTR);
+		
+		return r;	
+	}
+	
+	bool ioctlAct(int fd, int request, void *arg, const std::string& errorMsg = "") {
+		if(xioctl(fd, request, arg) == -1) {
+			printError(fd, errorMsg);
+			return false;
+		}	
+		return true;
+	}
 	
 	// ---------- V4l2 commands ----------
 	// --- File descriptor ---
@@ -150,32 +172,6 @@ namespace hvl {
 	// Get control value
 	bool getControl(int fd, struct v4l2_control* pCtrl) {
 		return ioctlAct(fd, VIDIOC_G_CTRL, pCtrl, "Getting control");		
-	}
-	
-	
-	
-
-	// ---------- Tools ----------
-	bool ioctlAct(int fd, int request, void *arg, const std::string& errorMsg = "") {
-		if(xioctl(fd, request, arg) == -1) {
-			printError(fd, errorMsg);
-			return false;
-		}	
-		return true;
-	}
-	
-	void printError(int fd, const std::string& message) const {
-		std::string mes = "[" + std::to_string(fd) + "] " + message + " - Errno: " +  std::to_string(errno);
-		perror(mes.c_str());	
-	}
-	
-	int xioctl(int fd, int request, void *arg) {
-		int r(-1);
-		do {
-			r = ioctl (fd, request, arg);
-		} while (r == -1 && errno == EINTR);
-		
-		return r;	
 	}
 }
 
