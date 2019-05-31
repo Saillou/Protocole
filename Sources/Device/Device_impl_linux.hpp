@@ -137,7 +137,7 @@ public:
 		
 		// Wait event on fd : return : 1 => ok, 0 => timeout, -1 => error
 		if((err = poll(&fdp, 1, 1000)) <= 0) {
-			printf("poll : %d \n");
+			printf("poll : %d \n", err);
 			return false;
 		}
 	
