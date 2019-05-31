@@ -2,8 +2,8 @@
 
 #include "../Network/Client.hpp"
 #include "../Device/DeviceMt.hpp"
-#include "../Device/Decoder.hpp"
 #include "../Tool/Timer.hpp"
+#include "../Tool/Decoder.hpp"
 #include "../Tool/Buffers.hpp"
 
 #include <string>

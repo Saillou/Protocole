@@ -43,12 +43,11 @@ int main() {
 	int i = 1;
 	int N = 33;
 	for(; i <= N; i++) {
-		if(i == 1)
-			device.read(frame);
-		else
-			Timer::wait(10);
+		device.read(frame);
+		std::cout << i << " " << frame.length() << std::endl;
 		
 		if(i%30 == 0) {
+			std:cout << " ------------------------------ chaning format -------------------------------- " << std::endl;
 			device.setFormat(fmtList[k].first, fmtList[k].second, Device::MJPG);
 			k = (k + 1) % fmtList.size();
 		}

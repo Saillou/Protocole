@@ -8,8 +8,8 @@
 #include <mutex>
 #include <functional>
 
-#include "Encoder.hpp"
 #include "structures.hpp"
+#include "../Tool/Encoder.hpp"
 #include "../Tool/Timer.hpp"
 
 class Device {
