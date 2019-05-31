@@ -147,7 +147,7 @@ public:
 			printf("%d iterations \n", iteration);
 		}
 		
-		std::cout << (fdp.revents & POLLIN > 0) << " " << (fdp.revents & POLLERR > 0) << std::endl;
+		std::cout << fdp.revents << std::endl;
 	
 		// Grab frame
 		_bufferQueued = false;
