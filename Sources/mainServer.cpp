@@ -51,6 +51,7 @@ int main() {
 	int N = 33;
 	for(; i <= N; i++) {
 		device.grab();
+		device.retrieve(frame);
 		std::cout << i << std::endl;
 		// device.read(frame);
 		// std::cout << i << " " << frame.length() << std::endl;
