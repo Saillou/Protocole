@@ -28,7 +28,7 @@ public:
 		_path(pathVideo), 
 		_format({640, 480, MJPG}),
 		_buffer({(void*)nullptr, (size_t)0}),
-		_bufferQueued(false),
+		_bufferQueued(false)
 	{
 		// Wait open
 	}
