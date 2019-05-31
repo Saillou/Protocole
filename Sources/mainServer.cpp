@@ -35,7 +35,7 @@ void pok() {
 	
 	// Test
 	Gb::Frame frame;
-	int limit = 10;
+	int limit = 1;
 	
 	do {
 		device.read(frame);
