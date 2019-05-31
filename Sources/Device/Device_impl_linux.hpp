@@ -69,7 +69,7 @@ public:
 		if(!hvl::memoryMap(_fd, buf, &_buffer.start, _buffer.length))
 			goto failed;
 		
-		printf("Buffer max: %f KB\n", _buffer.length/1000.0f);
+		printf("Buffer max: %f KB\n", _buffer.length/1000);
 		
 		// -- Init encoder/decoder
 		_encoderJpg.setup();		
@@ -79,7 +79,10 @@ public:
 		
 		// Start	 
 		if(!hvl::startCapture(_fd))
-			return false;
+			goto failed;
+		
+		if(!_askFrame())
+			goto failed;
 
 		// ----- Success -----
 		_open = true;
@@ -90,9 +93,7 @@ public:
 		close();
 		return false;		
 	}
-	bool close() {
-		struct v4l2_buffer buf = {0};
-			
+	bool close() {			
 		if(_fd == -1)
 			return true;
 		
@@ -101,16 +102,8 @@ public:
 		if(!hvl::stopCapture(_fd))
 			goto failed;
 		
-		if(!hvl::freeBuffer(_fd))
-			goto failed;
-		
 		if(!hvl::memoryUnmap(_fd, &_buffer.start, _buffer.length))
 			goto failed;
-		
-		if(!hvl::queryBuffer(_fd, buf))
-			goto failed;
-		
-		printf("Query: %d \n", buf.bytesused);
 		
 		if(!hvl::closefd(_fd))
 			goto failed;
@@ -135,8 +128,8 @@ public:
 		if(!_open)
 			return false;
 		
-		if(!_askFrame())
-			return false;
+		// if(!_askFrame())
+			// return false;
 		
 		struct v4l2_buffer buf = {0};
 		struct pollfd fdp;
