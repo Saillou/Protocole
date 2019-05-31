@@ -118,11 +118,17 @@ namespace hvl {
 		req.type 	= V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		req.memory 	= V4L2_MEMORY_MMAP;
 		
-		if(ioctlAct(fd, VIDIOC_REQBUFS,  &req, "Requesting Buffer")) {
-			std::cout << req.capabilities << " => orphaned: " << (req.capabilities & V4L2_BUF_CAP_SUPPORTS_ORPHANED_BUFS != 0) << std::endl;
-			return true;
-		}
-		return false;
+		return ioctlAct(fd, VIDIOC_REQBUFS,  &req, "Requesting Buffer");	
+	}
+	
+	// Desallocate buffer
+	bool freeBuffer(int fd) {
+		struct v4l2_requestbuffers req = {0};
+		req.count 	= 0;
+		req.type 	= V4L2_BUF_TYPE_VIDEO_CAPTURE;
+		req.memory 	= V4L2_MEMORY_MMAP;
+		
+		return ioctlAct(fd, VIDIOC_REQBUFS,  &req, "Freeing Buffer");
 	}
 	
 	// Check status of buffer (use for querying the size)
