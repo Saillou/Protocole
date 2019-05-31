@@ -63,7 +63,7 @@ namespace hvl {
 			return false;
 		}
 		
-		fd = -1;
+		// fd = -1;
 		return true;		
 	}
 	

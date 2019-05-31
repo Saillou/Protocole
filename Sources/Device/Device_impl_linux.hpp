@@ -50,7 +50,7 @@ public:
 			_format.height	= 480;
 			_format.format	= MJPG;
 		}
-		printf("Seting: [%d x %d] \n",  _format.width,  _format.height);
+		printf("Setting: [%d x %d] \n",  _format.width,  _format.height);
 		
 		if(!hvl::setFormat(_fd,  _format.width,  _format.height))
 			goto failed;
@@ -88,11 +88,11 @@ public:
 			goto failed;
 		if(!hvl::memoryUnmap(_fd, _buffer.start, _buffer.length))
 			goto failed;
-		if(!hvl::freeBuffer(_fd))
-			goto failed;
 		if(!hvl::closefd(_fd))
 			goto failed;
-		
+		if(!hvl::freeBuffer(_fd))
+			goto failed;
+		_fd = -1;
 		_encoderH264.cleanup();
 		_decoderJpg.cleanup();
 		_encoderJpg.cleanup();
