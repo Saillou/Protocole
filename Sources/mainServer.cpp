@@ -37,13 +37,14 @@ void pok() {
 	Gb::Frame frame;
 	device.read(frame);
 	std::cout << frame.length() << "B" << std::endl;
-	
-	// Close device
-	device.close();
 }
 
 int main() {
 	pok();
+	
+	std::cout << "Press a key to continue..." << std::endl;
+	return std::cin.get();	
+	
 	pok();
 	
 	return 0;

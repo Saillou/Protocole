@@ -174,15 +174,11 @@ public:
 	
 	// Setters
 	bool setFormat(int width, int height, PixelFormat formatPix) {
-		// close();
+		close();
 		_format.width  = width;
 		_format.height = height;
 		_format.format = formatPix;
-		// return open();
-		
-		hvl::stopCapture(_fd);
-		hvl::setFormat(_fd,  _format.width, _format.height);
-		hvl::startCapture(_fd);
+		return open();
 	}
 	bool set(Device::Param code, double value) {
 		if(!_open)
