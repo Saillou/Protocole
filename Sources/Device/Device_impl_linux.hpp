@@ -93,15 +93,7 @@ public:
 		close();
 		return false;		
 	}
-	bool close() {		
-		printf("beg test \n");
-		struct v4l2_buffer buf = {0};
-		hvl::stopCapture(_fd);
-		hvl::setFormat(_fd,  640, 480);
-		hvl::queryBuffer(_fd, buf);
-		hvl::startCapture(_fd);
-		printf("end test \n");
-		
+	bool close() {				
 		if(_fd == -1)
 			return true;
 		
@@ -181,12 +173,16 @@ public:
 	}
 	
 	// Setters
-	bool setFormat(int width, int height, PixelFormat formatPix) {
-		close();
+	bool setFormat(int width, int height, PixelFormat formatPix = MJPG) {
+		// close();
 		_format.width  = width;
 		_format.height = height;
 		_format.format = formatPix;
-		return open();
+		// return open();
+		
+		hvl::stopCapture(_fd);
+		hvl::setFormat(_fd,  _format.width, _format.height);
+		hvl::startCapture(_fd);
 	}
 	bool set(Device::Param code, double value) {
 		if(!_open)

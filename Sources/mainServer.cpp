@@ -42,12 +42,13 @@ void pok() {
 		std::cout << frame.length() << "B" << std::endl;
 	} while(limit-->0);
 	
+	device.setFormat(640, 480);
+	
 	// Close device
 	device.close();
 }
 
 int main() {
-	pok();
 	pok();
 	
 	return 0;
