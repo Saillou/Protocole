@@ -93,14 +93,18 @@ public:
 		close();
 		return false;		
 	}
-	bool close() {			
+	bool close() {		
+		printf("beg test \n");
+		struct v4l2_buffer buf = {0};
+		hvl::stopCapture(_fd)
+		hvl::setFormat(_fd,  640, 480);
+		hvl::queryBuffer(_fd, buf);
+		hvl::startCapture(_fd)
+		printf("end test \n");
+		
 		if(_fd == -1)
 			return true;
 		
-		if(!hvl::stopCapture(_fd))
-			goto failed;
-		if(!hvl::stopCapture(_fd))
-			goto failed;
 		if(!hvl::stopCapture(_fd))
 			goto failed;
 		
