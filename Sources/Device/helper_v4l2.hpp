@@ -99,7 +99,7 @@ namespace hvl {
 	
 	// Remove memory link
 	bool memoryUnmap(int fd, void** pBufStart, size_t& bufLen) {
-		if(munmap(*pBufStart, bufLen) == -1) {
+		if(munmap(*pBufStart, 640*480*3) == -1) {
 			printError(fd, "Memory unmap");
 			return false;
 		}
@@ -114,8 +114,7 @@ namespace hvl {
 	// Allocate 1 buffer (once allocate buffer can be queued/unqueued/cheked)
 	bool requestBuffer(int fd) {
 		struct v4l2_requestbuffers req = {0};
-		memset(&req, 0, sizeof(req));
-		
+
 		req.count 	= 1;
 		req.type 	= V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		req.memory 	= V4L2_MEMORY_MMAP;
@@ -126,8 +125,7 @@ namespace hvl {
 	// Desallocate any buffers
 	bool freeBuffer(int fd) {
 		struct v4l2_requestbuffers req = {0};
-		memset(&req, 0, sizeof(req));
-		
+
 		req.count 	= 0;
 		req.type 	= V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		req.memory 	= V4L2_MEMORY_MMAP;
