@@ -139,7 +139,7 @@ public:
 		return true;		
 	}
 	bool retrieve(Gb::Frame& frame) {
-		_rawData.buffer = std::vector<unsigned char>(_buffer.start, (unsigned char*)_buffer.start + _buffer.length);
+		_rawData.buffer = std::vector<unsigned char>((unsigned char*)_buffer.start, (unsigned char*)_buffer.start + _buffer.length);
 		_rawData.size = Gb::Size(_format.width, _format.height);
 		_rawData.type = (_format.format == MJPG) ? Gb::FrameType::Jpg422 : Gb::FrameType::Yuv422;
 		// _rawData = Gb::Frame(
