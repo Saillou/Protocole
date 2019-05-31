@@ -102,6 +102,8 @@ public:
 		if(!hvl::stopCapture(_fd))
 			goto failed;
 		
+		std::cout << grab() << std::endl;
+		
 		if(!hvl::memoryUnmap(_fd, &_buffer.start, _buffer.length))
 			goto failed;
 		
@@ -134,11 +136,12 @@ public:
 		fdp.events 		= POLLIN | POLLOUT; // inputs
 		fdp.revents		= 0; // outputs
 		
-		// Wait event on fd : return : 1 => ok, 0 => timeout, -1 => error
-		for(int err = 0; err <= 0; Timer::wait(1)) {
-			err = poll(&fdp, 1, 1000);
-
-			if(err < 0) // Error
+		// Wait event on fd
+		for(int iteration = 0; iteration < 50; Timer::wait(1)) {
+			int err = poll(&fdp, 1, 1000);
+			if(err > 0) // Success
+				break;
+			else if(err < 0) // Error
 				return false;
 		}
 	
