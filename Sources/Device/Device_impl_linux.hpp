@@ -97,12 +97,8 @@ public:
 		if(_fd == -1)
 			return true;
 		
-		_open = false;
-		
 		if(!hvl::stopCapture(_fd))
 			goto failed;
-		
-		std::cout << grab() << std::endl;
 		
 		if(!hvl::memoryUnmap(_fd, &_buffer.start, _buffer.length))
 			goto failed;
@@ -115,11 +111,13 @@ public:
 		_encoderJpg.cleanup();
 		
 		// ----- Success -----
+		_open = false;
 		return true;		
 	
 		// ----- Failed -----
 	failed:
 		_fd = -1;
+		_open = false;
 		return false;
 	}
 	void refresh() {
@@ -144,7 +142,7 @@ public:
 			else if(err < 0) // Error
 				return false;
 				
-			printf("%d iter", iteration);
+			printf("%d iterations \n", iteration);
 		}
 	
 		// Grab frame
