@@ -84,32 +84,6 @@ namespace hvl {
 	}
 	
 	
-	// --- Memory ---
-	// Link v4l2 buffer to our buffer
-	bool memoryMap(int fd, struct v4l2_buffer& vlBuf, void** pBufStart, size_t& bufLen) {
-		*pBufStart 	= mmap(nullptr, vlBuf.length, PROT_READ | PROT_WRITE, MAP_SHARED, fd, vlBuf.m.offset);
-		bufLen 		= vlBuf.bytesused > 0 ? vlBuf.bytesused : vlBuf.length;
-		
-		if(*pBufStart == MAP_FAILED) {
-			printError(fd, "Memory map");
-			return false;
-		}
-		return true;
-	}
-	
-	// Remove memory link
-	bool memoryUnmap(int fd, void** pBufStart, size_t& bufLen) {
-		if(munmap(*pBufStart, 640*480*3) == -1) {
-			printError(fd, "Memory unmap");
-			return false;
-		}
-		
-		*pBufStart = nullptr;
-		bufLen = 0;
-		return true;
-	}
-	
-	
 	// --- Buffers  ---
 	// Allocate 1 buffer (once allocate buffer can be queued/unqueued/cheked)
 	bool requestBuffer(int fd) {
@@ -158,6 +132,37 @@ namespace hvl {
 		
 		return ioctlAct(fd, VIDIOC_DQBUF,  &buf, "Dequeuing Buffer");
 	}
+	
+	
+	// --- Memory ---
+	// Link v4l2 buffer to our buffer
+	bool memoryMap(int fd, struct v4l2_buffer& vlBuf, void** pBufStart, size_t& bufLen) {
+		*pBufStart 	= mmap(nullptr, vlBuf.length, PROT_READ | PROT_WRITE, MAP_SHARED, fd, vlBuf.m.offset);
+		bufLen 		= vlBuf.bytesused > 0 ? vlBuf.bytesused : vlBuf.length;
+		
+		if(*pBufStart == MAP_FAILED) {
+			printError(fd, "Memory map");
+			return false;
+		}
+		return true;
+	}
+	
+	// Remove memory link
+	bool memoryUnmap(int fd, void** pBufStart, size_t& bufLen) {
+		struct v4l2_buffer buf = {0};
+		if(!queryBuffer(fd, &buf))
+			return false;
+		
+		if(munmap(*pBufStart, buf.length) == -1) {
+			printError(fd, "Memory unmap");
+			return false;
+		}
+		
+		*pBufStart = nullptr;
+		bufLen = 0;
+		return true;
+	}
+	
 	
 	// --- Format ---
 	bool setFormat(int fd, int width, int height) {
