@@ -88,8 +88,11 @@ public:
 			goto failed;
 		if(!hvl::memoryUnmap(_fd, _buffer.start, _buffer.length))
 			goto failed;
-		if(!hvl::closefd(_fd))
-			goto failed;
+		// if(!hvl::closefd(_fd))
+			// goto failed;
+		std::cout << "Before Closing : " << _fd << std::endl;
+		::close(fd);
+		std::cout << "After Closing : " << _fd << std::endl;
 		
 		_encoderH264.cleanup();
 		_decoderJpg.cleanup();
