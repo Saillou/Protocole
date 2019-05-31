@@ -141,17 +141,15 @@ public:
 			fdp.revents		= 0; // outputs
 			
 			int err = poll(&fdp, 1, 1000);
-			if(errno == 11) {
-				printf(".\n");
-				continue;
-			}
 			if(err > 0) // Success
 				break;
 			else if(err < 0) // Error
 				return false;
 		}
-		if(fdp.revents != POLLIN)
+		if(fdp.revents != POLLIN) {
+			std::cout << fdp.revents << std::endl;
 			return false;
+		}
 	
 		// Grab frame
 		_bufferQueued = false;
