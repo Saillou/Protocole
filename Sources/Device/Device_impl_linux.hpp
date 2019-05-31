@@ -147,7 +147,7 @@ public:
 			printf("%d iterations \n", iteration);
 		}
 		
-		std::cout << fdp.revents << std::endl;
+		std::cout << (fdp.revents & POLLIN > 0) << " " << (fdp.revents & POLLOUT > 0) << std::endl;
 	
 		// Grab frame
 		if(!hvl::dequeueBuffer(_fd, buf)) 
