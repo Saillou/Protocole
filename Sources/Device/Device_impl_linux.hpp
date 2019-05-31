@@ -84,15 +84,23 @@ public:
 		return false;		
 	}
 	bool close() {
-		if(hvl::stopCapture(_fd) && hvl::memoryUnmap(_fd, _buffer.start, _buffer.length) && hvl::closefd(_fd)) {
-			_encoderH264.cleanup();
-			_decoderJpg.cleanup();
-			_encoderJpg.cleanup();
-			
-			return true;		
-		}
-		else 
-			return false;	
+		if(!hvl::stopCapture(_fd))
+			goto failed;
+		if(!hvl::memoryUnmap(_fd, _buffer.start, _buffer.length))
+			goto failed;
+		if(!hvl::closefd(_fd))
+			goto failed;
+		
+		_encoderH264.cleanup();
+		_decoderJpg.cleanup();
+		_encoderJpg.cleanup();
+		
+		// ----- Success -----
+		return true;		
+	
+		// ----- Failed -----
+	failed:
+		return false;
 	}
 	void refresh() {
 		_encoderH264.refresh();
