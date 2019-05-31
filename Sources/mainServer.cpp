@@ -40,6 +40,11 @@ int main() {
 	std::cout << "Length: " << frame.length() << "B." <<std::endl;
 	device.close();
 	
+	device.open();
+	device.read(frame);
+	std::cout << "Length: " << frame.length() << "B." <<std::endl;
+	device.close();
+	
 	return 0;
 }
 
