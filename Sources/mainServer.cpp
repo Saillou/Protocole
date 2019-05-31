@@ -37,6 +37,8 @@ int pok() {
 	Gb::Frame frame;
 	
 	device.read(frame);
+	device.read(frame);
+	device.read(frame);
 	
 	// Close device
 	device.close();
@@ -45,11 +47,7 @@ int pok() {
 }
 
 int main() {
-	int l = 0;
-	do {
-		l = pok();
-		std::cout << l << "B" << std::endl;
-	} while(l == 0);
+	std::cout << pok() << "B" << std::endl;
 	std::cout << pok() << "B" << std::endl;
 	
 	return 0;
