@@ -99,7 +99,7 @@ namespace hvl {
 	
 	// Remove memory link
 	bool memoryUnmap(int fd, void** pBufStart, size_t& bufLen) {
-		if(munmap(*pBufStart, bufLen) == -1) {
+		if(munmap(*pBufStart, 640*480*3) == -1) {
 			printError(fd, "Memory unmap");
 			return false;
 		}
