@@ -123,6 +123,8 @@ public:
 		return true;		
 	}
 	bool retrieve(Gb::Frame& frame) {
+		std::cout << "Retrieve: " << _buffer.length << std::endl;
+		
 		_rawData = Gb::Frame(
 			reinterpret_cast<unsigned char*>(_buffer.start), 
 			static_cast<unsigned long>(_buffer.length),
