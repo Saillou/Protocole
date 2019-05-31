@@ -33,8 +33,7 @@ public:
 		// Wait open
 	}
 	~_Impl() {
-		if(_fd != -1)
-			close();
+		close();
 	}
 	
 	// Methods
@@ -92,6 +91,9 @@ public:
 		return false;		
 	}
 	bool close() {
+		if(_fd == -1)
+			return true;
+		
 		_open = false;
 		
 		if(!hvl::stopCapture(_fd))
@@ -115,6 +117,7 @@ public:
 	
 		// ----- Failed -----
 	failed:
+		_fd = -1;
 		return false;
 	}
 	void refresh() {
