@@ -71,7 +71,6 @@ public:
 		if(!_encoderH264.setup(_format.width, _format.height))
 			goto failed;
 		
-		
 		// Start	 
 		if(!hvl::startCapture(_fd))
 			return false;
