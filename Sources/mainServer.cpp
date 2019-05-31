@@ -43,14 +43,14 @@ int main() {
 	int i = 1;
 	int N = 33;
 	for(; i <= N; i++) {
-		device.read(frame);
-		std::cout << i << " " << frame.length() << std::endl;
+		// device.read(frame);
+		// std::cout << i << " " << frame.length() << std::endl;
 		
-		if(i%30 == 0) {
-			std::cout << " ------------------------------ chaning format -------------------------------- " << std::endl;
-			device.setFormat(fmtList[k].first, fmtList[k].second, Device::MJPG);
-			k = (k + 1) % fmtList.size();
-		}
+		// if(i%30 == 0) {
+			// std::cout << " ------------------------------ chaning format -------------------------------- " << std::endl;
+			// device.setFormat(fmtList[k].first, fmtList[k].second, Device::MJPG);
+			// k = (k + 1) % fmtList.size();
+		// }
 	}
 	
 	device.close();
