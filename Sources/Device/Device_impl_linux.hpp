@@ -139,14 +139,15 @@ public:
 		return true;		
 	}
 	bool retrieve(Gb::Frame& frame) {
-		_rawData = Gb::Frame(
-			reinterpret_cast<unsigned char*>(_buffer.start), 
-			static_cast<unsigned long>(_buffer.length),
-			Gb::Size(_format.width, _format.height),
-			(_format.format == MJPG) ? Gb::FrameType::Jpg422 : Gb::FrameType::Yuv422
-		).clone();
-		
-		// _askFrame();
+		_rawData.buffer = std::vector<unsigned char>(_buffer.start, _buffer.start + _buffer.length);
+		_rawData.size = Gb::Size(_format.width, _format.height);
+		_rawData.type = (_format.format == MJPG) ? Gb::FrameType::Jpg422 : Gb::FrameType::Yuv422;
+		// _rawData = Gb::Frame(
+			// reinterpret_cast<unsigned char*>(_buffer.start), 
+			// static_cast<unsigned long>(_buffer.length),
+			// Gb::Size(_format.width, _format.height),
+			// (_format.format == MJPG) ? Gb::FrameType::Jpg422 : Gb::FrameType::Yuv422
+		// ).clone();
 			
 		return _treat(frame);		
 	}
