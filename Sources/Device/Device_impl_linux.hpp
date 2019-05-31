@@ -103,6 +103,9 @@ public:
 		if(!hvl::memoryUnmap(_fd, &_buffer.start, _buffer.length))
 			goto failed;
 		
+		if(!hvl::freeBuffer(_fd))
+			goto failed;
+		
 		if(!hvl::closefd(_fd))
 			goto failed;
 
