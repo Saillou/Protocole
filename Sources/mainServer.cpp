@@ -45,8 +45,12 @@ int pok() {
 }
 
 int main() {
-	for(int i = 0; i < 5; i++)
+	for(int i = 0, int l = 0, int ln0 = 0; ln0 < 3; i++) {
+		l = pok();
+		if(l > 0) ln0++;
+		
 		std::cout << i << " - Length: " << pok() << "B. \n" << std::endl;
+	}
 
 	return 0;
 }
