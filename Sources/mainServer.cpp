@@ -36,14 +36,10 @@ void pok() {
 	// Test
 	Gb::Frame frame;
 	
-	device.read(frame);
-	std::cout << frame.length() << "B" << std::endl;
-	
-	device.read(frame);
-	std::cout << frame.length() << "B" << std::endl;
-	
-	device.read(frame);
-	std::cout << frame.length() << "B" << std::endl;
+	do {
+		device.read(frame);
+		std::cout << frame.length() << "B" << std::endl;
+	while(device.read(frame) && frame.length() == 0);
 	
 	// Close device
 	device.close();
