@@ -37,11 +37,24 @@ void pok() {
 	Gb::Frame frame;
 	device.read(frame);
 	std::cout << frame.length() << "B" << std::endl;
+	
+	device.read(frame);
+	std::cout << frame.length() << "B" << std::endl;
+
+	device.read(frame);
+	std::cout << frame.length() << "B" << std::endl;
+	
+	device.setFormat(1280, 720, Device::MJPG);
+	
+	device.read(frame);
+	std::cout << frame.length() << "B" << std::endl;
+	
+	device.read(frame);
+	std::cout << frame.length() << "B" << std::endl;
 }
 
 int main() {
 	pok();	
-	pok();
 	
 	return 0;
 }
