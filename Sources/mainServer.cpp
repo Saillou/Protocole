@@ -43,7 +43,7 @@ int main() {
 	pok();
 	
 	std::cout << "Press a key to continue..." << std::endl;
-	return std::cin.get();	
+	std::cin.get();	
 	
 	pok();
 	
