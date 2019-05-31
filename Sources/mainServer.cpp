@@ -28,7 +28,7 @@ static void sigintHandler(int signal) {
 	Globals::signalStatus = signal;
 }
 
-int pok() {
+void pok() {
 	// Open device
 	Device device(Globals::PATH_0);
 	device.open();
@@ -37,18 +37,21 @@ int pok() {
 	Gb::Frame frame;
 	
 	device.read(frame);
+	std::cout << frame.length() << "B" << std::endl;
+	
 	device.read(frame);
+	std::cout << frame.length() << "B" << std::endl;
+	
 	device.read(frame);
+	std::cout << frame.length() << "B" << std::endl;
 	
 	// Close device
 	device.close();
-	
-	return frame.length();
 }
 
 int main() {
-	std::cout << pok() << "B" << std::endl;
-	std::cout << pok() << "B" << std::endl;
+	pok();
+	pok();
 	
 	return 0;
 }
