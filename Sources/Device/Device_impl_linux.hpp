@@ -125,9 +125,9 @@ public:
 	}
 	
 	bool grab() {
-		printf("grab \n");
 		if(!_open)
 			return false;
+		printf("grabbing \n");
 		
 		struct v4l2_buffer buf = {0};
 		struct pollfd fdp;
