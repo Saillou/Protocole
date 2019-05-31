@@ -25,7 +25,7 @@ namespace hvl {
 		fd = open(path.c_str(), O_RDWR | O_NONBLOCK);
 
 		if(fd == -1) {
-			perror(fd, "Opening file descriptor");
+			printError(fd, "Opening file descriptor");
 			return false;
 		}
 		return true;
@@ -34,7 +34,7 @@ namespace hvl {
 	// Close file descriptor
 	bool closefd(int& fd) {
 		if(close(fd) == -1) {
-			perror(fd, "Closing file descriptor");
+			printError(fd, "Closing file descriptor");
 			return false;
 		}
 		
@@ -66,7 +66,7 @@ namespace hvl {
 		bufLen 	= buf.bytesused > 0 ? buf.bytesused : buf.length;
 		
 		if(bufStart == MAP_FAILED) {
-			perror(fd, "Memory map");
+			printError(fd, "Memory map");
 			return false;
 		}
 		return true;
@@ -75,7 +75,7 @@ namespace hvl {
 	// Remove memory link
 	bool memoryUnmap(void* bufStart, size_t& bufLen) {
 		if(munmap(bufStart, bufLen) == -1) {
-			perror(fd, "Memory unmap");
+			printError(fd, "Memory unmap");
 			return false;
 		}
 		
@@ -158,13 +158,13 @@ namespace hvl {
 	// ---------- Tools ----------
 	bool ioctlAct(int fd, int request, void *arg, const std::string& errorMsg = "") {
 		if(xioctl(fd, request, arg) == -1) {
-			perror(fd, errorMsg);
+			printError(fd, errorMsg);
 			return false;
 		}	
 		return true;
 	}
 	
-	void perror(int fd, const std::string& message) const {
+	void printError(int fd, const std::string& message) const {
 		std::string mes = "[" + std::to_string(fd) + "] " + message + " - Errno: " +  std::to_string(errno);
 		perror(mes.c_str());	
 	}
