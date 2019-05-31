@@ -51,6 +51,12 @@ void pok() {
 	
 	device.read(frame);
 	std::cout << frame.length() << "B" << std::endl;
+	
+	device.read(frame);
+	std::cout << frame.length() << "B" << std::endl;
+	
+	device.read(frame);
+	std::cout << frame.length() << "B" << std::endl;
 }
 
 int main() {
