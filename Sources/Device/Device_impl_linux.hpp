@@ -113,8 +113,10 @@ public:
 		_decoderJpg.cleanup();
 		_encoderJpg.cleanup();
 		
+		
 		// ----- Success -----
 		_open = false;
+		_bufferQueued = false;
 		return true;		
 	
 		// ----- Failed -----
@@ -146,10 +148,8 @@ public:
 			else if(err < 0) // Error
 				return false;
 		}
-		if(fdp.revents != POLLIN) {
-			std::cout << fdp.revents << std::endl;
+		if(fdp.revents != POLLIN)
 			return false;
-		}
 	
 		// Grab frame
 		_bufferQueued = false;
