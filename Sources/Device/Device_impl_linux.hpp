@@ -92,9 +92,6 @@ public:
 		return false;		
 	}
 	bool close() {
-		if(!_open)
-			return true;
-		
 		_open = false;
 		
 		if(!hvl::stopCapture(_fd))
