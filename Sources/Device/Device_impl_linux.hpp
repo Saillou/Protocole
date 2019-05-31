@@ -107,7 +107,7 @@ public:
 		if(!hvl::queryBuffer(_fd, buf))
 			goto failed;
 		
-		printf("Query: %d", buf.bytesused/1000);
+		printf("Query: %d \n", buf.bytesused/1000);
 		
 		if(!hvl::closefd(_fd))
 			goto failed;
