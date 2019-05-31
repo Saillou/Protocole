@@ -150,7 +150,7 @@ namespace hvl {
 	// Remove memory link
 	bool memoryUnmap(int fd, void** pBufStart, size_t& bufLen) {
 		struct v4l2_buffer buf = {0};
-		if(!queryBuffer(fd, &buf))
+		if(!queryBuffer(fd, buf))
 			return false;
 		
 		if(munmap(*pBufStart, buf.length) == -1) {
