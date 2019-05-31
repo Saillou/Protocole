@@ -35,25 +35,15 @@ void pok() {
 	
 	// Test
 	Gb::Frame frame;
-	int limit = 1;
-	
-	do {
-		device.read(frame);
-		std::cout << frame.length() << "B" << std::endl;
-	} while(limit-->0);
-	
-	device.setFormat(640, 480, Device::MJPG);
-	
-	for(int i = 0; i < 10; i++) {
-		device.read(frame);
-		std::cout << frame.length() << "B" << std::endl;
-	}
+	device.read(frame);
+	std::cout << frame.length() << "B" << std::endl;
 	
 	// Close device
 	device.close();
 }
 
 int main() {
+	pok();
 	pok();
 	
 	return 0;
