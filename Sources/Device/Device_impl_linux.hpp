@@ -134,15 +134,16 @@ public:
 		fdp.events 		= POLLIN | POLLOUT; // inputs
 		fdp.revents		= 0; // outputs
 		
-		// Wait event on fd
-		if(poll(&fdp, 1, 1000) <= 0) // 0 => timeout, -1 => error
+		// Wait event on fd : return : 1 => ok, 0 => timeout, -1 => error
+		if((int err = poll(&fdp, 1, 1000)) <= 0) {
+			printf("poll : %d \n");
 			return false;
+		}
 	
 		// Grab frame
-		std::cout << "deq" << std::endl;
 		if(!hvl::dequeueBuffer(_fd, buf)) 
 			return false;
-		std::cout << "buf" << std::endl;
+
 		_bufferQueued = false;
 		
 		// Check size
