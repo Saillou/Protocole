@@ -78,12 +78,12 @@ public:
 			goto failed;
 		
 		// Start	 
+		if(!_askFrame())
+			goto failed;
+		
 		if(!hvl::startCapture(_fd))
 			goto failed;
 		
-		if(!_askFrame())
-			goto failed;
-
 		// ----- Success -----
 		_open = true;
 		return true;		
@@ -127,9 +127,6 @@ public:
 	bool grab() {
 		if(!_open)
 			return false;
-		
-		// if(!_askFrame())
-			// return false;
 		
 		struct v4l2_buffer buf = {0};
 		struct pollfd fdp;
