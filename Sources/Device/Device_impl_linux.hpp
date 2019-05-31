@@ -139,8 +139,10 @@ public:
 			return false;
 	
 		// Grab frame
+		std::cout << "deq" << std::endl;
 		if(!hvl::dequeueBuffer(_fd, buf)) 
 			return false;
+		std::cout << "buf" << std::endl;
 		_bufferQueued = false;
 		
 		// Check size
