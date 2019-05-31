@@ -135,12 +135,10 @@ public:
 		fdp.revents		= 0; // outputs
 		
 		// Wait event on fd : return : 1 => ok, 0 => timeout, -1 => error
-		for(int err = 0; err <= 0;) {
+		for(int err = 0; err <= 0; Timer::wait(1)) {
 			err = poll(&fdp, 1, 1000);
-			printf("poll : %d \n", err);
-			if(err == 0) // timeout
-				Timer::wait(1);
-			else if(err < 0) // Error
+
+			if(err < 0) // Error
 				return false;
 		}
 	

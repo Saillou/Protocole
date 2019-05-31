@@ -40,7 +40,7 @@ void pok() {
 	do {
 		device.read(frame);
 		std::cout << frame.length() << "B" << std::endl;
-	} while(frame.length() == 0 && limit-->0);
+	} while(limit-->0);
 	
 	// Close device
 	device.close();
