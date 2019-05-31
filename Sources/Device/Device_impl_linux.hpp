@@ -125,6 +125,7 @@ public:
 	}
 	
 	bool grab() {
+		printf("grab \n");
 		if(!_open)
 			return false;
 		
