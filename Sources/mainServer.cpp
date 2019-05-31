@@ -40,11 +40,7 @@ void pok() {
 }
 
 int main() {
-	pok();
-	
-	std::cout << "Press a key to continue..." << std::endl;
-	std::cin.get();	
-	
+	pok();	
 	pok();
 	
 	return 0;
