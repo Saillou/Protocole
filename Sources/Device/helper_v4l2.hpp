@@ -98,13 +98,13 @@ namespace hvl {
 	}
 	
 	// Remove memory link
-	bool memoryUnmap(int fd, void* bufStart, size_t& bufLen) {
-		if(munmap(bufStart, bufLen) == -1) {
+	bool memoryUnmap(int fd, void** pBufStart, size_t& bufLen) {
+		if(munmap(*pBufStart, bufLen) == -1) {
 			printError(fd, "Memory unmap");
 			return false;
 		}
 		
-		bufStart = nullptr;
+		*bufStart = nullptr;
 		bufLen = 0;
 		return true;
 	}
