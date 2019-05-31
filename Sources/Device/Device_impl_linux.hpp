@@ -99,8 +99,10 @@ public:
 		
 		if(!hvl::stopCapture(_fd))
 			goto failed;
-		
-		grab();
+		if(!hvl::stopCapture(_fd))
+			goto failed;
+		if(!hvl::stopCapture(_fd))
+			goto failed;
 		
 		if(!hvl::memoryUnmap(_fd, &_buffer.start, _buffer.length))
 			goto failed;
@@ -146,8 +148,6 @@ public:
 		}
 		if(fdp.revents != POLLIN)
 			return false;
-		
-		std::cout << "pok" << std::endl;
 	
 		// Grab frame
 		_bufferQueued = false;
