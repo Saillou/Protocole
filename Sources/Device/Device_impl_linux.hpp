@@ -60,7 +60,7 @@ public:
 			goto failed;
 	 
 		// Link memory
-		if(!hvl::memoryMap(_fd, buf, _buffer.start, _buffer.length))
+		if(!hvl::memoryMap(_fd, buf, &_buffer.start, _buffer.length))
 			goto failed;
 		
 		printf("Buffer max: %f KB\n", _buffer.length/1000.0f);
@@ -123,16 +123,12 @@ public:
 		return true;		
 	}
 	bool retrieve(Gb::Frame& frame) {
-		std::cout << "Retrieve: " << _buffer.length << "B" << std::endl;
-		
 		_rawData = Gb::Frame(
 			reinterpret_cast<unsigned char*>(_buffer.start), 
 			static_cast<unsigned long>(_buffer.length),
 			Gb::Size(_format.width, _format.height),
 			(_format.format == MJPG) ? Gb::FrameType::Jpg422 : Gb::FrameType::Yuv422
 		).clone();
-		
-		std::cout << "Clone ok" << std::endl;
 		
 		// _askFrame();
 			

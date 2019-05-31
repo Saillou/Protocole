@@ -83,11 +83,11 @@ namespace hvl {
 	
 	// --- Memory ---
 	// Link v4l2 buffer to our buffer
-	bool memoryMap(int fd, struct v4l2_buffer& vlBuf, void* bufStart, size_t& bufLen) {
-		bufStart = mmap(nullptr, vlBuf.length, PROT_READ | PROT_WRITE, MAP_SHARED, fd, vlBuf.m.offset);
-		bufLen 	= vlBuf.bytesused > 0 ? vlBuf.bytesused : vlBuf.length;
+	bool memoryMap(int fd, struct v4l2_buffer& vlBuf, void** pBufStart, size_t& bufLen) {
+		*pBufStart 	= mmap(nullptr, vlBuf.length, PROT_READ | PROT_WRITE, MAP_SHARED, fd, vlBuf.m.offset);
+		bufLen 		= vlBuf.bytesused > 0 ? vlBuf.bytesused : vlBuf.length;
 		
-		if(bufStart == MAP_FAILED) {
+		if(*pBufStart == MAP_FAILED) {
 			printError(fd, "Memory map");
 			return false;
 		}
