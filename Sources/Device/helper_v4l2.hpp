@@ -17,7 +17,7 @@
 
 namespace hvl {
 	// ---------- Tools ----------
-	void printError(int fd, const std::string& message) const {
+	void printError(int fd, const std::string& message) {
 		std::string mes = "[" + std::to_string(fd) + "] " + message + " - Errno: " +  std::to_string(errno);
 		perror(mes.c_str());	
 	}
@@ -67,7 +67,7 @@ namespace hvl {
 	
 	// --- Capture ---
 	// Start capture during memory mapping
-	bool startCapture() {
+	bool startCapture(int fd) {
 		enum v4l2_buf_type type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		
 		return ioctlAct(fd, VIDIOC_STREAMON,  &type, "Starting Capture");		
@@ -84,8 +84,8 @@ namespace hvl {
 	// --- Memory ---
 	// Link v4l2 buffer to our buffer
 	bool memoryMap(int fd, struct v4l2_buffer& vlBuf, void* bufStart, size_t& bufLen) {
-		bufStart = mmap(nullptr, buf.length, PROT_READ | PROT_WRITE, MAP_SHARED, fd, vlBuf.m.offset);
-		bufLen 	= buf.bytesused > 0 ? buf.bytesused : buf.length;
+		bufStart = mmap(nullptr, vlBuf.length, PROT_READ | PROT_WRITE, MAP_SHARED, fd, vlBuf.m.offset);
+		bufLen 	= vlBuf.bytesused > 0 ? vlBuf.bytesused : vlBuf.length;
 		
 		if(bufStart == MAP_FAILED) {
 			printError(fd, "Memory map");
@@ -95,7 +95,7 @@ namespace hvl {
 	}
 	
 	// Remove memory link
-	bool memoryUnmap(void* bufStart, size_t& bufLen) {
+	bool memoryUnmap(int fd, void* bufStart, size_t& bufLen) {
 		if(munmap(bufStart, bufLen) == -1) {
 			printError(fd, "Memory unmap");
 			return false;
