@@ -114,20 +114,20 @@ namespace hvl {
 	// Allocate 1 buffer (once allocate buffer can be queued/unqueued/cheked)
 	bool requestBuffer(int fd) {
 		struct v4l2_requestbuffers req = {0};
+		memset(&req, 0, sizeof(req));
+		
 		req.count 	= 1;
 		req.type 	= V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		req.memory 	= V4L2_MEMORY_MMAP;
 		
-		if(ioctlAct(fd, VIDIOC_REQBUFS,  &req, "Requesting Buffer")) {
-			std::cout << "=> buffers: " << req.count <<std::endl;
-			return true;
-		}
-		return false;
+		return ioctlAct(fd, VIDIOC_REQBUFS,  &req, "Requesting Buffer");	
 	}
 	
 	// Desallocate any buffers
 	bool freeBuffer(int fd) {
 		struct v4l2_requestbuffers req = {0};
+		memset(&req, 0, sizeof(req));
+		
 		req.count 	= 0;
 		req.type 	= V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		req.memory 	= V4L2_MEMORY_MMAP;
