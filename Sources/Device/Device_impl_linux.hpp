@@ -38,6 +38,8 @@ public:
 	
 	// Methods
 	bool open() {
+		struct v4l2_buffer buf = {0};
+		
 		// -- Init file descriptor --
 		if(!hvl::openfd(_fd, _path))
 			goto failed;
@@ -54,7 +56,6 @@ public:
 			goto failed;
 					
 		// -- Init buffers --
-		struct v4l2_buffer buf = {0};
 		if(!hvl::requestBuffer(_fd) || !hvl::queryBuffer(_fd, buf))
 			goto failed;
 	 
