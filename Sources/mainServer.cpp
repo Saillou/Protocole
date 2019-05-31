@@ -44,11 +44,10 @@ void pok() {
 	
 	device.setFormat(640, 480, Device::MJPG);
 	
+	for(int i = 0; i < 10; i++) {
 		device.read(frame);
 		std::cout << frame.length() << "B" << std::endl;
-		
-				device.read(frame);
-		std::cout << frame.length() << "B" << std::endl;
+	}
 	
 	// Close device
 	device.close();
