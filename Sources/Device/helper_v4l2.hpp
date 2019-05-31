@@ -20,7 +20,7 @@ namespace hvl {
 	// ---------- V4l2 commands ----------
 	// --- File descriptor ---
 	// Open file descriptor in non blocking mdoe
-	bool openFd(int& fd, const std::string& path) {
+	bool openfd(int& fd, const std::string& path) {
 		fd = -1;
 		fd = open(path.c_str(), O_RDWR | O_NONBLOCK);
 

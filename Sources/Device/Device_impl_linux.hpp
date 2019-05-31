@@ -38,7 +38,7 @@ public:
 	
 	// Methods
 	bool open() {
-		if(hvl::openFd(_fd, _path) && _initDevice() && _initMmap())
+		if(hvl::openfd(_fd, _path) && _initDevice() && _initMmap())
 			return true;
 		
 		// Failed
@@ -46,7 +46,7 @@ public:
 		return false;		
 	}
 	bool close() {
-		if(hvl::stopCapture(fd) && hvl::memoryUnmap(_buffer.start, _buffer.length) && closefd(fd) {
+		if(hvl::stopCapture(_fd) && hvl::memoryUnmap(_buffer.start, _buffer.length) && hvl::closefd(_fd) {
 			_encoderH264.cleanup();
 			_decoderJpg.cleanup();
 			_encoderJpg.cleanup();
@@ -75,7 +75,7 @@ public:
 			return false;
 	
 		// Grab frame
-		if(!dequeueBuffer(fd, buf)) 
+		if(!hvl::dequeueBuffer(_fd, buf)) 
 			return false;
 		_bufferQueued = false;
 		
@@ -122,7 +122,7 @@ public:
 			default: return false;
 		}
 		
-		if(!hlv::queryControl(fd, control.id, &queryctrl))
+		if(!hvl::queryControl(_fd, control.id, &queryctrl))
 			return false;
 		
 		// Value
@@ -142,12 +142,12 @@ public:
 			autoControl.id 	 = V4L2_CID_EXPOSURE_AUTO;
 			autoControl.value = V4L2_EXPOSURE_MANUAL;
 
-			if(hlv::setControl(_fd, &autoControl))
+			if(hvl::setControl(_fd, &autoControl))
 				return false;
 		}
 		
 		// Change value
-		if(hlv::setControl(_fd, &control))
+		if(hvl::setControl(_fd, &control))
 			return false;
 
 		return true;
@@ -167,7 +167,7 @@ public:
 			return 0.0;
 		
 		// Check control
-		if(!hlv::queryControl(fd, control.id, &queryctrl))
+		if(!hvl::queryControl(_fd, control.id, &queryctrl))
 			return 0.0;
 		
 		// Return value if asked about a limit
@@ -179,7 +179,7 @@ public:
 			return queryctrl.default_value > queryctrl.maximum ? (queryctrl.maximum+queryctrl.minimum)/2 : queryctrl.default_value;
 		
 		// -- Return the control value if not asked for a limit	
-		if(!hlv::getControl(fd, &control))
+		if(!hvl::getControl(_fd, &control))
 			return 0.0;
 		
 		// Special case
@@ -206,7 +206,7 @@ private:
 		}
 		printf("Seting: [%d x %d] \n",  _format.width,  _format.height);
 		
-		if(!hvl::setFormat(fd,  _format.width,  _format.height))
+		if(!hvl::setFormat(_fd,  _format.width,  _format.height))
 			return false;
 					
 		// -- Tools
@@ -222,17 +222,17 @@ private:
 	bool _initMmap() {
 		// Init buffers
 		struct v4l2_buffer buf = {0};
-		if(!hlv::requestBuffer(fd) || !hlv::queryBuffer(fd, buf))
+		if(!hvl::requestBuffer(_fd) || !hvl::queryBuffer(_fd, buf))
 			return false;
 	 
 		// Link memory
-		if(!hlv::memoryMap(fd, buf, _buffer.start, _buffer.length))
+		if(!hvl::memoryMap(_fd, buf, _buffer.start, _buffer.length))
 			return false;
 		
 		printf("Buffer max: %f KB\n", _buffer.length/1000.0f);
 		
 		// Start	 
-		if(!hlv::startCapture(_fd))
+		if(!hvl::startCapture(_fd))
 			return false;
 
 		// Everything ok
@@ -244,7 +244,7 @@ private:
 		if(_bufferQueued)
 			return true;
 		
-		if(!hlv::queueBuffer(fd))
+		if(!hvl::queueBuffer(_fd))
 			return false;
 		
 		// Flag the queue

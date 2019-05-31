@@ -47,7 +47,7 @@ int main() {
 		std::cout << i << " " << frame.length() << std::endl;
 		
 		if(i%30 == 0) {
-			std:cout << " ------------------------------ chaning format -------------------------------- " << std::endl;
+			std::cout << " ------------------------------ chaning format -------------------------------- " << std::endl;
 			device.setFormat(fmtList[k].first, fmtList[k].second, Device::MJPG);
 			k = (k + 1) % fmtList.size();
 		}
