@@ -45,8 +45,13 @@ int pok() {
 }
 
 int main() {
-	while(pok() == 0) std::cout << pok() << std::endl;
-
+	int l = 0;
+	do {
+		l = pok();
+		std::cout << l << "B" << std::endl;
+	} while(l == 0);
+	std::cout << pok() << "B" << std::endl;
+	
 	return 0;
 }
 
