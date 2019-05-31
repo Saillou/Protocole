@@ -39,6 +39,9 @@ public:
 	
 	// Methods
 	bool open() {
+		if(_open)
+			return true;
+		
 		struct v4l2_buffer buf = {0};
 		
 		// -- Init file descriptor --
@@ -89,6 +92,9 @@ public:
 		return false;		
 	}
 	bool close() {
+		if(!_open)
+			return true;
+		
 		_open = false;
 		
 		if(!hvl::stopCapture(_fd))
