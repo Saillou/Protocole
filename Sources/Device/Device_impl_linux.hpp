@@ -143,6 +143,8 @@ public:
 				break;
 			else if(err < 0) // Error
 				return false;
+				
+			printf("%d iter", iteration);
 		}
 	
 		// Grab frame
