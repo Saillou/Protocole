@@ -31,17 +31,15 @@ static void sigintHandler(int signal) {
 int main() {
 	// Open device
 	Device device(Globals::PATH_0);
-	if(!device.open()) {
-		std::cout << "Failed to open device" << std::endl;
-		return 0;
-	}
 	
 	// Test
 	Gb::Frame frame;
+	
 	device.open();
 	device.read(frame);
 	std::cout << "Length: " << frame.length() << "B." <<std::endl;
 	device.close();
+	
 	return 0;
 }
 
