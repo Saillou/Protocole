@@ -96,7 +96,7 @@ public:
 	bool close() {		
 		printf("beg test \n");
 		struct v4l2_buffer buf = {0};
-		hvl::stopCapture(_fd)
+		hvl::stopCapture(_fd);
 		hvl::setFormat(_fd,  640, 480);
 		hvl::queryBuffer(_fd, buf);
 		hvl::startCapture(_fd)
