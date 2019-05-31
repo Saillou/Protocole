@@ -32,6 +32,7 @@ void pok() {
 	// Open device
 	Device device(Globals::PATH_0);
 	device.open();
+	device.setFormat(1280, 720, Device::MJPG);
 	
 	// Test
 	Gb::Frame frame;
@@ -44,7 +45,7 @@ void pok() {
 	device.read(frame);
 	std::cout << frame.length() << "B" << std::endl;
 	
-	device.setFormat(1280, 720, Device::MJPG);
+	device.setFormat(640, 480, Device::MJPG);
 	
 	device.read(frame);
 	std::cout << frame.length() << "B" << std::endl;
