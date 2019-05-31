@@ -127,7 +127,6 @@ public:
 	bool grab() {
 		if(!_open)
 			return false;
-		printf("grabbing \n");
 		
 		struct v4l2_buffer buf = {0};
 		struct pollfd fdp;
@@ -271,7 +270,7 @@ public:
 private:
 	// Methods
 	bool _askFrame() {
-		if(!_open)
+		if(_fd < 0)
 			return false;
 		
 		// Already queued
