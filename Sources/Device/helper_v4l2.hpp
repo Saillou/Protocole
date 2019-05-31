@@ -104,7 +104,7 @@ namespace hvl {
 			return false;
 		}
 		
-		*bufStart = nullptr;
+		*pBufStart = nullptr;
 		bufLen = 0;
 		return true;
 	}
