@@ -61,6 +61,8 @@ void pok() {
 
 int main() {
 	pok();	
+	pok();	
+	pok();	
 	
 	return 0;
 }
