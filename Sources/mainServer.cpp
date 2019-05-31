@@ -45,8 +45,8 @@ int pok() {
 }
 
 int main() {
-	std::cout << "Length: " << pok() << "B." <<std::endl;
-	std::cout << "Length: " << pok() << "B." <<std::endl;
+	for(int i = 0; i < 100; i++)
+		std::cout << i << " - Length: " << pok() << "B." <<std::endl;
 
 	return 0;
 }
