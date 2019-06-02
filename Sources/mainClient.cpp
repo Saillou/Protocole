@@ -52,11 +52,8 @@ void showDevice(const int port, cv::Mat& cvFrame, std::mutex& mutFrame) {
 	});
 	
 	device.onOpen([&]() {
+		std::cout << "Open" << std::endl;
 		std::cout << "Saturation: " << device.get(Device::Param::Saturation) << std::endl;
-		
-		// device.get(Device::Param::Saturation, [&](double value) {
-			// std::cout << value << std::endl;
-		// });
 	});
 	
 	// -------- Main loop --------  

@@ -69,7 +69,7 @@ public:
 	
 	// -- Getters --
 	double get(Device::Param code) {
-		const uint64_t TIMEOUT_MUS = 500*1000; // 500ms
+		const int64_t TIMEOUT_MUS = 500*1000; // 500ms
 		double value = 0.0;
 		
 		// Create thread to get back the answer
