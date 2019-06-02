@@ -49,8 +49,6 @@ int main(int argc, char* argv[]) {
 		std::cout << "Press a key to continue..." << std::endl;
 		return std::cin.get();
 	}
-	std::cout << "Saturation 0 : " << device0.get(Device::Param::Saturation) << std::endl;
-	std::cout << "Saturation 1 : " << device1.get(Device::Param::Saturation) << std::endl;
 	
 	std::vector<std::pair<int,int>> fmtList = {
 		std::pair<int,int>(1280, 720), 

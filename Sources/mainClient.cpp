@@ -51,6 +51,14 @@ void showDevice(const int port, cv::Mat& cvFrame, std::mutex& mutFrame) {
 		memcpy(cvFrame.data, frame.start(), frame.length());
 	});
 	
+	device.onOpen([&]() {
+		std::cout << "Saturation: " << device.get(Device::Param::Saturation) << std::endl;
+		
+		// device.get(Device::Param::Saturation, [&](double value) {
+			// std::cout << value << std::endl;
+		// });
+	});
+	
 	// -------- Main loop --------  
 	if(!device.open(-1)) {
 		std::cout << "Can't open device" << std::endl;

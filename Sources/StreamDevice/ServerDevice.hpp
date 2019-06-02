@@ -190,39 +190,42 @@ private:
 		}		
 	}
 	void _treatProperties(const Server::ClientInfo& client, const std::string& msg) {
+		// --- get all ---
 		if(msg == "?") {
-			// --- get ---
 			MessageFormat command;
-			command.add("saturation", 	_device.get(Device::Saturation));
-			command.add("exposure", 		_device.get(Device::Exposure));
-			command.add("auto_exposure", _device.get(Device::AutoExposure));
+			command.add("saturation", 	get(Device::Saturation));
+			command.add("brightness", 	get(Device::Brightness));
+			command.add("hue", 				get(Device::Hue));
+			command.add("contrast", 		get(Device::Contrast));
+			command.add("whiteness", 		get(Device::Whiteness));
+			command.add("exposure", 		get(Device::Exposure));
+			command.add("auto_exposure", get(Device::AutoExposure));
 			
 			_server.sendInfo(client, Message(Message::DEVICE | Message::PROPERTIES, command.str()));
 		}
 		else {
-			// --- set ---
+			Device::Param code;
 			bool exist = false;
 			MessageFormat command(msg);
 			
+			// --- get one ---
+			code = command.valueOf<Device::Param>("code?", &exist);
+			if(exist) {
+				MessageFormat answer;
+				
+				answer.add("code", 	code);
+				answer.add("value",	get(code));
+				_server.sendInfo(client, Message(Message::DEVICE | Message::PROPERTIES, answer.str()));
+				return;
+			}
+			
+			// --- set one ---
 			// Couple Code/Value
-			Device::Param code = command.valueOf<Device::Param>("code", &exist);
+			code = command.valueOf<Device::Param>("code", &exist);
 			if(exist) {
 				set(code, command.valueOf<double>("value"));
 				return;
 			}
-			
-			// Directly
-			double saturation	= command.valueOf<double>("saturation", &exist);
-			if(exist)
-				set(Device::Saturation, saturation);
-			
-			double exposure = command.valueOf<double>("exposure", &exist);
-			if(exist)
-				set(Device::Exposure, exposure);
-			
-			double autoExposure = command.valueOf<double>("auto_exposure", &exist);
-			if(exist)
-				set(Device::AutoExposure, autoExposure);
 		}	
 	}
 	void _treatTextMessage(const Server::ClientInfo& client, const std::string& msg) {

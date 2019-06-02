@@ -6,6 +6,7 @@
 #include "../Tool/Decoder.hpp"
 #include "../Tool/Buffers.hpp"
 
+#include <map>
 #include <string>
 #include <memory>
 #include <mutex>
@@ -68,8 +69,34 @@ public:
 	
 	// -- Getters --
 	double get(Device::Param code) {
-		// to do..
-		return 0.0;
+		const uint64_t TIMEOUT_MUS = 500*1000; // 500ms
+		double value = 0.0;
+		
+		// Create thread to get back the answer
+		std::thread threadWaitForCbk([&](){
+			Timer timeout;
+			std::atomic<bool> gotIt = false;
+			
+			this->onGetParam(code, [&](double val) {
+				gotIt = true;
+				value = val;
+			});
+			
+			while(timeout.elapsed_mus() < TIMEOUT_MUS && !gotIt)
+				timeout.wait(2);
+		});
+		
+		// Launch command
+		MessageFormat command;
+		command.add("code?", code);
+		_client.sendInfo(Message(Message::DEVICE | Message::PROPERTIES, command.str()));
+		
+		// Wait for thread to finish
+		if(threadWaitForCbk.joinable())
+			threadWaitForCbk.join();
+		
+		// Finally return
+		return value;
 	}
 	const Device::FrameFormat getFormat() {
 		_client.sendInfo(Message(Message::DEVICE | Message::FORMAT, "?"));
@@ -113,6 +140,11 @@ public:
 		_cbkError = cbkError;
 	}
 	
+	void onGetParam(Device::Param code, const std::function<void(double)>& cbkParam) {
+		std::lock_guard<std::mutex> lockCbk(_mutCbk);
+		_mapCbkParam[code] = cbkParam;
+	}
+	
 private:	
 	// -- Methods --
 	
@@ -142,6 +174,8 @@ private:
 		bool success = false;
 		
 		for(;_running; Timer::wait(2)) {
+			emitFrame = false;
+			
 			// -- Get frame --
 			_buffer.lock();
 			if(_buffer.update(messageFrame)) {
@@ -149,51 +183,35 @@ private:
 					(unsigned char*)messageFrame.content(), 
 					(unsigned long)(messageFrame.size()), 
 					Gb::Size(_format.width, _format.height), 
-					(Gb::FrameType)(messageFrame.code() >> 10)
+					(Gb::FrameType)(messageFrame.code() >> 10) // Decode frame type
 				);
 				emitFrame = true;
 			}
 			_buffer.unlock();
 			
-			// -- Send --
+			// -- Emit --
 			if(emitFrame) {	
 				Gb::Frame frameEmit;
 				
-				// Decode 
-				if(frame.type == Gb::FrameType::H264) {
-					success = _decoderH264.decode(frame.buffer, frameEmit.buffer, &frame.size.width, &frame.size.height);
-					_format.width = frame.size.width;
-					_format.height = frame.size.height;
-				}
-				else if(frame.type == Gb::FrameType::Jpg422 || frame.type == Gb::FrameType::Jpg420) {
-					success = _decoderJpg.decode2bgr24(frame.buffer, frameEmit.buffer, frame.size.width, frame.size.height);
-				}
-				else if(frame.type == Gb::FrameType::Bgr24) {
-					frameEmit.buffer = frame.buffer;
-					success = true;
-				}
-				
-				// Emit
-				if(success) {
-					frameEmit.size = frame.size;
-					frameEmit.type = Gb::FrameType::Bgr24;	
+				// Treat
+				if(_treatFrame(frame, frameEmit)) {	
 					_errCount = 0;
 					
+					// Call cbk
 					_mutCbk.lock();
 					if(_cbkFrame)
 						_cbkFrame(frameEmit);
 					_mutCbk.unlock();
 				}
 				else {
-					_errCount++;
-					if(_errCount > 10) {
+					if(_errCount ++> 10) {
 						refresh();
 						_errCount = 0;
 					}
 				}
-				emitFrame = false;
-			}
-		}
+			} // !Emit
+			
+		} // !Loop
 	}
 	
 	bool _ready() {		
@@ -255,10 +273,43 @@ private:
 		}
 	}
 	void _treatDeviceProperties(const Message& message) {
-		// To do..
+		bool exist = false;
+		MessageFormat command(message.str());
+		
+		Device::Param code = command.valueOf<Device::Param>("code", &exist);
+		if(!exist)
+			return;
+		double value = command.valueOf<double>("value");
+		
+		std::lock_guard<std::mutex> lockCbk(_mutCbk);
+		if(_mapCbkParam.find(code) != _mapCbkParam.end()) {
+			_mapCbkParam[code](value);
+			_mapCbkParam[code] = nullptr;
+		}
 	}
-	bool _treatFrame(const Gb::Frame& frameIn, Gb::Frame& frameOut) {
-	
+	bool _treatFrame(Gb::Frame& frameIn, Gb::Frame& frameOut) {
+		bool success = false;
+		// Decode 
+		if(frameIn.type == Gb::FrameType::H264) {
+			success = _decoderH264.decode(frameIn.buffer, frameOut.buffer, &frameIn.size.width, &frameIn.size.height);
+			_format.width = frameIn.size.width;
+			_format.height = frameIn.size.height;
+		}
+		else if(frameIn.type == Gb::FrameType::Jpg422 || frameIn.type == Gb::FrameType::Jpg420) {
+			success = _decoderJpg.decode2bgr24(frameIn.buffer, frameOut.buffer, frameIn.size.width, frameIn.size.height);
+		}
+		else if(frameIn.type == Gb::FrameType::Bgr24) {
+			frameOut.buffer = frameIn.buffer;
+			success = true;
+		}
+		
+		// Add info
+		if(success) {
+			frameOut.size = frameIn.size;
+			frameOut.type = Gb::FrameType::Bgr24;
+		}
+		
+		return success;
 	}
 	
 	// -- Members --
@@ -282,5 +333,6 @@ private:
 	std::function<void(const Error& error)> _cbkError;	
 	std::function<void(const Gb::Frame&)> _cbkFrame;
 	std::function<void(void)> _cbkOpen;
+	std::map<Device::Param, std::function<void(double)>> _mapCbkParam;
 };
 

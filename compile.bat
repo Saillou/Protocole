@@ -3,12 +3,12 @@ setlocal EnableDelayedExpansion
 
 cd /d %~dp0
 set fRelease=%~dp0Release\
-set compile=0
+set compile=1
 set commit=1
-set launch=0
+set launch=1
 
 if %compile%==1 (
-	call compileCode.bat Server mainServer
+	REM call compileCode.bat Server mainServer
 	call compileCode.bat Client mainClient
 )
 
