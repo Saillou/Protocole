@@ -77,10 +77,10 @@ public:
 			Timer timeout;
 			std::atomic<bool> gotIt = false;
 			
-			// this->onGetParam(code, [&](double val) {
-				// gotIt = true;
-				// value = val;
-			// });
+			this->onGetParam(code, [&](double val) {
+				gotIt = true;
+				value = val;
+			});
 			
 			timeout.beg();
 			while(timeout.elapsed_mus() < TIMEOUT_MUS && !gotIt) {
