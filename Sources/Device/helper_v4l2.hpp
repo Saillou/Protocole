@@ -181,7 +181,10 @@ namespace hvl {
 	// Check control capabilities (maximum, minimum, default value)
 	bool queryControl(int fd, int id, struct v4l2_queryctrl* pqCtrl) {
 		pqCtrl->id = id;
-		return ioctlAct(fd, VIDIOC_G_CTRL, pqCtrl, "Querying control");
+		ioctlAct(fd, VIDIOC_G_CTRL, pqCtrl, "Querying control");
+		std::cout << "query: " << pqCtrl->maximum << std::endl;
+		return true;
+		// return ioctlAct(fd, VIDIOC_G_CTRL, pqCtrl, "Querying control");
 	}
 	
 	// Change control value
