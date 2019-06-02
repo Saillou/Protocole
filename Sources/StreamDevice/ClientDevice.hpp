@@ -69,31 +69,32 @@ public:
 	
 	// -- Getters --
 	double get(Device::Param code) {
-		const int64_t TIMEOUT_MUS = 500*1000; // 500ms
+		// const int64_t TIMEOUT_MUS = 500*1000; // 500ms
 		double value = 0.0;
 		
-		// Create thread to get back the answer
-		std::thread threadWaitForCbk([&](){
-			Timer timeout;
-			std::atomic<bool> gotIt = false;
+		// // Create thread to get back the answer
+		// std::thread threadWaitForCbk([&](){
+			// Timer timeout;
+			// std::atomic<bool> gotIt = false;
 			
-			this->onGetParam(code, [&](double val) {
-				gotIt = true;
-				value = val;
-			});
+			// this->onGetParam(code, [&](double val) {
+				// gotIt = true;
+				// value = val;
+			// });
 			
-			while(timeout.elapsed_mus() < TIMEOUT_MUS && !gotIt)
-				timeout.wait(2);
-		});
+			// while(timeout.elapsed_mus() < TIMEOUT_MUS && !gotIt) {
+				// timeout.wait(2);
+			// }
+		// });
 		
 		// Launch command
 		MessageFormat command;
 		command.add("code?", code);
 		_client.sendInfo(Message(Message::DEVICE | Message::PROPERTIES, command.str()));
 		
-		// Wait for thread to finish
-		if(threadWaitForCbk.joinable())
-			threadWaitForCbk.join();
+		// // Wait for thread to finish
+		// if(threadWaitForCbk.joinable())
+			// threadWaitForCbk.join();
 		
 		// Finally return
 		return value;

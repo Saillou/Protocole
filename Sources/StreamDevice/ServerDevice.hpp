@@ -215,6 +215,7 @@ private:
 				
 				answer.add("code", 	code);
 				answer.add("value",	get(code));
+				std::cout << code << "->" << value << std::endl;
 				_server.sendInfo(client, Message(Message::DEVICE | Message::PROPERTIES, answer.str()));
 				return;
 			}
