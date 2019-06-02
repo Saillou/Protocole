@@ -161,7 +161,9 @@ private:
 				
 				// Decode 
 				if(frame.type == Gb::FrameType::H264) {
-					success = _decoderH264.decode(frame.buffer, frameEmit.buffer);
+					success = _decoderH264.decode(frame.buffer, frameEmit.buffer, &frame.size.width, &frame.size.height);
+					_format.width = frame.size.width;
+					_format.height = frame.size.height;
 				}
 				else if(frame.type == Gb::FrameType::Jpg422 || frame.type == Gb::FrameType::Jpg420) {
 					success = _decoderJpg.decode2bgr24(frame.buffer, frameEmit.buffer, frame.size.width, frame.size.height);

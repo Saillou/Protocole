@@ -97,8 +97,8 @@ public:
 		_cleanDecoder();
 	}
 	
-	bool decode(const std::vector<unsigned char>& dataIn, std::vector<unsigned char>& dataOut) {
-		return _decodeH264(dataIn, dataOut);
+	bool decode(const std::vector<unsigned char>& dataIn, std::vector<unsigned char>& dataOut, int* pWidth = nullptr, int* pHeight = nullptr) {
+		return _decodeH264(dataIn, dataOut, pWidth, pHeight);
 	}
 	
 private:
@@ -125,7 +125,7 @@ private:
 		_decoder = nullptr;
 	}
 	
-	bool _decodeH264(const std::vector<unsigned char>& dataIn, std::vector<unsigned char>& dataOut) {
+	bool _decodeH264(const std::vector<unsigned char>& dataIn, std::vector<unsigned char>& dataOut, int* pWidth = nullptr, int* pHeight = nullptr) {
 		if(!_decoder)
 			return false;
 		
@@ -147,6 +147,8 @@ private:
 				dataOut.resize(area);
 			
 			Convert::yuv420ToBgr24(yuvDecode, &dataOut[0], oStride, oWidth, oHeight);
+			if(pWidth) *pWidth = oWidth;
+			if(pHeight) *pHeight = oHeight;
 			return true;
 		}
 		return false;

@@ -1,25 +1,7 @@
 #pragma once
 #ifdef __linux__
 
-#include "Device.hpp"
-#include "helper_v4l2.hpp"
-#include "../Tool/Decoder.hpp"
-
-// Use v4l2
-#include <linux/videodev2.h>
-#include <errno.h>
-#include <sys/ioctl.h>
-#include <sys/mman.h>
-#include <sys/poll.h>
-
-#include <cstdint>
-#include <cstdio>
-#include <cstring>
-
-#include <fcntl.h>
-#include <unistd.h>
-
-struct Device::_Impl {	
+struct _Impl {	
 public:
 	// Constructors
 	explicit _Impl(const std::string& pathVideo) :

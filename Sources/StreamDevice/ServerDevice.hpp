@@ -45,8 +45,8 @@ public:
 		
 		return true;
 	}
-	bool refresh() {
-		_device.refresh();
+	void refresh() {
+		return _device.refresh();
 	}
 	
 	// -- Getters --

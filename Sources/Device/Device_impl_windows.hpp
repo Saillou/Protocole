@@ -1,17 +1,7 @@
 #pragma once
 #ifdef _WIN32
 
-#include "Device.hpp"
-
-// Based on Opencv
-#include <opencv2/core.hpp>	
-#include <opencv2/videoio.hpp>	
-#include <opencv2/highgui.hpp>
-#include <opencv2/imgproc.hpp>
-#include <opencv2/imgcodecs.hpp>
-
-
-struct Device::_Impl {
+struct _Impl {
 public:
 	// Constructors
 	explicit _Impl(const std::string& pathVideo) : 
