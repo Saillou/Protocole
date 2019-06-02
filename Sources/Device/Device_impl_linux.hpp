@@ -221,6 +221,8 @@ public:
 		if(!hvl::getControl(_fd, &control))
 			return 0.0;
 		
+		std::cout << queryctrl.maximum << " " <<  queryctrl.minimum << " " << control.value << std::endl;
+		
 		if(queryctrl.maximum == queryctrl.minimum)
 			return 1.0;
 		
