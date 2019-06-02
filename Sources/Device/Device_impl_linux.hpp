@@ -183,7 +183,7 @@ public:
 		struct v4l2_queryctrl queryctrl = {0};
 		
 		// Check control	
-		if(!_getControlId(control.id))
+		if(!_getControlId(code, control.id))
 			return false;
 		
 		if(!hvl::queryControl(_fd, control.id, &queryctrl))
