@@ -221,12 +221,10 @@ public:
 		if(!hvl::getControl(_fd, &control))
 			return 0.0;
 		
-		std::cout << queryctrl.maximum << " " <<  queryctrl.minimum << " " << control.value << std::endl;
-		
 		if(queryctrl.maximum == queryctrl.minimum)
 			return 1.0;
 		
-		return (control.value - queryctrl.minimum) / (queryctrl.maximum - queryctrl.minimum);
+		return (double)(control.value - queryctrl.minimum) / (queryctrl.maximum - queryctrl.minimum);
 	}
 	const FrameFormat getFormat() const {
 		return _format;
