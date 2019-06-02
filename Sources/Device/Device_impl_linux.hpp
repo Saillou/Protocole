@@ -218,6 +218,9 @@ public:
 			return 0.0;
 		
 		// Return value between 0.0 and 1.0
+		if(!hvl::getControl(_fd, &control))
+			return 0.0;
+		
 		if(queryctrl.maximum == queryctrl.minimum)
 			return 1.0;
 		
