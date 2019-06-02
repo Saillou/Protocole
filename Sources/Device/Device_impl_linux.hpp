@@ -172,18 +172,19 @@ public:
 		if(!_open)
 			return false;
 		
+		if(value < 0.0 || value > 1.0) {
+			printf("Warning - Set control : value outside range [0.0; 1.0], will be truncated. \n");
+			
+			if(value < 0.0) value = 0.0;
+			if(value > 1.0) value = 1.0;
+		}
+		
 		struct v4l2_control control = {0};
 		struct v4l2_queryctrl queryctrl = {0};
 		
-		// -- Check control	
-		// Id
-		switch(code) {
-			case Saturation: 		control.id = V4L2_CID_SATURATION; 				break;
-			case Exposure: 		control.id = V4L2_CID_EXPOSURE_ABSOLUTE; 	break;
-			case AutoExposure: 	control.id = V4L2_CID_EXPOSURE_AUTO; 			break;
-			
-			default: return false;
-		}
+		// Check control	
+		if(!_getControlId(control.id))
+			return false;
 		
 		if(!hvl::queryControl(_fd, control.id, &queryctrl))
 			return false;
@@ -192,23 +193,8 @@ public:
 		if(code == AutoExposure)
 			control.value = value != 0 ? V4L2_EXPOSURE_AUTO : V4L2_EXPOSURE_MANUAL;
 		else
-			control.value = value;
-		
-		if (control.value > queryctrl.maximum || control.value < queryctrl.minimum) {
-			printf("Set value out of range \n");
-			return false;			
-		}
-		
-		// Need change mode ?
-		if((code & Exposure) && !(code & Automatic)) {
-			struct v4l2_control autoControl = {0};
-			autoControl.id 	 = V4L2_CID_EXPOSURE_AUTO;
-			autoControl.value = V4L2_EXPOSURE_MANUAL;
+			control.value = value * (queryctrl.maximum - queryctrl.minimum) + queryctrl.minimum;
 
-			if(hvl::setControl(_fd, &autoControl))
-				return false;
-		}
-		
 		// Change value
 		if(hvl::setControl(_fd, &control))
 			return false;
@@ -224,35 +210,18 @@ public:
 		struct v4l2_control control = {0};
 		struct v4l2_queryctrl queryctrl = {0};
 		
-		// Define id
-		if(code & Saturation)
-			control.id = V4L2_CID_SATURATION;
-		else if(code & Exposure)
-			control.id = code & Automatic ? V4L2_CID_EXPOSURE_AUTO : V4L2_CID_EXPOSURE_ABSOLUTE;
-		else 
+		// Check control
+		if(!_getControlId(control.id))
 			return 0.0;
 		
-		// Check control
 		if(!hvl::queryControl(_fd, control.id, &queryctrl))
 			return 0.0;
 		
-		// Return value if asked about a limit
-		if(code & Minimum)
-			return queryctrl.minimum;
-		else if(code & Maximum)
-			return queryctrl.maximum;
-		else if(code & Default)
-			return queryctrl.default_value > queryctrl.maximum ? (queryctrl.maximum+queryctrl.minimum)/2 : queryctrl.default_value;
+		// Return value between 0.0 and 1.0
+		if(queryctrl.maximum == queryctrl.minimum)
+			return 1.0;
 		
-		// -- Return the control value if not asked for a limit	
-		if(!hvl::getControl(_fd, &control))
-			return 0.0;
-		
-		// Special case
-		if(code == AutoExposure)
-			return control.value == V4L2_EXPOSURE_MANUAL ? 0 : 1;
-		
-		return control.value;
+		return (control.value - queryctrl.minimum) / (queryctrl.maximum - queryctrl.minimum);
 	}
 	const FrameFormat getFormat() const {
 		return _format;
@@ -339,6 +308,22 @@ private:
 		
 		// std::cout << t.elapsed_mus()/1000.0 << std::endl;
 		return success;
+	}
+	
+	bool _getControlId(const Param code, unsigned int& id) {
+		id = 0;
+		
+		// Get v4l2 id
+		if(code == Saturation)
+			id = V4L2_CID_SATURATION;
+		else if(code == Exposure)
+			id = V4L2_CID_EXPOSURE_ABSOLUTE;		
+		else if(code == AutoExposure)
+			id = V4L2_CID_EXPOSURE_AUTO;
+		else 
+			return false;
+		
+		return true;
 	}
 	
 	// Members

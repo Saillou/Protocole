@@ -60,21 +60,24 @@ public:
 	};
 	
 	enum Param {
-		Maximum		= (1 << 1),
-		Minimum		= (1 << 2),
-		Default		= (1 << 3),
-		Automatic	= (1 << 4),
+		Saturation,
+		Exposure,
+		AutoExposure,
+		// Maximum		= (1 << 1),
+		// Minimum		= (1 << 2),
+		// Default		= (1 << 3),
+		// Automatic	= (1 << 4),
 		
-		Saturation 	= (1 << 5),
-		MinSaturation 			= Saturation | Minimum,
-		MaxSaturation 			= Saturation | Maximum,
-		DefaultSaturation	= Saturation | Default,
+		// Saturation 	= (1 << 5),
+		// MinSaturation 			= Saturation | Minimum,
+		// MaxSaturation 			= Saturation | Maximum,
+		// DefaultSaturation	= Saturation | Default,
 		
-		Exposure		= (1 << 6),
-		MinExposure 		= Exposure | Minimum,
-		MaxExposure 		= Exposure | Maximum,
-		DefaultExposure 	= Exposure | Default,
-		AutoExposure 		= Exposure | Automatic,
+		// Exposure		= (1 << 6),
+		// MinExposure 		= Exposure | Minimum,
+		// MaxExposure 		= Exposure | Maximum,
+		// DefaultExposure 	= Exposure | Default,
+		// AutoExposure 		= Exposure | Automatic,
 	};
 	
 private:

@@ -77,12 +77,21 @@ public:
 		
 		return true;
 	}
-	bool set(Device::Param code, double value) {		
+	bool set(Device::Param code, double value) {	
+		if(value < 0.0 || value > 1.0) {
+			printf("Warning - Set control : value outside range [0.0; 1.0], will be truncated. \n");
+			
+			if(value < 0.0) value = 0.0;
+			if(value > 1.0) value = 1.0;
+		}
+		
 		switch(code) {
 			case Saturation:
-				return _cap.set(cv::CAP_PROP_SATURATION, value);
+				return _cap.set(cv::CAP_PROP_SATURATION, value * 100.0);
+				
 			case Exposure:
-				return _cap.set(cv::CAP_PROP_EXPOSURE, value);
+				return _cap.set(cv::CAP_PROP_EXPOSURE, - value * 12 - 12);
+				
 			case AutoExposure:
 				return _cap.set(cv::CAP_PROP_AUTO_EXPOSURE, value != 0 ? 1 : 0);
 		}
@@ -93,27 +102,15 @@ public:
 	// Getters
 	double get(Device::Param code) {
 		switch(code) {
-			// Saturation
+			// Saturation : [0.0 - 100.0]
 			case Saturation:
-				return _cap.get(cv::CAP_PROP_SATURATION);
-			case MaxSaturation:
-				return 100.0;
-			case MinSaturation:
-				return 0.0;
-			case DefaultSaturation:
-				return 64.0;
+				return _cap.get(cv::CAP_PROP_SATURATION) / 100.0;
 				
-			// Exposure
+			// Exposure : [-12.0 - 0.0]
 			case Exposure:
-				return _cap.get(cv::CAP_PROP_EXPOSURE);
-			case MaxExposure:
-				return 0.0;
-			case MinExposure:
-				return -12.0;
-			case DefaultExposure:
-				return -6.0;
+				return (_cap.get(cv::CAP_PROP_EXPOSURE) - 12.0)/ 12.0;
 				
-			// Auto
+			// Auto : [0 - 1]
 			case AutoExposure:
 				return _cap.get(cv::CAP_PROP_AUTO_EXPOSURE);
 		}
