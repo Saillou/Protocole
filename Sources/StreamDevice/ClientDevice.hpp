@@ -82,11 +82,13 @@ public:
 				// value = val;
 			// });
 			
+			timeout.beg();
 			while(timeout.elapsed_mus() < TIMEOUT_MUS && !gotIt) {
 				timeout.wait(2);
 			}
+			timeout.end();
 			if(!gotIt) {
-				std::cout << "Timeout" << std::endl;
+				std::cout << "Timeout" << timeout.mus()/1000.0 << "ms." << std::endl;
 			}
 		});
 		
