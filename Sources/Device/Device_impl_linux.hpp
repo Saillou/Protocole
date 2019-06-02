@@ -319,8 +319,22 @@ private:
 		// Get v4l2 id
 		if(code == Saturation)
 			id = V4L2_CID_SATURATION;
+		
+		else if(code == Brightness)
+			id = V4L2_CID_BRIGHTNESS;		
+		
+		else if(code == Hue)
+			id = V4L2_CID_HUE;		
+		
+		else if(code == Contrast)
+			id = V4L2_CID_CONTRAST;		
+		
+		else if(code == Whiteness)
+			id = V4L2_CID_WHITENESS;
+		
 		else if(code == Exposure)
-			id = V4L2_CID_EXPOSURE_ABSOLUTE;		
+			id = V4L2_CID_EXPOSURE_ABSOLUTE;	
+		
 		else if(code == AutoExposure)
 			id = V4L2_CID_EXPOSURE_AUTO;
 		else 
