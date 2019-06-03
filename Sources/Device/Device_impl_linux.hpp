@@ -203,6 +203,8 @@ public:
 			
 			if(control.value > queryctrl.maximum)
 				control.value = queryctrl.maximum;
+			
+			std::cout << "Set: " << value << " -> " << control.value << std::endl;
 		}
 		else {
 			control.value = value * (queryctrl.maximum - queryctrl.minimum) + queryctrl.minimum;
@@ -244,9 +246,9 @@ public:
 			double minVal = std::log2((double)queryctrl.minimum);
 			double maxVal = std::log2((double)queryctrl.maximum);
 			double scaledVal = std::log2((double)control.value);
-			double value = scaledVal * (maxVal - minVal) + minVal;
+			double value = (scaledVal - minVal) / (maxVal - minVal);
 			
-			std::cout << "Get: " << value << " -> " << std::log2(value) << " -> " << control.value << std::endl;
+			std::cout << "Get: " << control.value << " -> " << value << std::endl;
 			return value;
 		}
 		else
