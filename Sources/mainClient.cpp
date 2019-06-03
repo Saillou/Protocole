@@ -100,8 +100,8 @@ int main(int argc, char* argv[]) {
 	std::mutex frameMut0;
 	std::mutex frameMut1;
 	
-	// std::thread thread0(showDevice, 6666, std::ref(cvFrame0), std::ref(frameMut0));
-	std::thread thread1(showDevice, 8888, std::ref(cvFrame1), std::ref(frameMut1));
+	// std::thread thread0(showDevice, 8888, std::ref(cvFrame0), std::ref(frameMut0));
+	std::thread thread1(showDevice, 6666, std::ref(cvFrame1), std::ref(frameMut1));
 	
 	// --- Loop ----
 	while(Globals::signalStatus != SIGINT && cv::waitKey(10) != 27) {
