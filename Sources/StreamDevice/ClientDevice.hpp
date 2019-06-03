@@ -223,7 +223,7 @@ private:
 				unsigned int frameSizeCode = (messageFrame.code() >> 13) & ((1 << 0) | (1 << 1)); 				// Decode frame size 2 bits : 13 - 14
 				
 				Gb::Size sizeDecode = frameSizeCode == 0 ? Gb::Size(_format.width, _format.height) : Gb::Size((Gb::SizeType)frameSizeCode);
-				std::cout << frameTypeCode << std::endl;
+
 				frame = Gb::Frame(
 					(unsigned char*)messageFrame.content(), 
 					(unsigned long)(messageFrame.size()), 
@@ -342,6 +342,7 @@ private:
 			_format.height = frameIn.size.height;
 		}
 		else if(frameIn.type == Gb::FrameType::Jpg422 || frameIn.type == Gb::FrameType::Jpg420) {
+			std::cout << frameIn.size.width << " " << frameIn.size.height << std::endl;
 			success = _decoderJpg.decode2bgr24(frameIn.buffer, frameOut.buffer, frameIn.size.width, frameIn.size.height);
 		}
 		else if(frameIn.type == Gb::FrameType::Bgr24) {
