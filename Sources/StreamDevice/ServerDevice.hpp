@@ -7,6 +7,7 @@
 #include <map>
 #include <mutex>
 #include <string>
+#include <future>
 #include <functional>
 
 class ServerDevice {
@@ -112,7 +113,7 @@ private:
 		// Callback
 		std::lock_guard<std::mutex> lockCbk(_mutCbk);
 		if(_cbkOpen)
-			_cbkOpen();
+			_futureOpen = std::async(std::launch::async, _cbkOpen);
 		
 		return true;
 	}
@@ -139,7 +140,7 @@ private:
 		// Callback
 		std::lock_guard<std::mutex> lockCbk(_mutCbk);
 		if(_cbkFrame)
-			_cbkFrame(frame);
+			_futureFrame = std::async(std::launch::async, _cbkFrame, frame);
 	}
 	
 	void _onServerInfo(const Server::ClientInfo& client, const Message& message) {
@@ -249,5 +250,8 @@ private:
 	std::function<void(void)> _cbkOpen;
 	
 	std::map<SOCKET, bool> _clientPlayer;
+	
+	std::future<void> _futureFrame;
+	std::future<void> _futureOpen;
 };
 

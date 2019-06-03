@@ -50,10 +50,10 @@ void showDevice(const int port, cv::Mat& cvFrame, std::mutex& mutFrame) {
 		
 		// Data
 		memcpy(cvFrame.data, frame.start(), frame.length());
+		std::cout << "Saturation: "	<< device.get(Device::Param::Saturation) << std::endl;
 	});
 	
 	device.onOpen([&]() {
-		std::cout << "> Thread open: " << std::this_thread::get_id() << std::endl;
 		std::cout << "Saturation: "	<< device.get(Device::Param::Saturation) << std::endl;
 		std::cout << "Brightness: "	<< device.get(Device::Param::Brightness) << std::endl;
 		std::cout << "Hue: " 			<< device.get(Device::Param::Hue) << std::endl;

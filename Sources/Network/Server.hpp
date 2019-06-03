@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include <thread>
+#include <future>
 #include <atomic>
 #include <mutex>
 #include <deque>
@@ -342,7 +343,7 @@ private:
 				else {					
 					std::lock_guard<std::mutex> lockCbk(_mutCbk);
 					if(_cbkError) 
-						_cbkError(Error(error, "TCP receive Error"));
+						_futureError = std::async(std::launch::async, _cbkError, Error(error, "TCP receive Error"));
 					break;
 				}
 			}
@@ -363,14 +364,14 @@ private:
 			for(const Message& message : MessageManager::readMessages(buf, recv_len)) {
 				std::lock_guard<std::mutex> lockCbk(_mutCbk);
 				if(_cbkInfo) 
-					_cbkInfo(client, message);
+					_futureInfo = std::async(std::launch::async, _cbkInfo, client, message);
 			}
 		}
 		
 		// End
 		std::lock_guard<std::mutex> lockCbk(_mutCbk);
 		if(_cbkDisconnect) 
-			_cbkDisconnect(client);	
+			_futureDisconnect = std::async(std::launch::async, _cbkDisconnect, client);
 		
 		std::lock_guard<std::mutex> lockClients(_mutClients);
 		std::vector<ConnectedClient>::iterator itClient = _findClientFromAddress(client.tcpSock.address());
@@ -427,7 +428,7 @@ private:
 				else {					
 					std::lock_guard<std::mutex> lockCbk(_mutCbk);
 					if(_cbkError) 
-						_cbkError(Error(error, "UDP receive Error"));
+						_futureError = std::async(std::launch::async, _cbkError, Error(error, "UDP receive Error"));
 					
 					timer.wait(100);
 					continue;
@@ -459,18 +460,18 @@ private:
 						
 						std::lock_guard<std::mutex> lockCbk(_mutCbk);
 						if(_cbkConnect) 
-							_cbkConnect(itClient->info);
+							_futureConnect = std::async(std::launch::async, _cbkConnect, itClient->info);
 					}
 					else { // Shakehand error
 						std::lock_guard<std::mutex> lockCbk(_mutCbk);
 						if(_cbkError) 
-							_cbkError(Error(Error::BAD_CONNECTION, "Handshake Error"));
+							_futureError = std::async(std::launch::async, _cbkError, Error(Error::BAD_CONNECTION, "Handshake Error"));
 					}
 				}
 				else { // Read data message
 					std::lock_guard<std::mutex> lockCbk(_mutCbk);
 					if(_cbkData) 
-						_cbkData(itClient->info, message);
+						_futureData = std::async(std::launch::async, _cbkData, itClient->info, message);
 				}
 			}			
 			
@@ -537,6 +538,12 @@ private:
 	std::function<void(const ClientInfo& client, const Message& message)> _cbkData;
 	std::function<void(const ClientInfo& client)> _cbkConnect;
 	std::function<void(const ClientInfo& client)> _cbkDisconnect;
+	
+	std::future<void> _futureError;
+	std::future<void> _futureInfo;
+	std::future<void> _futureData;
+	std::future<void> _futureConnect;
+	std::future<void> _futureDisconnect;
 	
 	// Threads
 	std::shared_ptr<std::thread> _pHandleTcp4;
