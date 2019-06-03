@@ -53,18 +53,16 @@ void showDevice(const int port, cv::Mat& cvFrame, std::mutex& mutFrame) {
 	});
 	
 	std::atomic<bool> open = false;
-	device.onOpen([&]() {		
-		device.setFrameType(Gb::FrameType::Jpg420);
+	device.onOpen([&]() {
 		open = true;
 	});
 	
 	// -------- Main loop --------  
-	if(!device.open(-1)) {
+	if(!device.open()) {
 		std::cout << "Can't open device" << std::endl;
 		std::cout << "Press a key to continue..." << std::endl;
 		return;
 	}
-	
 	
 	double speed = 0.01;
 	double exposure = 0;

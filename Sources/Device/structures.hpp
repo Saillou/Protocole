@@ -28,7 +28,7 @@ namespace Gb {
 	struct Size {
 		Size(int w=0, int h=0) : width(w), height(h) {
 		}
-		Size(SizeType& type) : width(0), height(0) {
+		Size(SizeType type) : width(0), height(0) {
 			if(type== QVGA) {
 				width = 320;
 				height = 200;

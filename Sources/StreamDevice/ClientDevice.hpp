@@ -69,6 +69,10 @@ public:
 	}
 	
 	// -- Getters --
+	bool isOpen() const {
+		return _running;
+	}
+	
 	double get(Device::Param code, bool* success = nullptr) {
 		const int64_t TIMEOUT_MUS = 500*1000; // 500ms
 		double value = 0.0;
@@ -138,9 +142,6 @@ public:
 		// Finally return
 		futureParam.get();
 		return _format;
-	}
-	bool isOpen() const {
-		return _running;
 	}
 	
 	// -- Setters --
@@ -222,7 +223,7 @@ private:
 				unsigned int frameTypeCode = (messageFrame.code() >> 10) & ((1 << 0) | (1 << 1) | (1 << 2)); 	// Decode frame type 3 bits : 10 - 11 - 12
 				unsigned int frameSizeCode = (messageFrame.code() >> 13) & ((1 << 0) | (1 << 1)); 				// Decode frame size 2 bits : 13 - 14
 				
-				Gb::Size sizeDecode = frameSizeCode == 0 ? Gb::Size(_format.width, _format.height) : Gb::Size((Gb::SizeType)frameSizeCode);
+				Gb::Size sizeDecode = (frameSizeCode == 0) ? Gb::Size(_format.width, _format.height) : Gb::Size((Gb::SizeType)frameSizeCode);
 
 				frame = Gb::Frame(
 					(unsigned char*)messageFrame.content(), 
@@ -342,7 +343,6 @@ private:
 			_format.height = frameIn.size.height;
 		}
 		else if(frameIn.type == Gb::FrameType::Jpg422 || frameIn.type == Gb::FrameType::Jpg420) {
-			std::cout << "Width: " << frameIn.size.width << " x Height: " << frameIn.size.height << std::endl;
 			success = _decoderJpg.decode2bgr24(frameIn.buffer, frameOut.buffer, frameIn.size.width, frameIn.size.height);
 		}
 		else if(frameIn.type == Gb::FrameType::Bgr24) {
