@@ -195,7 +195,7 @@ public:
 		else if(code == Exposure) {
 			double minVal = std::log2((double)queryctrl.minimum);
 			double maxVal = std::log2((double)queryctrl.maximum);
-			double scaledVal = (value - minVal) / (maxVal - minVal);
+			double scaledVal = value * (maxVal - minVal) + minVal;
 			control.value = std::exp2(scaledVal);
 			
 			if(control.value < queryctrl.minimum)
