@@ -37,6 +37,7 @@ static void sigintHandler(int signal) {
 // --- Helper ----
 void showDevice(const int port, cv::Mat& cvFrame, std::mutex& mutFrame) {
 	// Device	
+	// std::atomic<bool> opened = false;
 	ClientDevice device(IAddress(Globals::IP_ADDRESS, port));
 	
 	// ----- Events -----	
@@ -52,8 +53,16 @@ void showDevice(const int port, cv::Mat& cvFrame, std::mutex& mutFrame) {
 	});
 	
 	device.onOpen([&]() {
-		std::cout << "Open" << std::endl;
-		std::cout << "Saturation: " << device.get(Device::Param::Saturation) << std::endl;
+		std::cout << "> Thread open: " << std::this_thread::get_id() << std::endl;
+		std::cout << "Saturation: "	<< device.get(Device::Param::Saturation) << std::endl;
+		std::cout << "Brightness: "	<< device.get(Device::Param::Brightness) << std::endl;
+		std::cout << "Hue: " 			<< device.get(Device::Param::Hue) << std::endl;
+		std::cout << "Contrast: " 	<< device.get(Device::Param::Contrast) << std::endl;
+		std::cout << "Whiteness: " 	<< device.get(Device::Param::Whiteness) << std::endl;
+		std::cout << "Exposure: " 	<< device.get(Device::Param::Exposure) << std::endl;
+		std::cout << "Auto-expo: " 	<< device.get(Device::Param::AutoExposure) << std::endl;
+		
+		// device.set(Device::Param::AutoExposure, 1);
 	});
 	
 	// -------- Main loop --------  
@@ -62,6 +71,7 @@ void showDevice(const int port, cv::Mat& cvFrame, std::mutex& mutFrame) {
 		std::cout << "Press a key to continue..." << std::endl;
 		return;
 	}
+	
 	
 	while(Globals::signalStatus != SIGINT) {
 		Timer::wait(100);
@@ -81,7 +91,7 @@ int main(int argc, char* argv[]) {
 	std::mutex frameMut0;
 	std::mutex frameMut1;
 	
-	std::thread thread0(showDevice, 6666, std::ref(cvFrame0), std::ref(frameMut0));
+	// std::thread thread0(showDevice, 6666, std::ref(cvFrame0), std::ref(frameMut0));
 	std::thread thread1(showDevice, 8888, std::ref(cvFrame1), std::ref(frameMut1));
 	
 	// --- Loop ----
@@ -101,8 +111,8 @@ int main(int argc, char* argv[]) {
 	Globals::signalStatus = SIGINT;
 	
 	// Wait
-	if(thread0.joinable())
-		thread0.join();
+	// if(thread0.joinable())
+		// thread0.join();
 	if(thread1.joinable())
 		thread1.join();
 	cv::destroyAllWindows();

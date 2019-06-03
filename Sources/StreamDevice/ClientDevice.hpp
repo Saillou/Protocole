@@ -12,6 +12,7 @@
 #include <mutex>
 #include <atomic>
 #include <thread>
+#include <future>
 #include <functional>
 
 class ClientDevice {
@@ -160,13 +161,13 @@ private:
 		_client.onError(_cbkError);
 		
 		_client.onConnect([&]() {
-			this->_onConnect();
+			std::async(std::launch::async, &ClientDevice::_onConnect, this);
 		});
 		_client.onInfo([&](const Message& message) {
-			this->_onClientInfo(message);
+			std::async(std::launch::async, &ClientDevice::_onClientInfo, this, message);
 		});
 		_client.onData([&](const Message& message) {
-			this->_onClientData(message);
+			std::async(std::launch::async, &ClientDevice::_onClientData, this, message);
 		});
 		
 		return true;
@@ -224,9 +225,8 @@ private:
 		_running = true;
 		_pThreadBuffer = std::make_shared<std::thread>(&ClientDevice::_bufferRead, this);
 		
-		std::lock_guard<std::mutex> lockCbk(_mutCbk);
-		if(_cbkOpen)
-			_cbkOpen();
+		std::cout << "> Thread ready: " << std::this_thread::get_id() << std::endl;
+		std::async(std::launch::async, _cbkOpen);
 		
 		_client.sendInfo(Message(Message::HANDSHAKE, "Start"));
 		
@@ -286,12 +286,10 @@ private:
 		if(!exist)
 			return;
 		double value = command.valueOf<double>("value");
-		std::cout << message.str() << std::endl;
 		
 		std::lock_guard<std::mutex> lockCbk(_mutCbk);
 		if(_mapCbkParam.find(code) != _mapCbkParam.end()) {
 			_mapCbkParam[code](value);
-			_mapCbkParam[code] = nullptr;
 		}
 	}
 	bool _treatFrame(Gb::Frame& frameIn, Gb::Frame& frameOut) {
