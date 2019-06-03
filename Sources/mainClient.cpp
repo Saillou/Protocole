@@ -60,7 +60,6 @@ void showDevice(const int port, cv::Mat& cvFrame, std::mutex& mutFrame) {
 	// -------- Main loop --------  
 	if(!device.open()) {
 		std::cout << "Can't open device" << std::endl;
-		std::cout << "Press a key to continue..." << std::endl;
 		return;
 	}
 	
