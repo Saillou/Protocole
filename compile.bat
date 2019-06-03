@@ -4,7 +4,7 @@ setlocal EnableDelayedExpansion
 cd /d %~dp0
 set fRelease=%~dp0Release\
 set compile=1
-set commit=0
+set commit=1
 set launch=1
 
 if %compile%==1 (

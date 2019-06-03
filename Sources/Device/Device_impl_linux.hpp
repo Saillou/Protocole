@@ -192,15 +192,22 @@ public:
 		// Value
 		if(code == AutoExposure)
 			control.value = value != 0 ? V4L2_EXPOSURE_AUTO : V4L2_EXPOSURE_MANUAL;
-		// else if(code == Exposure) {
-			// control.value = std::exp2(value) * (std::log2(queryctrl.minimum) - std::log2(queryctrl.minimum)) + std::log2(queryctrl.minimum);
-			// std::cout << value << " -> " << std::exp2(value) << " -> " << control.value << std::endl;
-		// }
+		else if(code == Exposure) {
+			double minVal = std::log2(queryctrl.minimum);
+			double maxVal = std::log2(queryctrl.maximum);
+			double scaledVal = value * (maxVal - minVal) + minVal;
+			control.value = std::exp2(value);
+			
+			if(control.value < queryctrl.minimum)
+				control.value = queryctrl.minimum;
+			
+			if(control.value < queryctrl.maximum)
+				control.value = queryctrl.maximum;
+			
+			std::cout << "Set: " << value << " -> " << std::exp2(value) << " -> " << control.value << std::endl;
+		}
 		else {
 			control.value = value * (queryctrl.maximum - queryctrl.minimum) + queryctrl.minimum;
-			
-			if(code == Exposure)
-				std::cout << "Control: " << control.value << std::endl;
 		}
 
 		// Change value
@@ -235,8 +242,15 @@ public:
 		// Value
 		if(code == AutoExposure)
 			return (control.value == V4L2_EXPOSURE_AUTO) ? 1.0 : 0.0;
-		// else if(code == Exposure) 
-			// return (std::log2(control.value) - std::log2(queryctrl.minimum)) / (std::log2(queryctrl.maximum) - std::log2(queryctrl.minimum));
+		else if(code == Exposure) {
+			double minVal = std::log2(queryctrl.minimum);
+			double maxVal = std::log2(queryctrl.maximum);
+			double scaledVal = std::log2((double)control.value);
+			double value = (scaledVal - minVal) / (maxVal - minVal);
+			
+			std::cout << "Get: " << value << " -> " << std::log2(value) << " -> " << control.value << std::endl;
+			return value;
+		}
 		else
 			return (double)(control.value - queryctrl.minimum) / (queryctrl.maximum - queryctrl.minimum);
 	}
