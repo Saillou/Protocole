@@ -178,9 +178,18 @@ private:
 			bool exist = false;
 			MessageFormat command(msg);
 			
+			// Frame type ?
+			Gb::FrameType fType = command.valueOf<Gb::FrameType>("type", &exist);
+			if(exist)
+				setFrameType(fType);
+			
+			// Frame size ?
+			Device::PixelFormat pixFmt 	= command.valueOf<Device::PixelFormat>("pixel", &exist);
+			if(!exist)
+				return;
+			
 			int width 							= command.valueOf<int>("width");
 			int height 							= command.valueOf<int>("height");
-			Device::PixelFormat pixFmt 	= command.valueOf<Device::PixelFormat>("pixel", &exist);
 			
 			if(exist && width > 0 && height > 0) {
 				setFormat(width, height, pixFmt);

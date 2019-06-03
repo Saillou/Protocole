@@ -22,7 +22,7 @@ public:
 		_running(false),
 		_port(address.port),
 		_pathDest(address.ip),
-		_format({640,480,Device::MJPG}),
+		_format({640, 480, Device::MJPG}),
 		_errCount(0)
 	{
 		// client
@@ -159,7 +159,12 @@ public:
 			
 		return _client.sendInfo(Message(Message::DEVICE | Message::FORMAT, command.str()));
 	}
-
+	bool setFrameType(Gb::FrameType ftype) {
+		MessageFormat command;
+		command.add("type", ftype);
+		
+		return _client.sendInfo(Message(Message::DEVICE | Message::FORMAT, command.str()));
+	}
 	
 	// -- Events --
 	void onOpen(const std::function<void(void)>& cbkOpen) {

@@ -287,16 +287,26 @@ private:
 		int h = _rawData.size.height;
 		int area = w*h;
 		
-		// -- From jpg to h264:
-		if(frame.type == Gb::FrameType::H264) {
+		// -- From jpg to h264: (Brief stop at YUV422 and YUV420 step)
+		if(frame.type == Gb::FrameType::H264 || frame.type == Gb::FrameType::Yuv422 || frame.type == Gb::FrameType::Yuv420) {
 			// jpg decompress : jpg422 -> yuv422
-			_decoderJpg.decode2yuv422(_rawData.buffer, _yuv422Frame, w, h);
+			if(!_decoderJpg.decode2yuv422(_rawData.buffer, _yuv422Frame, w, h))
+				goto End_Translation;
+			
+			if(frame.type == Gb::FrameType::Yuv422) {
+				success = true;
+				goto End_Translation;
+			}
 
 			// yuv422 -> yuv420
 			if(_yuv420Frame.size() != area*3/2)
 				_yuv420Frame.resize(area*3/2);
 			
 			Convert::yuv422ToYuv420(&_yuv422Frame[0], &_yuv420Frame[0], w, h);
+			if(frame.type == Gb::FrameType::Yuv420) {
+				success = true;
+				goto End_Translation;
+			}
 
 			// h264 encode : yuv420 -> h264 packet
 			if(_encoderH264.encodeYuv(&_yuv420Frame[0], frame.buffer))
@@ -332,6 +342,7 @@ private:
 		}
 		
 		// -- Set final info
+End_Translation:
 		if(success) 
 			frame.size = _rawData.size;
 		else 

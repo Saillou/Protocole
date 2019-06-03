@@ -54,7 +54,7 @@ void showDevice(const int port, cv::Mat& cvFrame, std::mutex& mutFrame) {
 	
 	std::atomic<bool> open = false;
 	device.onOpen([&]() {		
-		device.set(Device::Param::Exposure, 0.7);
+		device.setFrameType(Gb::FrameType::Jpg420);
 		open = true;
 	});
 	
