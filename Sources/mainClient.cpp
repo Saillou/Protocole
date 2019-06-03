@@ -54,8 +54,8 @@ void showDevice(const int port, cv::Mat& cvFrame, std::mutex& mutFrame) {
 	
 	std::atomic<bool> open = false;
 	device.onOpen([&]() {
-		device.set(Device::Param::AutoExposure, 0);
-		device.set(Device::Param::Exposure, 0.5);		
+		device.set(Device::Param::AutoExposure, 1);
+		device.set(Device::Param::Exposure, 0.033106);		
 		std::cout << "Exposure: "	<< device.get(Device::Param::Exposure) << " | " << "AutoExposure: " << device.get(Device::Param::AutoExposure) << std::endl;
 		open = true;
 	});
