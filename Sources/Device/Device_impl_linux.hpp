@@ -196,8 +196,12 @@ public:
 			// control.value = std::exp2(value) * (std::log2(queryctrl.minimum) - std::log2(queryctrl.minimum)) + std::log2(queryctrl.minimum);
 			// std::cout << value << " -> " << std::exp2(value) << " -> " << control.value << std::endl;
 		// }
-		else
+		else {
 			control.value = value * (queryctrl.maximum - queryctrl.minimum) + queryctrl.minimum;
+			
+			if(code == Exposure)
+				std::cout << "Control: " << control.value << std::endl;
+		}
 
 		// Change value
 		if(hvl::setControl(_fd, &control))

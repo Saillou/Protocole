@@ -91,9 +91,8 @@ public:
 			if(success)
 				*success = gotIt;
 			
-			if(!gotIt) {
+			if(!gotIt)
 				printf("(Timeout: %lf ms.)\n", timeout.mus()/1000.0);
-			}
 			
 			return fVal.load();
 		});
@@ -108,8 +107,36 @@ public:
 		return value;
 	}
 	const Device::FrameFormat getFormat(bool* success = nullptr) {
+		const int64_t TIMEOUT_MUS = 500*1000; // 500ms
+		
+		std::future<void> futureParam = std::async(std::launch::async, [&]() {
+			std::atomic<bool> gotIt = false;
+	
+			_cbkFormat = [&](void) {
+				gotIt = true;
+			};
+			
+			Timer timeout;
+			while(timeout.elapsed_mus() < TIMEOUT_MUS && !gotIt)
+				timeout.wait(2);
+			timeout.end();
+			
+			// Timeout or success ?
+			if(success)
+				*success = gotIt;
+			
+			if(!gotIt)
+				printf("(Timeout: %lf ms.)\n", timeout.mus()/1000.0);
+			
+			return void();
+		});
+		
+		// Launch command
+		MessageFormat command;
 		_client.sendInfo(Message(Message::DEVICE | Message::FORMAT, "?"));
-		// Need to be done
+		
+		// Finally return
+		futureParam.get();
 		return _format;
 	}
 	bool isOpen() const {
@@ -279,6 +306,9 @@ private:
 			_format.height = height;
 			_mutFormat.unlock();
 			
+			if(_cbkFormat)
+				_cbkFormat();
+			
 			// Can begin running
 			if(!_running) 
 				_ready();
@@ -342,6 +372,7 @@ private:
 	mutable std::mutex _mutCbk;
 	mutable std::mutex _mutCbkFrame;
 	
+	std::function<void(void)> _cbkFormat; // only use internally
 	std::function<void(void)> _cbkOpen;
 	std::function<void(const Gb::Frame&)> _cbkFrame;
 	std::function<void(const Error& error)> _cbkError;	
