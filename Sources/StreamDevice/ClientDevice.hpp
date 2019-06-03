@@ -223,7 +223,7 @@ private:
 				unsigned int frameSizeCode = (messageFrame.code() >> 13) & ((1 << 0) | (1 << 1)); 				// Decode frame size 2 bits : 13 - 14
 				
 				Gb::Size sizeDecode = frameSizeCode == 0 ? Gb::Size(_format.width, _format.height) : Gb::Size((Gb::SizeType)frameSizeCode);
-				
+				std::cout << frameTypeCode << std::endl;
 				frame = Gb::Frame(
 					(unsigned char*)messageFrame.content(), 
 					(unsigned long)(messageFrame.size()), 
@@ -334,6 +334,7 @@ private:
 	}
 	bool _treatFrame(Gb::Frame& frameIn, Gb::Frame& frameOut) {
 		bool success = false;
+		
 		// Decode 
 		if(frameIn.type == Gb::FrameType::H264) {
 			success = _decoderH264.decode(frameIn.buffer, frameOut.buffer, &frameIn.size.width, &frameIn.size.height);
