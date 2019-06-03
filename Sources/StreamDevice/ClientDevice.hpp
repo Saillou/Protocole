@@ -69,7 +69,7 @@ public:
 	}
 	
 	// -- Getters --
-	double get(Device::Param code) {
+	double get(Device::Param code, bool* success = nullptr) {
 		const int64_t TIMEOUT_MUS = 500*1000; // 500ms
 		double value = 0.0;
 		
@@ -87,8 +87,13 @@ public:
 				timeout.wait(2);
 			timeout.end();
 			
-			if(!gotIt)
+			// Timeout or success ?
+			if(success)
+				*success = gotIt;
+			
+			if(!gotIt) {
 				printf("(Timeout: %lf ms.)\n", timeout.mus()/1000.0);
+			}
 			
 			return fVal.load();
 		});
@@ -102,8 +107,10 @@ public:
 		value = futureParam.get();
 		return value;
 	}
-	const Device::FrameFormat getFormat() {
+	const Device::FrameFormat getFormat(bool* success = nullptr) {
 		_client.sendInfo(Message(Message::DEVICE | Message::FORMAT, "?"));
+		// Need to be done
+		return _format;
 	}
 	bool isOpen() const {
 		return _running;
@@ -125,10 +132,7 @@ public:
 			
 		return _client.sendInfo(Message(Message::DEVICE | Message::FORMAT, command.str()));
 	}
-	bool setFrameType(Gb::FrameType ftype) {
-		// Need to be done
-		return false;
-	}
+
 	
 	// -- Events --
 	void onOpen(const std::function<void(void)>& cbkOpen) {
@@ -183,11 +187,16 @@ private:
 			// -- Get frame --
 			_buffer.lock();
 			if(_buffer.update(messageFrame)) {
+				unsigned int frameTypeCode = (messageFrame.code() >> 10) & ((1 << 0) | (1 << 1) | (1 << 2)); 	// Decode frame type 3 bits : 10 - 11 - 12
+				unsigned int frameSizeCode = (messageFrame.code() >> 13) & ((1 << 0) | (1 << 1)); 				// Decode frame size 2 bits : 13 - 14
+				
+				Gb::Size sizeDecode = frameSizeCode == 0 ? Gb::Size(_format.width, _format.height) : Gb::Size((Gb::SizeType)frameSizeCode);
+				
 				frame = Gb::Frame(
 					(unsigned char*)messageFrame.content(), 
 					(unsigned long)(messageFrame.size()), 
-					Gb::Size(_format.width, _format.height), 
-					(Gb::FrameType)(messageFrame.code() >> 10) // Decode frame type
+					frameSizeCode == 0 ? Gb::Size(_format.width, _format.height) : Gb::Size((Gb::SizeType)frameSizeCode), 	
+					(Gb::FrameType)(frameTypeCode)	
 				);
 				emitFrame = true;
 			}

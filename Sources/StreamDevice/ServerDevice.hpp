@@ -128,7 +128,7 @@ private:
 	}
 	
 	void _onDeviceFrame(const Gb::Frame& frame) {
-		unsigned int code = Message::DEVICE | (((int)(frame.type)) << 10);
+		unsigned int code = Message::DEVICE | ((( ((unsigned int)frame.size.type() << 3) | (unsigned int)frame.type)) << 10);
 		
 		// Broadcast frame
 		for(auto& client: _server.getClients()) {
