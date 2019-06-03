@@ -50,7 +50,7 @@ namespace Gb {
 			return width * height;
 		}
 		
-		SizeType type() {
+		SizeType type() const {
 			if(width == 320)
 				return QVGA;			
 			else if(width == 640)
