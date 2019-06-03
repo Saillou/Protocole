@@ -204,7 +204,7 @@ public:
 			if(control.value < queryctrl.maximum)
 				control.value = queryctrl.maximum;
 			
-			std::cout << "Set: " << value << " -> " << std::exp2(scaledVal) << " -> " << control.value << std::endl;
+			std::cout << "Set: " << value << " ->" << scaledVal << "in [" << minVal << ";" << maxVal << "] -> "<< std::exp2(scaledVal) << ", trunc: " << control.value << std::endl;
 		}
 		else {
 			control.value = value * (queryctrl.maximum - queryctrl.minimum) + queryctrl.minimum;
