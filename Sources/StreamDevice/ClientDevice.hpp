@@ -205,10 +205,9 @@ private:
 					_errCount = 0;
 					
 					// Call cbk
-					_mutCbk.lock();
+					std::lock_guard<std::mutex> lockCbk(_mutCbk);
 					if(_cbkFrame)
-						_cbkFrame(frameEmit);
-					_mutCbk.unlock();
+						std::async(std::launch::async, _cbkFrame, frameEmit);
 				}
 				else {
 					if(_errCount ++> 10) {
@@ -226,7 +225,10 @@ private:
 		_pThreadBuffer = std::make_shared<std::thread>(&ClientDevice::_bufferRead, this);
 		
 		std::cout << "> Thread ready: " << std::this_thread::get_id() << std::endl;
-		std::async(std::launch::async, _cbkOpen);
+		
+		std::lock_guard<std::mutex> lockCbk(_mutCbk);
+		if(_cbkOpen)
+			std::async(std::launch::async, _cbkOpen);
 		
 		_client.sendInfo(Message(Message::HANDSHAKE, "Start"));
 		
@@ -288,9 +290,8 @@ private:
 		double value = command.valueOf<double>("value");
 		
 		std::lock_guard<std::mutex> lockCbk(_mutCbk);
-		if(_mapCbkParam.find(code) != _mapCbkParam.end()) {
-			_mapCbkParam[code](value);
-		}
+		if(_mapCbkParam.find(code) != _mapCbkParam.end()) 
+			std::async(std::launch::async, _mapCbkParam[code], value);		
 	}
 	bool _treatFrame(Gb::Frame& frameIn, Gb::Frame& frameOut) {
 		bool success = false;
