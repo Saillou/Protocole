@@ -342,7 +342,7 @@ private:
 			_format.height = frameIn.size.height;
 		}
 		else if(frameIn.type == Gb::FrameType::Jpg422 || frameIn.type == Gb::FrameType::Jpg420) {
-			std::cout << frameIn.size.width << " " << frameIn.size.height << std::endl;
+			std::cout << "Width: " << frameIn.size.width << " x Height: " << frameIn.size.height << std::endl;
 			success = _decoderJpg.decode2bgr24(frameIn.buffer, frameOut.buffer, frameIn.size.width, frameIn.size.height);
 		}
 		else if(frameIn.type == Gb::FrameType::Bgr24) {
