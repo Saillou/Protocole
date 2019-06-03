@@ -223,7 +223,7 @@ public:
 		
 		if(queryctrl.maximum == queryctrl.minimum)
 			return 1.0;
-		
+		std::cout <<  queryctrl.minimum << " " << queryctrl.maximum << std::endl;
 		// Value
 		if(code == AutoExposure)
 			return (control.value == V4L2_EXPOSURE_AUTO) ? 1.0 : 0.0;

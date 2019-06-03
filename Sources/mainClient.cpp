@@ -52,15 +52,12 @@ void showDevice(const int port, cv::Mat& cvFrame, std::mutex& mutFrame) {
 		memcpy(cvFrame.data, frame.start(), frame.length());
 	});
 	
+	std::atomic<bool> open = false;
 	device.onOpen([&]() {
-		std::cout << "Exposure: "			<< device.get(Device::Param::Exposure) << std::endl << std::endl;
-		std::cout << "AutoExposure: "	<< device.get(Device::Param::AutoExposure) << std::endl << std::endl;
-		
-		device.set(Device::Param::AutoExposure, 1);
+		device.set(Device::Param::AutoExposure, 0);
 		device.set(Device::Param::Exposure, 0.0331066);
-		
-		std::cout << "Exposure: "			<< device.get(Device::Param::Exposure) << std::endl << std::endl;
-		std::cout << "AutoExposure: "	<< device.get(Device::Param::AutoExposure) << std::endl << std::endl;
+		std::cout << "Exposure: "	<< device.get(Device::Param::Exposure) << std::endl << std::endl;
+		open = true;
 	});
 	
 	// -------- Main loop --------  
@@ -71,8 +68,22 @@ void showDevice(const int port, cv::Mat& cvFrame, std::mutex& mutFrame) {
 	}
 	
 	
+	double speed = 0.01;
+	double exposure = 0;
+	double direction = 1;
 	while(Globals::signalStatus != SIGINT) {
 		Timer::wait(100);
+		
+		if(open) {
+			// device.set(Device::Param::Exposure, exposure);
+			// printf("Exposure %.5lf -> %.5lf \n", exposure, device.get(Device::Param::Exposure));
+			// exposure += direction * speed;
+			
+			// if(exposure >= 1 || exposure <= 0) {
+				// direction *= -1;
+				// exposure += 2 * direction * speed;
+			// }
+		}
 	}
 
 	// -- End
