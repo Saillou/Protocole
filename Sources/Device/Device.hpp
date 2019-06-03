@@ -30,6 +30,8 @@
 
 	#include <fcntl.h>
 	#include <unistd.h>
+	
+	#include <cmath>
 
 // ---------- Header for windows ----------
 #elif _WIN32
