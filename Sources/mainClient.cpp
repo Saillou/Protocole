@@ -56,7 +56,7 @@ void showDevice(const int port, cv::Mat& cvFrame, std::mutex& mutFrame) {
 		std::cout << "Exposure: "			<< device.get(Device::Param::Exposure) << std::endl << std::endl;
 		std::cout << "AutoExposure: "	<< device.get(Device::Param::AutoExposure) << std::endl << std::endl;
 		
-		device.set(Device::Param::AutoExposure, 0);
+		device.set(Device::Param::AutoExposure, 1);
 		device.set(Device::Param::Exposure, 0.0331066);
 		
 		std::cout << "Exposure: "			<< device.get(Device::Param::Exposure) << std::endl << std::endl;
