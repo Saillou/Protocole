@@ -73,7 +73,7 @@ void showDevice(const int port, cv::Mat& cvFrame, std::mutex& mutFrame) {
 		Timer::wait(100);
 		
 		if(open) {
-			device.set(Device::Param::Exposure, exposure);
+			// do something
 		}
 	}
 
