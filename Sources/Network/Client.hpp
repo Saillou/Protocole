@@ -305,7 +305,7 @@ private:
 		if(!connectSocked.send(msg)) {
 			std::lock_guard<std::mutex> lockCbk(_mutCbk);
 			if(_cbkError) 
-				auto p = std::async(std::launch::async, _cbkError, Error(wlc::getError(), "Send error"));
+				_futureError = std::async(std::launch::async, _cbkError, Error(wlc::getError(), "Send error"));
 			return false;
 		}
 		return true;
@@ -326,7 +326,7 @@ private:
 	std::function<void(const Message& message)> _cbkData;
 	std::function<void(void)> _cbkConnect;
 	
-	std::future<void> _futureError;
+	mutable std::future<void> _futureError;
 	std::future<void> _futureInfo;
 	std::future<void> _futureData;
 	std::future<void> _futureConnect;

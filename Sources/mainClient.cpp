@@ -50,19 +50,17 @@ void showDevice(const int port, cv::Mat& cvFrame, std::mutex& mutFrame) {
 		
 		// Data
 		memcpy(cvFrame.data, frame.start(), frame.length());
-		std::cout << "Saturation: "	<< device.get(Device::Param::Saturation) << std::endl;
 	});
 	
 	device.onOpen([&]() {
-		std::cout << "Saturation: "	<< device.get(Device::Param::Saturation) << std::endl;
-		std::cout << "Brightness: "	<< device.get(Device::Param::Brightness) << std::endl;
-		std::cout << "Hue: " 			<< device.get(Device::Param::Hue) << std::endl;
-		std::cout << "Contrast: " 		<< device.get(Device::Param::Contrast) << std::endl;
-		std::cout << "Whiteness: " 	<< device.get(Device::Param::Whiteness) << std::endl;
-		std::cout << "Exposure: " 		<< device.get(Device::Param::Exposure) << std::endl;
-		std::cout << "Auto-expo: " 	<< device.get(Device::Param::AutoExposure) << std::endl;
+		std::cout << "Exposure: "			<< device.get(Device::Param::Exposure) << std::endl << std::endl;
+		std::cout << "AutoExposure: "	<< device.get(Device::Param::AutoExposure) << std::endl << std::endl;
 		
-		// device.set(Device::Param::AutoExposure, 1);
+		device.set(Device::Param::AutoExposure, 0);
+		device.set(Device::Param::Exposure, 0.0331066);
+		
+		std::cout << "Exposure: "			<< device.get(Device::Param::Exposure) << std::endl << std::endl;
+		std::cout << "AutoExposure: "	<< device.get(Device::Param::AutoExposure) << std::endl << std::endl;
 	});
 	
 	// -------- Main loop --------  

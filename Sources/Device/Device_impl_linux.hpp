@@ -224,7 +224,11 @@ public:
 		if(queryctrl.maximum == queryctrl.minimum)
 			return 1.0;
 		
-		return (double)(control.value - queryctrl.minimum) / (queryctrl.maximum - queryctrl.minimum);
+		// Value
+		if(code == AutoExposure)
+			return (control.value == V4L2_EXPOSURE_AUTO) ? 1.0 : 0.0;
+		else
+			return (double)(control.value - queryctrl.minimum) / (queryctrl.maximum - queryctrl.minimum);
 	}
 	const FrameFormat getFormat() const {
 		return _format;

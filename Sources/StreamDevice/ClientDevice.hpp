@@ -73,24 +73,24 @@ public:
 		const int64_t TIMEOUT_MUS = 500*1000; // 500ms
 		double value = 0.0;
 		
-		// Create thread to get back the answer
-		std::thread threadWaitForCbk([&](){
-			Timer timeout;
+		std::future<double> futureParam = std::async(std::launch::async, [&]() {
+			std::atomic<double> fVal = 0.0;
 			std::atomic<bool> gotIt = false;
-			
+	
 			this->onGetParam(code, [&](double val) {
 				gotIt = true;
-				value = val;
+				fVal = val;
 			});
 			
-			timeout.beg();
-			while(timeout.elapsed_mus() < TIMEOUT_MUS && !gotIt) {
+			Timer timeout;
+			while(timeout.elapsed_mus() < TIMEOUT_MUS && !gotIt)
 				timeout.wait(2);
-			}
 			timeout.end();
-			if(!gotIt) {
-				std::cout << "Timeout" << timeout.mus()/1000.0 << "ms." << std::endl;
-			}
+			
+			if(!gotIt)
+				printf("(Timeout: %lf ms.)\n", timeout.mus()/1000.0);
+			
+			return fVal.load();
 		});
 		
 		// Launch command
@@ -98,11 +98,8 @@ public:
 		command.add("code?", code);
 		_client.sendInfo(Message(Message::DEVICE | Message::PROPERTIES, command.str()));
 		
-		// Wait for thread to finish
-		if(threadWaitForCbk.joinable())
-			threadWaitForCbk.join();
-		
 		// Finally return
+		value = futureParam.get();
 		return value;
 	}
 	const Device::FrameFormat getFormat() {
@@ -139,7 +136,7 @@ public:
 		_cbkOpen = cbkOpen;
 	}
 	void onFrame(const std::function<void(const Gb::Frame&)>& cbkFrame) {
-		std::lock_guard<std::mutex> lockCbk(_mutCbk);
+		std::lock_guard<std::mutex> lockCbkFrame(_mutCbkFrame);
 		_cbkFrame = cbkFrame;
 	}
 	void onError(const std::function<void(const Error& error)>& cbkError) {
@@ -205,7 +202,7 @@ private:
 					_errCount = 0;
 					
 					// Call cbk
-					std::lock_guard<std::mutex> lockCbk(_mutCbk);
+					std::lock_guard<std::mutex> lockCbk(_mutCbkFrame);
 					if(_cbkFrame)
 						_futureOpen = std::async(std::launch::async, _cbkFrame, frameEmit);
 				}
@@ -223,8 +220,6 @@ private:
 	bool _ready() {		
 		_running = true;
 		_pThreadBuffer = std::make_shared<std::thread>(&ClientDevice::_bufferRead, this);
-		
-		std::cout << "> Thread ready: " << std::this_thread::get_id() << std::endl;
 		
 		std::lock_guard<std::mutex> lockCbk(_mutCbk);
 		if(_cbkOpen) 
@@ -259,7 +254,6 @@ private:
 	void _treatDeviceFormat(const Message& message) {
 		bool exist = false;
 		MessageFormat command(message.str());
-		std::cout << command.str() << std::endl;
 		
 		int width 	= command.valueOf<int>("width");
 		int height 	= command.valueOf<int>("height");
@@ -337,6 +331,8 @@ private:
 	
 	mutable std::mutex _mutFormat;
 	mutable std::mutex _mutCbk;
+	mutable std::mutex _mutCbkFrame;
+	
 	std::function<void(void)> _cbkOpen;
 	std::function<void(const Gb::Frame&)> _cbkFrame;
 	std::function<void(const Error& error)> _cbkError;	
