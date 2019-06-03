@@ -70,11 +70,13 @@ public:
 	
 	// -- Getters --
 	double get(Device::Param code) {
+		std::cout << "> Thread Get: "<< std::this_thread::get_id() << std::endl;
 		const int64_t TIMEOUT_MUS = 500*1000; // 500ms
 		double value = 0.0;
 		
 		// Create thread to get back the answer
 		std::thread threadWaitForCbk([&](){
+			std::cout << "> Thread wait: " << std::this_thread::get_id() << std::endl;
 			Timer timeout;
 			std::atomic<bool> gotIt = false;
 			
@@ -143,12 +145,12 @@ public:
 		_cbkFrame = cbkFrame;
 	}
 	void onError(const std::function<void(const Error& error)>& cbkError) {
-		std::lock_guard<std::mutex> lockCbk(_mutCbk);
+		// std::lock_guard<std::mutex> lockCbk(_mutCbk);
 		_cbkError = cbkError;
 	}
 	
 	void onGetParam(Device::Param code, const std::function<void(double)>& cbkParam) {
-		std::lock_guard<std::mutex> lockCbk(_mutCbk);
+		// std::lock_guard<std::mutex> lockCbk(_mutCbk);
 		_mapCbkParam[code] = cbkParam;
 	}
 	
@@ -164,6 +166,7 @@ private:
 			std::async(std::launch::async, &ClientDevice::_onConnect, this);
 		});
 		_client.onInfo([&](const Message& message) {
+			std::cout << "> Client info: " << std::this_thread::get_id() << std::endl;
 			std::async(std::launch::async, &ClientDevice::_onClientInfo, this, message);
 		});
 		_client.onData([&](const Message& message) {
@@ -205,7 +208,7 @@ private:
 					_errCount = 0;
 					
 					// Call cbk
-					std::lock_guard<std::mutex> lockCbk(_mutCbk);
+					// std::lock_guard<std::mutex> lockCbk(_mutCbk);
 					if(_cbkFrame)
 						std::async(std::launch::async, _cbkFrame, frameEmit);
 				}
@@ -228,7 +231,7 @@ private:
 		
 		std::lock_guard<std::mutex> lockCbk(_mutCbk);
 		if(_cbkOpen)
-			std::async(std::launch::async, _cbkOpen);
+			_futures.push_back(std::async(std::launch::async, _cbkOpen));
 		
 		_client.sendInfo(Message(Message::HANDSHAKE, "Start"));
 		
@@ -239,7 +242,7 @@ private:
 	void _onConnect() {
 		_client.sendInfo(Message(Message::DEVICE | Message::FORMAT, "?"));
 	}	
-	void _onClientInfo(const Message& message) {		
+	void _onClientInfo(const Message& message) {
 		if(message.code() & Message::FORMAT)
 			_treatDeviceFormat(message);
 		
@@ -259,6 +262,7 @@ private:
 	void _treatDeviceFormat(const Message& message) {
 		bool exist = false;
 		MessageFormat command(message.str());
+		std::cout << command.str() << std::endl;
 		
 		int width 	= command.valueOf<int>("width");
 		int height 	= command.valueOf<int>("height");
@@ -290,6 +294,7 @@ private:
 		double value = command.valueOf<double>("value");
 		
 		std::lock_guard<std::mutex> lockCbk(_mutCbk);
+		std::cout << "> Thread properties: "<< std::this_thread::get_id() << std::endl;
 		if(_mapCbkParam.find(code) != _mapCbkParam.end()) 
 			std::async(std::launch::async, _mapCbkParam[code], value);		
 	}
@@ -340,5 +345,7 @@ private:
 	std::function<void(const Gb::Frame&)> _cbkFrame;
 	std::function<void(void)> _cbkOpen;
 	std::map<Device::Param, std::function<void(double)>> _mapCbkParam;
+	
+	std::vector<std::future<void>> _futures;
 };
 

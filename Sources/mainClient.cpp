@@ -57,9 +57,9 @@ void showDevice(const int port, cv::Mat& cvFrame, std::mutex& mutFrame) {
 		std::cout << "Saturation: "	<< device.get(Device::Param::Saturation) << std::endl;
 		std::cout << "Brightness: "	<< device.get(Device::Param::Brightness) << std::endl;
 		std::cout << "Hue: " 			<< device.get(Device::Param::Hue) << std::endl;
-		std::cout << "Contrast: " 	<< device.get(Device::Param::Contrast) << std::endl;
+		std::cout << "Contrast: " 		<< device.get(Device::Param::Contrast) << std::endl;
 		std::cout << "Whiteness: " 	<< device.get(Device::Param::Whiteness) << std::endl;
-		std::cout << "Exposure: " 	<< device.get(Device::Param::Exposure) << std::endl;
+		std::cout << "Exposure: " 		<< device.get(Device::Param::Exposure) << std::endl;
 		std::cout << "Auto-expo: " 	<< device.get(Device::Param::AutoExposure) << std::endl;
 		
 		// device.set(Device::Param::AutoExposure, 1);

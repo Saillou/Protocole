@@ -3,7 +3,6 @@
 #include <atomic>
 #include <thread>
 #include <mutex>
-#include <future>
 #include <chrono>
 
 #include "Device.hpp"
@@ -136,10 +135,12 @@ protected:
 
 	// - Methods	
 	virtual void _onFrame() {
-		std::lock_guard<std::mutex> lockCbk(_mutCbk);
+		_mutCbk.lock();
 		
 		if(_cbkFrame) 
-			std::async(std::launch::async, _cbkFrame, frame); // Call back if set
+			_cbkFrame(frame);					// Call back if set
+		
+		_mutCbk.unlock();		
 	}
 	
 private:	

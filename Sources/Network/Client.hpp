@@ -4,7 +4,6 @@
 #include <memory>
 #include <string>
 #include <thread>
-#include <future>
 #include <atomic>
 #include <mutex>
 #include <vector>
@@ -150,7 +149,7 @@ private:
 				else {
 					std::lock_guard<std::mutex> lockCbk(_mutCbk);
 					if(_cbkError) 
-						std::async(std::launch::async, _cbkError, Error(error, "TCP receive Error"));
+						_cbkError(Error(error, "TCP receive Error"));
 					break;
 				}
 			}
@@ -158,7 +157,7 @@ private:
 			if(recv_len == 0) {
 				std::lock_guard<std::mutex> lockCbk(_mutCbk);
 				if(_cbkError) 
-					std::async(std::launch::async, _cbkError, Error(wlc::REFUSED_CONNECT, "Server disconnected"));
+					_cbkError(Error(wlc::REFUSED_CONNECT, "Server disconnected"));
 				break;
 			}
 			
@@ -179,14 +178,14 @@ private:
 							
 							std::lock_guard<std::mutex> lockCbk(_mutCbk);
 							if(_cbkConnect) 
-								std::async(std::launch::async, _cbkConnect);
+								_cbkConnect();
 						}
 					}
 				}
 				else {
 					std::lock_guard<std::mutex> lockCbk(_mutCbk);
-					if(_cbkInfo)
-						std::async(std::launch::async, _cbkInfo, message);
+					if(_cbkInfo) 
+						_cbkInfo(message);
 				}
 			} // -- End messages
 		} // -- End loop
@@ -240,7 +239,7 @@ private:
 				else {
 					std::lock_guard<std::mutex> lockCbk(_mutCbk);
 					if(_cbkError) 
-						std::async(std::launch::async, _cbkError, Error(error, "UDP receive Error"));
+						_cbkError(Error(error, "UDP receive Error"));
 					break;
 				}
 			}
@@ -262,7 +261,7 @@ private:
 					
 					std::lock_guard<std::mutex> lockCbk(_mutCbk);
 					if(_cbkData) 
-						std::async(std::launch::async, _cbkData, message);
+						_cbkData(message);
 				}
 				else { // Fragmented messages
 					if(message.code() & Message::HEADER) { // Header don't have data, only information (timestamps, code, size total)
@@ -286,7 +285,7 @@ private:
 									// std::cout << now - messagesBufferingTs[code] << "ms" << std::endl;
 									std::lock_guard<std::mutex> lockCbk(_mutCbk);
 									if(_cbkData) 
-										std::async(std::launch::async, _cbkData, message);
+										_cbkData(message);
 								}
 							}
 						}
@@ -305,7 +304,7 @@ private:
 		if(!connectSocked.send(msg)) {
 			std::lock_guard<std::mutex> lockCbk(_mutCbk);
 			if(_cbkError) 
-				std::async(std::launch::async, _cbkError, Error(wlc::getError(), msgOnError));
+				_cbkError(Error(wlc::getError(), msgOnError));
 			return false;
 		}
 		return true;
