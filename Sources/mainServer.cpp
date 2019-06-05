@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
 	
 	// - Device
 	ServerDevice device0(Globals::PATH_0, 6666);
-	// ServerDevice device1(Globals::PATH_1, 8888);
+	ServerDevice device1(Globals::PATH_1, 8888);
 
 	
 	// -------- Main loop --------  
@@ -44,11 +44,11 @@ int main(int argc, char* argv[]) {
 		std::cout << "Press a key to continue..." << std::endl;
 		return std::cin.get();
 	}
-	// if(!device1.open(-1)) {
-		// std::cout << "Can't open device" << std::endl;
-		// std::cout << "Press a key to continue..." << std::endl;
-		// return std::cin.get();
-	// }
+	if(!device1.open(-1)) {
+		std::cout << "Can't open device" << std::endl;
+		std::cout << "Press a key to continue..." << std::endl;
+		return std::cin.get();
+	}
 	
 
 	
@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
 	
 	// -- End
 	device0.close();
-	// device1.close();
+	device1.close();
 	
 	std::cout << "Clean exit" << std::endl;
 	std::cout << "Press a key to continue..." << std::endl;
