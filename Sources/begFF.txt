@@ -1,0 +1,86 @@
+set INCLUDES_PATH_DEP=^
+	D:\Dev\Opencv4\build_vc15_x64\install\include ^
+	D:\Dev\LibJpeg\libjpeg-turbo-1.5.2 ^
+	D:\Dev\h264\openh264\codec\api\ ^
+	D:\Dev\h264\openh264\test\utils ^
+	D:\Dev\FFMPEG\include ^
+
+set LIBRARIES_PATH_DEP=^
+	D:\Dev\Opencv4\build_vc15_x64\install\x64\vc15\lib ^
+	D:\Dev\LibJpeg\build_vc17x64\Release ^
+	D:\Dev\h264\openh264\bin\x64\Release ^
+	D:\Dev\FFMPEG\lib ^
+ 
+set LIBRARIES_NAME_DEP=^
+	ws2_32.lib ^
+	opencv_core400.lib ^
+	opencv_imgproc400.lib ^
+	opencv_highgui400.lib ^
+	opencv_imgcodecs400.lib ^
+	opencv_dnn400.lib ^
+	opencv_videoio400.lib ^
+	turbojpeg.lib ^
+	welsenc.lib ^
+	welsdec.lib  ^
+	avcodec.lib ^
+	avdevice.lib ^
+	avfilter.lib ^
+	avformat.lib ^
+	avutil.lib ^
+	postproc.lib ^
+	swresample.lib ^
+	swscale.lib 
+
+#include <iostream>
+#include <csignal>
+
+#include "Tool/Timer.hpp"
+
+// FFmpeg
+extern "C" {
+	#include "libavcodec/avcodec.h"
+	#include "libavformat/avformat.h"
+	#include "libavdevice/avdevice.h"
+	#include "libswscale/swscale.h"
+}
+
+namespace Globals {
+	// Variables
+	volatile std::sig_atomic_t signalStatus = 0;
+}
+
+// --- Signals ---
+static void sigintHandler(int signal) {
+	Globals::signalStatus = signal;
+}
+
+// --- Functions ---
+int returnError(const std::string& message) {
+	std::cout << message << std::endl;
+	std::cout << "Press a key to continue..." << std::endl;
+	return std::cin.get();		
+}
+
+
+// --- Entry point ---
+int main(int argc, char* argv[]) {	
+	// - Install signal handler
+	std::signal(SIGINT, sigintHandler);
+	
+	//  -- Init --
+	
+	// -- Loop --
+	for(Timer timer; Globals::signalStatus != SIGINT; timer.wait(100)) {
+		// // ... Do other stuff ...
+
+	}
+	
+	// -- Cleanup --
+	pSource->Shutdown();
+	SafeRelease(&pSource);
+	MFShutdown();
+
+	std::cout << "Clean exit" << std::endl;
+	std::cout << "Press a key to continue..." << std::endl;
+	return std::cin.get();
+}

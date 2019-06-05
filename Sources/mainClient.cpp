@@ -19,8 +19,8 @@
 
 namespace Globals {
 	// Constantes
-	const std::string IP_ADDRESS = "192.168.11.24"; 	// Barnacle V4
-	// const std::string IP_ADDRESS = "127.0.0.1"; 	// localhost V4
+	// const std::string IP_ADDRESS = "192.168.11.24"; 	// Barnacle V4
+	const std::string IP_ADDRESS = "127.0.0.1"; 	// localhost V4
 	
 	// const std::string IP_ADDRESS = "fe80::b18:f81d:13a8:3a4"; 		// Barnacle V6
 	// const std::string IP_ADDRESS = "::1"; 									// localhost V6
@@ -58,7 +58,7 @@ void showDevice(const int port, cv::Mat& cvFrame, std::mutex& mutFrame) {
 	});
 	
 	// -------- Main loop --------  
-	if(!device.open()) {
+	if(!device.open(-1)) {
 		std::cout << "Can't open device" << std::endl;
 		return;
 	}

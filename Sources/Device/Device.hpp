@@ -9,8 +9,7 @@
 #include <functional>
 
 #include "structures.hpp"
-#include "../Tool/Decoder.hpp"
-#include "../Tool/Encoder.hpp"
+#include "../Tool/Translator.hpp"
 #include "../Tool/Timer.hpp"
 
 // ---------- Header for linux ----------
@@ -35,12 +34,11 @@
 
 // ---------- Header for windows ----------
 #elif _WIN32
-	// Use Opencv
-	#include <opencv2/core.hpp>	
-	#include <opencv2/videoio.hpp>	
-	#include <opencv2/highgui.hpp>
-	#include <opencv2/imgproc.hpp>
-	#include <opencv2/imgcodecs.hpp>
+	// Use Dshow
+	#include "helper_dshow.hpp"
+	
+	#include <atlbase.h>
+	#include <dshow.h>
 #endif
 
 class Device {
@@ -53,7 +51,7 @@ public:
 	struct FrameFormat {
 		int width;
 		int height;
-		int format;	
+		int format;	// PixelFormat
 	};
 	
 	// Enums

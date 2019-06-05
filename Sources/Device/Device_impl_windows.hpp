@@ -5,61 +5,75 @@ struct _Impl {
 public:
 	// Constructors
 	explicit _Impl(const std::string& pathVideo) : 
+		_isOpen(false),
 		_path(pathVideo), 
-		_format({480, 640, MJPG}) {
+		_format({640, 480, MJPG}),
+		_rawData(nullptr, 0),
+		_pFormat(nullptr)		
+	{
+		CoInitialize(nullptr);
 		// Wait for open
 	}
 	~_Impl() {
-		if(_cap.isOpened())
-			_cap.release();
-		_encoderH264.cleanup();
+		close();
+		
+		CoUninitialize();
 	}
 	
 	// Methods
 	bool open() {
-		// USB camera
-		if(_path.size() == 1)
-			_cap.open((int)(_path[0]-'0'));
-		else 
-			_cap.open(_path);
-		
-		if(_format.width > 0 && _format.height > 0)
-			setFormat(_format.width, _format.height, (PixelFormat)_format.format);
-		
-		if(!_encoderH264.setup(_format.width, _format.height))
+		// Check opening
+		if(_format.width > 0 && _format.height > 0 && _path.size() != 1)
 			return false;
 		
-		return _cap.isOpened();
+		if(!_translator.setup(_format.width, _format.height))
+			return false;
+		
+		_isOpen = _open((int)(_path[0]-'0'));
+		
+		if(_isOpen)
+			_pMediaControl->Run();
+		
+		return _isOpen;
 	}
 	bool close() {
-		if(_cap.isOpened())
-			_cap.release();	
+		if(!_isOpen)
+			return true;
 		
-		_encoderH264.cleanup();
+		if(_pMediaControl)
+			_pMediaControl->Stop();
 		
-		return !_cap.isOpened();
+		_translator.cleanup();
+		_isOpen = false;
+		
+		return true;
 	}
 	void refresh() {
-		_encoderH264.refresh();
+		_translator.refresh();
 	}
 	
 	bool grab() {
-		return _cap.grab();
+		if(!_isOpen)
+			return false;
+		
+		 // Wait for callback		
+		while(!_rendererCallback.updated)
+			Timer::wait(1);
+		
+		// Get the frame
+		_rendererCallback.loadBuffer(_rawData.buffer);
+		
+		return !_rawData.buffer.empty();
 	}
 	bool retrieve(Gb::Frame& frame) {
-		cv::Mat cvFrame;
-		if(!_cap.retrieve(cvFrame))
+		if(!_isOpen)
 			return false;
 		
-		// Compress to h264
-		if(!_encoderH264.encodeBgr(cvFrame.data, frame.buffer))
-			return false;
+		// Convert to expected format
+		_rawData.size 	= Gb::Size(_format.width, _format.height);
+		_rawData.type 	= (_format.format == MJPG) ? Gb::FrameType::Jpg422 : Gb::FrameType::Yuv422;
 		
-		// Complete
-		frame.size = Gb::Size(_format.width, _format.height);
-		frame.type = Gb::FrameType::H264;
-		
-		return frame.size.area() > 0;
+		return _translator.treat(_rawData, frame);	
 	}
 	bool read(Gb::Frame& frame) {
 		return (grab() && retrieve(frame));
@@ -67,15 +81,43 @@ public:
 	
 	// Setters
 	bool setFormat(int width, int height, PixelFormat formatPix) {
-		if(_cap.isOpened()) {
-			_cap.set(cv::CAP_PROP_FRAME_WIDTH, width);
-			_cap.set(cv::CAP_PROP_FRAME_HEIGHT, height);
+		bool wasOpen = _isOpen;
+		bool success = false;
+		
+		if(wasOpen) {
+			if(_pMediaControl)
+				_pMediaControl->Stop();
+			_translator.cleanup();
+		}
+
+		if(FAILED(hvw::getFormat(_pDeviceConfig, 640, 480, formatPix == MJPG ? MEDIASUBTYPE_MJPG : MEDIASUBTYPE_YUY2, &_pFormat))) {
+			hvw::echo("Can't find format");
+			goto setFormatEnd;
 		}
 		
-		_format.width		= width;
-		_format.height	= height;
+		if(FAILED(_pDeviceConfig->SetFormat(_pFormat))) {
+			hvw::echo("Can't set device format");
+			goto setFormatEnd;
+		}
 		
-		return true;
+		if(FAILED(_pRendererGrabber->SetMediaType(_pFormat))) {
+			hvw::echo("Can't set grabber format");	
+			goto setFormatEnd;
+		}
+		
+		_format.width	= width;
+		_format.height = height;
+		_format.format = formatPix;
+		success = true;
+		
+setFormatEnd:
+		if(wasOpen) {
+			_translator.setup(_format.width, _format.height);
+			if(_pMediaControl)
+				_pMediaControl->Run();
+		}
+		
+		return success;
 	}
 	bool set(Device::Param code, double value) {	
 		if(value < 0.0 || value > 1.0) {
@@ -87,13 +129,25 @@ public:
 		
 		switch(code) {
 			case Saturation:
-				return _cap.set(cv::CAP_PROP_SATURATION, value * 100.0);
+				return false;
+				
+			case Brightness:
+				return false;
+				
+			case Hue:
+				return false;
+				
+			case Contrast:
+				return false;
+				
+			case Whiteness:
+				return false;
 				
 			case Exposure:
-				return _cap.set(cv::CAP_PROP_EXPOSURE, - value * 12 - 12);
+				return false;
 				
 			case AutoExposure:
-				return _cap.set(cv::CAP_PROP_AUTO_EXPOSURE, value != 0 ? 1 : 0);
+				return false;
 		}
 		
 		return false;
@@ -102,17 +156,26 @@ public:
 	// Getters
 	double get(Device::Param code) {
 		switch(code) {
-			// Saturation : [0.0 - 100.0]
 			case Saturation:
-				return _cap.get(cv::CAP_PROP_SATURATION) / 100.0;
+				return 0.0;
 				
-			// Exposure : [-12.0 - 0.0]
+			case Brightness:
+				return 0.0;
+				
+			case Hue:
+				return 0.0;
+				
+			case Contrast:
+				return 0.0;
+				
+			case Whiteness:
+				return 0.0;
+				
 			case Exposure:
-				return (_cap.get(cv::CAP_PROP_EXPOSURE) - 12.0)/ 12.0;
+				return 0.0;
 				
-			// Auto : [0 - 1]
 			case AutoExposure:
-				return _cap.get(cv::CAP_PROP_AUTO_EXPOSURE);
+				return 0.0;
 		}
 		
 		return 0.0;
@@ -128,13 +191,83 @@ public:
 	
 private:
 	// Methods
+	bool _open(int idCamera) {
+		if(_isOpen)
+			return true;
+		
+		// ----- Device graph build -----
+		// Create objects
+		if(FAILED(CoCreateInstance(CLSID_CaptureGraphBuilder2, nullptr, CLSCTX_INPROC_SERVER, IID_ICaptureGraphBuilder2, (void **)&_pBuild)))
+			return hvw::echo("Error builderGraph2");
+
+		if(FAILED(CoCreateInstance(CLSID_FilterGraph, nullptr, CLSCTX_INPROC_SERVER, IID_IGraphBuilder, (void **)&_pGraph)))
+			return hvw::echo("Error filterGraph");
+
+		if(FAILED(CoCreateInstance(CLSID_SampleGrabber, nullptr, CLSCTX_INPROC_SERVER, IID_IBaseFilter, (void **)&_pRendererFilter)))
+			return hvw::echo("Error sampleGrabber");
+		
+		
+		// Device init
+		if(FAILED(hvw::getMonikerDevice(0, &_pMonikerDevice)))
+			return hvw::echo("Can't find device");
+		
+		if(FAILED(_pMonikerDevice->BindToObject(0, 0, IID_IBaseFilter, (void**)&_pDeviceFilter)))
+			return hvw::echo("Can't bind device");
+		
+		if(FAILED(_pBuild->FindInterface(&PIN_CATEGORY_CAPTURE, &MEDIATYPE_Video, _pDeviceFilter, IID_IAMStreamConfig, (void **)&_pDeviceConfig)))
+			return hvw::echo("Can't find config");
+
+		
+		// Query graph interfaces
+		if(FAILED(_pGraph->QueryInterface(IID_IMediaControl, (void **)&_pMediaControl)))
+			return hvw::echo("Error mediaControl");
+
+		
+		// Set renderer configuration
+		if(FAILED(_pRendererFilter->QueryInterface(IID_ISampleGrabber, (void **)&_pRendererGrabber)))
+			return hvw::echo("Error setRenderer");
+
+		_pRendererGrabber->SetBufferSamples(true);
+		_pRendererGrabber->SetCallback(&_rendererCallback, 1); // 0 : Sample | 1 : Buffer
+		
+		// Add filters
+		if(FAILED(_pGraph->AddFilter(_pDeviceFilter, L"Capture_filter")))
+			return hvw::echo("Error add capture filter");
+
+		if(FAILED(_pGraph->AddFilter(_pRendererFilter, L"Renderer_filter")))
+			return hvw::echo("Error add renderer filter");
+
+		
+		// Render
+		if(FAILED(_pBuild->SetFiltergraph(_pGraph)))
+			return hvw::echo("Error set filter graph ");
+
+		if(FAILED(_pBuild->RenderStream(&PIN_CATEGORY_PREVIEW, &MEDIATYPE_Video, _pDeviceFilter, nullptr, _pRendererFilter)))	
+			return hvw::echo("Error renderer stream");	
+		
+		// Format 
+		return setFormat(640, 480, MJPG);
+	}
 	
+
 	// Members
+	bool _isOpen;
 	std::string _path;
-	cv::VideoCapture _cap;
 	FrameFormat	_format;
+	Gb::Frame 	_rawData;
+	Translator	_translator;
+
 	
-	EncoderH264 _encoderH264;
+	CComPtr<ICaptureGraphBuilder2>	_pBuild;
+	CComPtr<IGraphBuilder>				_pGraph;
+	CComPtr<IMediaControl>				_pMediaControl;
+	CComPtr<IMoniker> 					_pMonikerDevice;
+	CComPtr<IBaseFilter>				_pDeviceFilter;
+	CComPtr<IAMStreamConfig>			_pDeviceConfig;
+	CComPtr<IBaseFilter>				_pRendererFilter;
+	CComPtr<ISampleGrabber>			_pRendererGrabber;
+	AM_MEDIA_TYPE* 						_pFormat;
+	hvw::RendererCallback				_rendererCallback;
 };
 
 #endif

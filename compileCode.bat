@@ -69,7 +69,9 @@ set LIBRARIES_NAME_DEP=^
 	opencv_videoio400.lib ^
 	turbojpeg.lib ^
 	welsenc.lib ^
-	welsdec.lib 
+	welsdec.lib ^
+	Strmiids.lib ^
+	ole32.lib
  
 set COMMAND_LAUNCH=
 
