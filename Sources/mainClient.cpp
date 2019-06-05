@@ -19,8 +19,8 @@
 
 namespace Globals {
 	// Constantes
-	const std::string IP_ADDRESS = "192.168.11.24"; 	// Barnacle V4
-	// const std::string IP_ADDRESS = "127.0.0.1"; 	// localhost V4
+	// const std::string IP_ADDRESS = "192.168.11.24"; 	// Barnacle V4
+	const std::string IP_ADDRESS = "127.0.0.1"; 	// localhost V4
 	
 	// const std::string IP_ADDRESS = "fe80::b18:f81d:13a8:3a4"; 		// Barnacle V6
 	// const std::string IP_ADDRESS = "::1"; 									// localhost V6
@@ -85,8 +85,8 @@ int main(int argc, char* argv[]) {
 	std::mutex frameMut0;
 	std::mutex frameMut1;
 	
-	std::thread thread0(showDevice, 8888, std::ref(cvFrame0), std::ref(frameMut0));
-	std::thread thread1(showDevice, 6666, std::ref(cvFrame1), std::ref(frameMut1));
+	// std::thread thread0(showDevice, 6666, std::ref(cvFrame0), std::ref(frameMut0));
+	std::thread thread1(showDevice, 8888, std::ref(cvFrame1), std::ref(frameMut1));
 	
 	// --- Loop ----
 	while(Globals::signalStatus != SIGINT && cv::waitKey(10) != 27) {
@@ -105,8 +105,8 @@ int main(int argc, char* argv[]) {
 	Globals::signalStatus = SIGINT;
 	
 	// Wait
-	if(thread0.joinable())
-		thread0.join();
+	// if(thread0.joinable())
+		// thread0.join();
 	if(thread1.joinable())
 		thread1.join();
 	cv::destroyAllWindows();

@@ -213,7 +213,7 @@ private:
 		
 		
 		// Device init
-		if(FAILED(hvw::getMonikerDevice(0, &_pMonikerDevice)))
+		if(FAILED(hvw::getMonikerDevice(idCamera, &_pMonikerDevice)))
 			return hvw::echo("Can't find device");
 		
 		if(FAILED(_pMonikerDevice->BindToObject(0, 0, IID_IBaseFilter, (void**)&_pDeviceFilter)))

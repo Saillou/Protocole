@@ -47,8 +47,8 @@ if %commit%==0 (
 
 :: Launch
 if %launch%==1 (
-	REM start "Server" Server.exe
-	REM timeout 1
+	start "Server" Server.exe
+	timeout 1
 	start "Client" Client.exe
 )
 
