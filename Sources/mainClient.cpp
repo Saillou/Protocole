@@ -85,7 +85,7 @@ int main(int argc, char* argv[]) {
 	std::mutex frameMut0;
 	std::mutex frameMut1;
 	
-	// std::thread thread0(showDevice, 6666, std::ref(cvFrame0), std::ref(frameMut0));
+	std::thread thread0(showDevice, 6666, std::ref(cvFrame0), std::ref(frameMut0));
 	std::thread thread1(showDevice, 8888, std::ref(cvFrame1), std::ref(frameMut1));
 	
 	// --- Loop ----
@@ -105,8 +105,8 @@ int main(int argc, char* argv[]) {
 	Globals::signalStatus = SIGINT;
 	
 	// Wait
-	// if(thread0.joinable())
-		// thread0.join();
+	if(thread0.joinable())
+		thread0.join();
 	if(thread1.joinable())
 		thread1.join();
 	cv::destroyAllWindows();
