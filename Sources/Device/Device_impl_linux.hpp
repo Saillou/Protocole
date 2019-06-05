@@ -199,8 +199,6 @@ public:
 			
 			if(control.value > queryctrl.maximum)
 				control.value = queryctrl.maximum;
-			
-			// std::cout << "Set: " << value << " -> " << control.value << std::endl;
 		}
 		else {
 			control.value = value * (queryctrl.maximum - queryctrl.minimum) + queryctrl.minimum;
@@ -238,14 +236,13 @@ public:
 		// Value
 		if(code == AutoExposure)
 			return (control.value == V4L2_EXPOSURE_AUTO) ? 1.0 : 0.0;
+		
 		else if(code == Exposure) {
 			double minVal = std::log2((double)queryctrl.minimum);
 			double maxVal = std::log2((double)queryctrl.maximum);
 			double scaledVal = std::log2((double)control.value);
-			double value = (scaledVal - minVal) / (maxVal - minVal);
 			
-			// std::cout << "Get: " << control.value << " -> " << value << std::endl;
-			return value;
+			return (scaledVal - minVal) / (maxVal - minVal);
 		}
 		else
 			return (double)(control.value - queryctrl.minimum) / (queryctrl.maximum - queryctrl.minimum);

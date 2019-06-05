@@ -140,6 +140,53 @@ namespace hvw {
 		return E_FAIL;
 	}
 	
+	// Get value of filter / control of a device in range [0, 1]
+	template<typename U, class T>
+	double getProp(U idValue, CComPtr<T> pBase, const CameraControlFlags flag = CameraControl_Flags_Manual) {
+		long mode = 0, value = 0, minValue = 0, maxValue = 0, defaultValue = 0, stepDelta = 0, capsFlags = 0;
+			
+		// Get value and mode
+		if(FAILED(pBase->Get(idValue, &value, &mode)))
+			return 0.0;
+		
+		// -> Asking about mode ?
+		if(flag == CameraControl_Flags_Auto) 
+			return (mode == CameraControl_Flags_Auto) ? 1.0 : 0.0;
+		
+		// Get range
+		if(FAILED(pBase->GetRange(idValue, &minValue, &maxValue, &stepDelta, &defaultValue, &capsFlags)))
+			return 0.0;
+		
+		// -> Asking about value ?
+		if(minValue == maxValue)
+			return 1.0;
+		
+		return (double)(value - minValue) / (maxValue - minValue);		
+	}
+	
+	// Set value of filter / control of a device in range [0, 1]
+	template<typename U, class T>
+	bool setProp(U idValue, double value, CComPtr<T> pBase, const CameraControlFlags flag = CameraControl_Flags_Manual) {
+		long mode = 0, aValue = 0, minValue = 0, maxValue = 0, defaultValue = 0, stepDelta = 0, capsFlags = 0;
+			
+		// Get value and mode
+		if(FAILED(pBase->Get(idValue, &aValue, &mode)))
+			return false;
+		
+		// Get range
+		if(FAILED(pBase->GetRange(idValue, &minValue, &maxValue, &stepDelta, &defaultValue, &capsFlags)))
+			return false;
+		
+		// Manual
+		if(flag == CameraControl_Flags_Manual) {
+			long valueScaled = (long)(value * (maxValue - minValue) + minValue);
+			return SUCCEEDED(pBase->Set(idValue, valueScaled, CameraControl_Flags_Manual));
+		}
+		
+		// Auto
+		return SUCCEEDED(pBase->Set(idValue, aValue, value > 0 ? CameraControl_Flags_Auto : CameraControl_Flags_Manual));
+	}
+	
 	// Just write a message
 	bool echo(const std::string& msg) {
 		printf("Error : %s", msg.c_str());

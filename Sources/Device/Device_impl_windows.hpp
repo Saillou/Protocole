@@ -15,8 +15,7 @@ public:
 		// Wait for open
 	}
 	~_Impl() {
-		close();
-		
+		close();		
 		CoUninitialize();
 	}
 	
@@ -120,6 +119,9 @@ setFormatEnd:
 		return success;
 	}
 	bool set(Device::Param code, double value) {	
+		if(!_pPropFilter || !_pPropControl)
+			return false;
+		
 		if(value < 0.0 || value > 1.0) {
 			printf("Warning - Set control : value outside range [0.0; 1.0], will be truncated. \n");
 			
@@ -129,25 +131,25 @@ setFormatEnd:
 		
 		switch(code) {
 			case Saturation:
-				return false;
+				return hvw::setProp(VideoProcAmp_Saturation, value, _pPropFilter);
 				
 			case Brightness:
-				return false;
+				return hvw::setProp(VideoProcAmp_Brightness, value, _pPropFilter);
 				
 			case Hue:
-				return false;
+				return hvw::setProp(VideoProcAmp_Hue, value, _pPropFilter);
 				
 			case Contrast:
-				return false;
+				return hvw::setProp(VideoProcAmp_Contrast, value, _pPropFilter);
 				
 			case Whiteness:
-				return false;
+				return hvw::setProp(VideoProcAmp_WhiteBalance, value, _pPropFilter);
 				
 			case Exposure:
-				return false;
+				return hvw::setProp(CameraControl_Exposure, value, _pPropControl);
 				
 			case AutoExposure:
-				return false;
+				return hvw::setProp(CameraControl_Exposure, value, _pPropControl, CameraControl_Flags_Auto);
 		}
 		
 		return false;
@@ -155,27 +157,30 @@ setFormatEnd:
 	
 	// Getters
 	double get(Device::Param code) {
+		if(!_pPropFilter || !_pPropControl)
+			return 0.0;
+		
 		switch(code) {
 			case Saturation:
-				return 0.0;
+				return hvw::getProp(VideoProcAmp_Saturation, _pPropFilter);
 				
 			case Brightness:
-				return 0.0;
+				return hvw::getProp(VideoProcAmp_Brightness, _pPropFilter);
 				
 			case Hue:
-				return 0.0;
+				return hvw::getProp(VideoProcAmp_Hue, _pPropFilter);
 				
 			case Contrast:
-				return 0.0;
+				return hvw::getProp(VideoProcAmp_Contrast, _pPropFilter);
 				
 			case Whiteness:
-				return 0.0;
+				return hvw::getProp(VideoProcAmp_WhiteBalance, _pPropFilter);
 				
 			case Exposure:
-				return 0.0;
+				return hvw::getProp(CameraControl_Exposure, _pPropControl);
 				
 			case AutoExposure:
-				return 0.0;
+				return hvw::getProp(CameraControl_Exposure, _pPropControl, CameraControl_Flags_Auto);
 		}
 		
 		return 0.0;
@@ -214,11 +219,19 @@ private:
 		if(FAILED(_pMonikerDevice->BindToObject(0, 0, IID_IBaseFilter, (void**)&_pDeviceFilter)))
 			return hvw::echo("Can't bind device");
 		
+		
+		// Device interfaces
+		if(FAILED(_pDeviceFilter->QueryInterface(IID_IAMCameraControl, (void **)&_pPropControl)))
+			return hvw::echo("Can't find prop control");
+		
+		if(FAILED(_pDeviceFilter->QueryInterface(IID_IAMVideoProcAmp, (void **)&_pPropFilter)))
+			return hvw::echo("Can't find prop filter");
+		
+		
+		// Graph interfaces
 		if(FAILED(_pBuild->FindInterface(&PIN_CATEGORY_CAPTURE, &MEDIATYPE_Video, _pDeviceFilter, IID_IAMStreamConfig, (void **)&_pDeviceConfig)))
 			return hvw::echo("Can't find config");
 
-		
-		// Query graph interfaces
 		if(FAILED(_pGraph->QueryInterface(IID_IMediaControl, (void **)&_pMediaControl)))
 			return hvw::echo("Error mediaControl");
 
@@ -230,6 +243,7 @@ private:
 		_pRendererGrabber->SetBufferSamples(true);
 		_pRendererGrabber->SetCallback(&_rendererCallback, 1); // 0 : Sample | 1 : Buffer
 		
+		
 		// Add filters
 		if(FAILED(_pGraph->AddFilter(_pDeviceFilter, L"Capture_filter")))
 			return hvw::echo("Error add capture filter");
@@ -238,7 +252,7 @@ private:
 			return hvw::echo("Error add renderer filter");
 
 		
-		// Render
+		// Build graph
 		if(FAILED(_pBuild->SetFiltergraph(_pGraph)))
 			return hvw::echo("Error set filter graph ");
 
@@ -256,14 +270,15 @@ private:
 	FrameFormat	_format;
 	Gb::Frame 	_rawData;
 	Translator	_translator;
-
 	
 	CComPtr<ICaptureGraphBuilder2>	_pBuild;
 	CComPtr<IGraphBuilder>				_pGraph;
-	CComPtr<IMediaControl>				_pMediaControl;
 	CComPtr<IMoniker> 					_pMonikerDevice;
 	CComPtr<IBaseFilter>				_pDeviceFilter;
+	CComPtr<IMediaControl>				_pMediaControl;
 	CComPtr<IAMStreamConfig>			_pDeviceConfig;
+	CComPtr<IAMCameraControl>			_pPropControl;
+	CComPtr<IAMVideoProcAmp> 			_pPropFilter;
 	CComPtr<IBaseFilter>				_pRendererFilter;
 	CComPtr<ISampleGrabber>			_pRendererGrabber;
 	AM_MEDIA_TYPE* 						_pFormat;

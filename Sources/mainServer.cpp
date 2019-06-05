@@ -1,24 +1,10 @@
 #include <iostream>
 #include <csignal>
 
-#include "StreamDevice/ServerDevice.hpp"
+#include "Device/Device.hpp"
 #include "Tool/Timer.hpp"
 
-#ifdef __linux__
-	#define PATH_CAMERA_0 "/dev/video0"
-	#define PATH_CAMERA_1 "/dev/video1"
-
-#elif _WIN32
-	#define PATH_CAMERA_0 "0"
-	#define PATH_CAMERA_1 "1"
-	
-#endif
-
 namespace Globals {
-	// Constantes
-	const std::string PATH_0 = PATH_CAMERA_0;
-	const std::string PATH_1 = PATH_CAMERA_1;
-	
 	// Variables
 	volatile std::sig_atomic_t signalStatus = 0;
 }
@@ -28,40 +14,27 @@ static void sigintHandler(int signal) {
 	Globals::signalStatus = signal;
 }
 
+int echo(const std::string& msg) {
+	Timer::wait(100);
+	std::cout << msg << std::endl;
+	std::cout << "Press a key to continue..." << std::endl;
+	return std::cin.get();
+}
+
 // --- Entry point ---
 int main(int argc, char* argv[]) {	
 	// - Install signal handler
 	std::signal(SIGINT, sigintHandler);
 	
-	// - Device
-	ServerDevice device0(Globals::PATH_0, 6666);
-	// ServerDevice device1(Globals::PATH_1, 8888);
-
-	
-	// -------- Main loop --------  
-	if(!device0.open(-1)) {
-		std::cout << "Can't open device" << std::endl;
-		std::cout << "Press a key to continue..." << std::endl;
-		return std::cin.get();
-	}
-	// if(!device1.open(-1)) {
-		// std::cout << "Can't open device" << std::endl;
-		// std::cout << "Press a key to continue..." << std::endl;
-		// return std::cin.get();
-	// }
-	
-
+	Device device("0");
+	device.open();
 	
 	for(Timer timer; Globals::signalStatus != SIGINT; timer.wait(100)) {
-		// // ... Do other stuff ...
-
+		// ... Do other stuff ...
 	}
 	
-	// -- End
-	device0.close();
-	// device1.close();
+	device.close();
+	// End
 	
-	std::cout << "Clean exit" << std::endl;
-	std::cout << "Press a key to continue..." << std::endl;
-	return std::cin.get();
+	return echo("Success");
 }
