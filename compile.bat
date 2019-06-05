@@ -9,7 +9,7 @@ set launch=1
 
 if %compile%==1 (
 	call compileCode.bat Server mainServer
-	REM call compileCode.bat Client mainClient
+	call compileCode.bat Client mainClient
 )
 
 :: Launch on success
@@ -48,8 +48,8 @@ if %commit%==0 (
 :: Launch
 if %launch%==1 (
 	start "Server" Server.exe
-	REM timeout 1
-	REM start "Client" Client.exe
+	timeout 1
+	start "Client" Client.exe
 )
 
 exit
