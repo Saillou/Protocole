@@ -117,14 +117,16 @@ int main(int argc, char* argv[]) {
 	
 	std::cout << "Clean exit" << std::endl;
 	
-	// Waiting for shutting down
-	while(!Globals::G_shutdown) {
-		Timer::wait(100);
-		gLedShut.setValue(gLedShut.readValue() == Gpio::High ? Gpio::Low : Gpio::High);
-	}
-	gNpn.setValue(Gpio::Low); 				// Disable relay
+	if(Globals::signalStatus != SIGINT) {
+		// Waiting for shutting down
+		while(!Globals::G_shutdown) {
+			Timer::wait(100);
+			gLedShut.setValue(gLedShut.readValue() == Gpio::High ? Gpio::Low : Gpio::High);
+		}
+		gNpn.setValue(Gpio::Low); 				// Disable relay
 	
-	std::cout << "Shutting down" << std::endl;
-	system("shutdown -h now");
+		std::cout << "Shutting down" << std::endl;
+		system("shutdown -h now");
+	}
 	return 0;
 }
