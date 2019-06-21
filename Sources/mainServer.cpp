@@ -59,22 +59,24 @@ int main(int argc, char* argv[]) {
 	// - Install signal handler
 	std::signal(SIGINT, sigintHandler);
 	
-	// - Devices
-	ServerDevice device0(Globals::PATH_0, 8000);
-	ServerDevice device1(Globals::PATH_1, 8002);
-	
 	// - Gpio
 	Gpio gLedRec(100, Gpio::Output); 	// Rock64 = 15 (GPIO3_A4)
 	Gpio gBtnRec(101, Gpio::Input);		// Rock64 = 16 (GPIO3_A5)
 	Gpio gLedShut(102, Gpio::Output);  	// Rock64 = 18 (GPIO3_A6)
 	Gpio gBtnShut(103, Gpio::Input);   	// Rock64 = 22 (GPIO3_A7)
 	Gpio gNpn(81, Gpio::Output);  		// Rock64 = 3  (GPIO2_C1)
+	
+	gLedShut.setValue(Gpio::High);
 	gNpn.setValue(Gpio::High);			// Activate relay (shutdown button)
 	
 	ManagerGpio manager;
 	manager.addEventListener(gBtnShut, Gpio::Both, onBtnShut);
 	manager.startListening();
 
+	
+	// - Devices
+	ServerDevice device0(Globals::PATH_0, 8000);
+	ServerDevice device1(Globals::PATH_1, 8002);
 	
 	// -------- Main loop --------  
 	bool error = false;
@@ -128,5 +130,8 @@ int main(int argc, char* argv[]) {
 		std::cout << "Shutting down" << std::endl;
 		system("shutdown -h now");
 	}
+	
+	gLedShut.setValue(Gpio::Low);
+	gLedRec.setValue(Gpio::Low);
 	return 0;
 }
