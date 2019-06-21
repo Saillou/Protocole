@@ -108,7 +108,7 @@ int main(int argc, char* argv[]) {
 		if(Globals::G_countLong) {
 			Globals::G_count++;
 			
-			if(Globals::G_count > 20) // 20 * 100ms => 2 secondes
+			if(Globals::G_count > 7) // Wait 7 * 100ms
 				Globals::G_stop = true;
 		}
 	}

@@ -329,16 +329,30 @@ struct Socket {
 		if(!_createSocket(address, proto))
 			return false;
 		
-		// -- Connection --
-		if(::connect(_socket, _address.get(), _address.size()) != 0) {
-			close();
-			return false;
-		}
-		
 		// -- Options --
 		if(wlc::setNonBlocking(_socket, !blocking) < 0 || wlc::setReusable(_socket, true) < 0) {
 			close();
 			return false;
+		}
+		
+		// -- Connection --
+		if(::connect(_socket, _address.get(), _address.size()) != 0) {
+			if (!wlc::errorIs(wlc::WOULD_BLOCK, wlc::getError())) {
+				close();
+				return false;
+			}
+
+			// Connection pending
+			const int TIMEOUT = 500; // 0.5 sec
+			pollfd fdRead = { 0 };
+			fdRead.fd = _socket;
+			fdRead.events = POLLIN;
+
+			int pollResult = wlc::polling(&fdRead, 1, TIMEOUT);
+			if (pollResult < 0 || pollResult == 0) { 	// failed || timeout
+				close();
+				return false;
+			}
 		}
 		
 		return true;
