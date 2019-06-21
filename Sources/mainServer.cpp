@@ -72,7 +72,7 @@ int main(int argc, char* argv[]) {
 	gNpn.setValue(Gpio::High);			// Activate relay (shutdown button)
 	
 	ManagerGpio manager;
-	manager.addEventListener(gBtnRec, Gpio::Both, onBtnRec);
+	manager.addEventListener(gBtnShut, Gpio::Both, onBtnShut);
 	manager.startListening();
 
 	
@@ -87,7 +87,7 @@ int main(int argc, char* argv[]) {
 		error = true;
 	}
 	
-	G_ready = true;
+	Globals::G_ready = true;
 	for(Timer timer; !Globals::G_stop && Globals::signalStatus != SIGINT; timer.wait(100)) {
 		// ... Do other stuff ...
 		if(error) {
