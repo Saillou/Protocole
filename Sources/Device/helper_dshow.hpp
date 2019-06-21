@@ -107,7 +107,7 @@ namespace hvw {
 		if(FAILED(pEnumCatDevice->Next(1, ppMonikerDevice, nullptr)))
 			return E_FAIL;
 		
-		return S_OK;
+		return (*ppMonikerDevice == nullptr) ? E_FAIL : S_OK;
 	}
 
 	// Seach a corresponding format from the choosen device

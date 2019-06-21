@@ -37,13 +37,13 @@ REM set EVT_SCRIPT="C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\v
 
 
 :: -- Visual Studio 2017 - 64bits
-set COMPILER="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.12.25827\bin\Hostx64\x64\cl.exe"
-set LINKER="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.12.25827\bin\Hostx64\x64\link.exe"
+set COMPILER="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\bin\Hostx64\x64\cl.exe"
+set LINKER="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\bin\Hostx64\x64\link.exe"
 set EVT_SCRIPT="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
 
 :: -- Visual Studio 2017 - 32bits
-REM set COMPILER="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.12.25827\bin\Hostx86\x86\cl.exe"
-REM set LINKER="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.12.25827\bin\Hostx86\x86\link.exe"
+REM set COMPILER="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\bin\Hostx86\x86\cl.exe"
+REM set LINKER="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\bin\Hostx86\x86\link.exe"
 REM set EVT_SCRIPT="C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars32.bat"
 
 
@@ -88,6 +88,7 @@ call :needFile D:\Dev\h264\openh264\bin\x64\Release welsdec.dll !fRelease!
 call :needFile D:\Dev\h264\openh264\bin\x64\Release welsenc.dll !fRelease!
 call :needFile D:\Dev\h264\openh264\bin\x64\Release welsvp.dll !fRelease!
 echo.
+
 
 ::--------------------------------------------------------
 

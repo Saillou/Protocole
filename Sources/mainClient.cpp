@@ -37,7 +37,6 @@ static void sigintHandler(int signal) {
 // --- Helper ----
 void showDevice(const int port, cv::Mat& cvFrame, std::mutex& mutFrame) {
 	// Device	
-	// std::atomic<bool> opened = false;
 	ClientDevice device(IAddress(Globals::IP_ADDRESS, port));
 	
 	// ----- Events -----	
