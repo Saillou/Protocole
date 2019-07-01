@@ -381,6 +381,7 @@ struct Socket {
 		return true;
 	}
 	bool accept(Socket& socketAccepted) {
+		std::cout << "accept: " << _socket << " " << _protoType << std::endl;
 		if(_socket == INVALID_SOCKET || _protoType == Proto_error)
 			return false;
 		
@@ -388,6 +389,7 @@ struct Socket {
 		socklen_t slen =  _address.size();
 		SOCKET socketId = ::accept(_socket, &address, &slen);
 		
+		std::cout << "Id: " << socketId << std::endl;
 		if(socketId == SOCKET_ERROR)
 			return false;
 		

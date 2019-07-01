@@ -81,16 +81,16 @@ int main(int argc, char* argv[]) {
 	// -------- Main loop --------  
 	bool error = false;
 	if(!device0.open(1000)) {
-		std::cout << "Can't open device" << std::endl;
+		std::cout << "Can't open device 0" << std::endl;
 		error = true;
 	}
 	if(!device1.open(1000)) {
-		std::cout << "Can't open device" << std::endl;
+		std::cout << "Can't open device 1" << std::endl;
 		error = true;
 	}
 	
 	Globals::G_ready = true;
-	for(Timer timer; !Globals::G_stop && Globals::signalStatus != SIGINT; timer.wait(100)) {
+	for(Timer timer; !Globals::G_stop && Globals::signalStatus != SIGINT; timer.wait(50)) {
 		// ... Do other stuff ...
 		if(error) {
 			static int iLed = 1;
@@ -108,7 +108,7 @@ int main(int argc, char* argv[]) {
 		if(Globals::G_countLong) {
 			Globals::G_count++;
 			
-			if(Globals::G_count > 7) // Wait 7 * 100ms
+			if(Globals::G_count > 7) // Wait 8 * ts (ms)
 				Globals::G_stop = true;
 		}
 	}
@@ -128,7 +128,7 @@ int main(int argc, char* argv[]) {
 		gNpn.setValue(Gpio::Low); 				// Disable relay
 	
 		std::cout << "Shutting down" << std::endl;
-		system("shutdown -h now");
+		// system("shutdown -h now");
 	}
 	
 	gLedShut.setValue(Gpio::Low);
