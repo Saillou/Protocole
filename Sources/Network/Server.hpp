@@ -279,7 +279,6 @@ private:
 		for(Timer timer; _isConnected; timer.wait(100)) {
 			// New client
 			if(tcpSock.accept(clientInfo.tcpSock)) {
-				std::cout << "Accepted" << std::endl;
 				// Update infos
 				clientInfo.lastUpdate = clock();
 				clientInfo.udpAddress.memset(0);
@@ -292,6 +291,7 @@ private:
 				client.pThread = std::make_shared<std::thread>(&Server::_clientTcp, this, std::ref(client.info)); 	// Start its thread
 			}
 			else {
+				std::cout << tcpSock.get() << " ";
 				// Use this time to collect garbage
 				if(!_garbageItClients.empty()) {
 					std::lock_guard<std::mutex> lockCbk(_mutClients);
@@ -300,6 +300,7 @@ private:
 					
 					_garbageItClients.clear();
 				}
+				std::cout << tcpSock.get() << "\n";
 			}
 		}
 	}
