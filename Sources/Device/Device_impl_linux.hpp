@@ -30,12 +30,13 @@ public:
 			goto failed;
 		
 		// -- Set format --
-		if(get(Saturation) > 0) {
-			_format.width 		= 1280;
-			_format.height	= 720;
-			_format.format	= MJPG;
-		}
-		else if(_format.width == 0 || _format.height == 0) {
+		// if(get(Saturation) > 0) {
+			// _format.width 		= 1280;
+			// _format.height	= 720;
+			// _format.format	= MJPG;
+		// }
+		// else
+		if(_format.width == 0 || _format.height == 0) {
 			_format.width 		= 640;
 			_format.height	= 480;
 			_format.format	= MJPG;
