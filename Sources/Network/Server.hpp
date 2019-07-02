@@ -262,9 +262,7 @@ public:
 	
 private:	
 	// Methods in threads
-	void _handleTcp(Socket& tcpSock) {
-		std::cout <<"tcpSock: " << tcpSock.get() << std::endl;
-		
+	void _handleTcp(Socket& tcpSock) {		
 		// Listen
 		if(!_isConnected || listen(tcpSock.get(), SOMAXCONN) == SOCKET_ERROR)
 			return;
@@ -279,8 +277,9 @@ private:
 		
 		// Loop accept() until the server is stopped
 		for(Timer timer; _isConnected; timer.wait(100)) {
-			std::cout << tcpSock.get() << " " << tcpSock.type() << std::endl;
+			// New client
 			if(tcpSock.accept(clientInfo.tcpSock)) {
+				std::cout << "Accepted" << std::endl;
 				// Update infos
 				clientInfo.lastUpdate = clock();
 				clientInfo.udpAddress.memset(0);
