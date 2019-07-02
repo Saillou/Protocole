@@ -264,10 +264,8 @@ private:
 	// Methods in threads
 	void _handleTcp(Socket& tcpSock) {		
 		// Listen
-		std::cout << tcpSock.get() << " -> \n \t";
 		if(!_isConnected || listen(tcpSock.get(), SOMAXCONN) == SOCKET_ERROR)
 			return;
-		std::cout << tcpSock.get() << "\n";
 
 		// Accept new clients
 		ClientInfo clientInfo;
@@ -280,7 +278,9 @@ private:
 		// Loop accept() until the server is stopped
 		for(Timer timer; _isConnected; timer.wait(100)) {
 			// New client
+			std::cout << tcpSock.get() << " -> \n \t";
 			if(tcpSock.accept(clientInfo.tcpSock)) {
+				std::cout << "ok :" << tcpSock.get() << " \n";
 				// Update infos
 				clientInfo.lastUpdate = clock();
 				clientInfo.udpAddress.memset(0);
@@ -293,6 +293,7 @@ private:
 				client.pThread = std::make_shared<std::thread>(&Server::_clientTcp, this, std::ref(client.info)); 	// Start its thread
 			}
 			else {
+				std::cout << "ng :" << tcpSock.get() << " \n";
 				// Use this time to collect garbage
 				if(!_garbageItClients.empty()) {
 					std::lock_guard<std::mutex> lockCbk(_mutClients);
