@@ -388,23 +388,29 @@ struct Socket {
 		socklen_t slen =  _address.size();
 		SOCKET socketId = ::accept(_socket, &address, &slen);
 		
-		// Accept pending
-		const int TIMEOUT = 500; // 0.5 sec
-		pollfd fdRead		= { 0 };
-		fdRead.fd 			= _socket;
-		fdRead.events		= POLLIN;
+		// // Accept pending
+		// const int TIMEOUT = 500; // 0.5 sec
+		// pollfd fdRead		= { 0 };
+		// fdRead.fd 			= _socket;
+		// fdRead.events		= POLLIN;
 
-		int pollResult = wlc::polling(&fdRead, 1, TIMEOUT);
-		if (pollResult < 0 || pollResult == 0) { 	// failed || timeout
-			std::cout << _socket << " - poll: "<< pollResult << "\n";
+		// int pollResult = wlc::polling(&fdRead, 1, TIMEOUT);
+		// if (pollResult < 0 || pollResult == 0) { 	// failed || timeout
+			// std::cout << _socket << " - poll: "<< pollResult << "\n";
+			// if (!wlc::errorIs(wlc::WOULD_BLOCK, wlc::getError())) {
+				// std::cout << "Close \n";
+				// close();
+			// }
+		// }
+		
+		if(socketId == SOCKET_ERROR) {
 			if (!wlc::errorIs(wlc::WOULD_BLOCK, wlc::getError())) {
 				std::cout << "Close \n";
 				close();
 			}
-		}
-		
-		if(socketId == SOCKET_ERROR)
+			std::cout << "WOULD_BLOCK \n";
 			return false;
+		}
 		
 		// Create socket | address
 		socketAccepted = Socket(socketId, _protoType, SocketAddress(_address.type(), address, slen));
