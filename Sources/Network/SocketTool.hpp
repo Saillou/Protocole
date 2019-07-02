@@ -401,7 +401,7 @@ struct Socket {
 
 		int pollResult = wlc::polling(&fdRead, 1, TIMEOUT);
 		if (pollResult < 0 || pollResult == 0) { 	// failed || timeout
-			close();
+			std::cout << _socket << " - poll: "<< pollResult << "\n";
 			return false;
 		}
 		
