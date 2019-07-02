@@ -277,6 +277,7 @@ private:
 		
 		// Loop accept() until the server is stopped
 		for(Timer timer; _isConnected; timer.wait(100)) {
+			std::cout << tcpSock.get() << "::accept()" << std::endl;
 			if(tcpSock.accept(clientInfo.tcpSock)) {
 				// Update infos
 				clientInfo.lastUpdate = clock();
