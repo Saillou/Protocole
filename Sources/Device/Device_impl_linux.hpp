@@ -219,7 +219,7 @@ public:
 	
 	// Getters
 	double get(Device::Param code) {
-		if(!_open)
+		if(_fd < 0)
 			return 0.0;
 		
 		struct v4l2_control control 		= {0};
