@@ -264,8 +264,10 @@ private:
 	// Methods in threads
 	void _handleTcp(Socket& tcpSock) {		
 		// Listen
+		std::cout << tcpSock.get() << " -> \n \t";
 		if(!_isConnected || listen(tcpSock.get(), SOMAXCONN) == SOCKET_ERROR)
 			return;
+		std::cout << tcpSock.get() << "\n";
 
 		// Accept new clients
 		ClientInfo clientInfo;
@@ -291,7 +293,6 @@ private:
 				client.pThread = std::make_shared<std::thread>(&Server::_clientTcp, this, std::ref(client.info)); 	// Start its thread
 			}
 			else {
-				std::cout << tcpSock.get() << " ";
 				// Use this time to collect garbage
 				if(!_garbageItClients.empty()) {
 					std::lock_guard<std::mutex> lockCbk(_mutClients);
@@ -300,7 +301,6 @@ private:
 					
 					_garbageItClients.clear();
 				}
-				std::cout << tcpSock.get() << "\n";
 			}
 		}
 	}
