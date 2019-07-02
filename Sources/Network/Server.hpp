@@ -192,9 +192,6 @@ public:
 		_pHandleTcp4 = std::make_shared<std::thread>(&Server::_handleTcp, this, std::ref(_tcpSock4));
 		_pHandleTcp6 = std::make_shared<std::thread>(&Server::_handleTcp, this, std::ref(_tcpSock6));
 		
-		std::cout <<"Init: " << _tcpSock4.get() << std::endl;
-		std::cout <<"Init: " << _tcpSock6.get() << std::endl;
-		
 		return true;
 	}
 	
@@ -282,7 +279,7 @@ private:
 		
 		// Loop accept() until the server is stopped
 		for(Timer timer; _isConnected; timer.wait(100)) {
-			// std::cout << tcpSock.get() << "::accept()" << std::endl;
+			std::cout << tcpSock.get() << " " << tcpSock.type() << std::endl;
 			if(tcpSock.accept(clientInfo.tcpSock)) {
 				// Update infos
 				clientInfo.lastUpdate = clock();
