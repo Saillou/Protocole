@@ -390,7 +390,6 @@ struct Socket {
 		
 		if(socketId == SOCKET_ERROR) {
 			if (!wlc::errorIs(wlc::WOULD_BLOCK, wlc::getError())) {
-				std::cout << "Close \n";
 				close();
 			}
 			return false;
