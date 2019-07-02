@@ -30,7 +30,12 @@ public:
 			goto failed;
 		
 		// -- Set format --
-		if(_format.width == 0 || _format.height == 0) {
+		if(get(Saturation) > 0) {
+			_format.width 		= 1280;
+			_format.height	= 720;
+			_format.format	= MJPG;
+		}
+		else if(_format.width == 0 || _format.height == 0) {
 			_format.width 		= 640;
 			_format.height	= 480;
 			_format.format	= MJPG;
@@ -39,6 +44,7 @@ public:
 		
 		if(!hvl::setFormat(_fd,  _format.width,  _format.height))
 			goto failed;
+		
 					
 		// -- Init buffers --
 		if(!hvl::requestBuffer(_fd))
@@ -296,6 +302,10 @@ private:
 		
 		else if(code == AutoExposure)
 			id = V4L2_CID_EXPOSURE_AUTO;
+		
+		else if(code == Gamma)
+			id = V4L2_CID_GAMMA;
+		
 		else 
 			return false;
 		

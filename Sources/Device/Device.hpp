@@ -61,7 +61,7 @@ public:
 	
 	enum Param {
 		Saturation, Brightness, Hue, Contrast, Whiteness,
-		Exposure, AutoExposure
+		Exposure, AutoExposure, Gamma
 	};
 	
 private:
