@@ -381,7 +381,7 @@ struct Socket {
 		return true;
 	}
 	bool accept(Socket& socketAccepted) {
-		std::cout << "accept: " << _socket << "? " << _protoType << std::endl;
+		// std::cout << "accept: " << _socket << "? " << _protoType << std::endl;
 		if(_socket == INVALID_SOCKET || _protoType == Proto_error)
 			return false;
 		
