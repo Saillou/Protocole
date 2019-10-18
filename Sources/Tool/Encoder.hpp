@@ -11,12 +11,16 @@
 
 class EncoderJpg {
 public:	
-	EncoderJpg() : _jpgCompressor(tjInitCompress())
+	EncoderJpg() : _jpgCompressor(tjInitCompress()), _bufferOut(tjAlloc(25000)), _bufferSize(25000)
 	{
 		
 	}
 	~EncoderJpg() {
 		cleanup();
+		
+		if(_bufferOut)
+			tjFree(_bufferOut);
+		
 		if(_jpgCompressor)
 			tjDestroy(_jpgCompressor);
 	}
@@ -30,26 +34,52 @@ public:
 	void cleanup() {
 	}
 	
-	bool encodeBgr24(const std::vector<unsigned char>& dataIn, std::vector<unsigned char>& dataOut, int width, int height, int quality = 70, int subsamp = TJSAMP_420) {
+	bool encodeBgr24(const std::vector<unsigned char>& dataIn, std::vector<unsigned char>& dataOut, int width, int height, int quality = 70, int subsamp = TJSAMP_420, int pad = 0) {
 		if(!_jpgCompressor)
 			return false;
-		
-		unsigned char* bufferOut = nullptr;
-		unsigned long bufferSize = 0;
 		
 		if(tjCompress2 (
 			_jpgCompressor,
 			dataIn.data(), 
-			width, 0, height,
+			width, pad, height,
 			TJPF_BGR,
-			&bufferOut, &bufferSize,
+			&_bufferOut, &_bufferSize,
 			subsamp, quality,
 			TJFLAG_FASTDCT
 		) >= 0) {
-				dataOut = std::vector<unsigned char>(bufferOut, bufferOut+bufferSize);
+			dataOut = std::vector<unsigned char>(_bufferOut, _bufferOut+_bufferSize);
 		}
 		else {
-				dataOut.clear();
+			dataOut.clear();
+		}
+		
+		return !dataOut.empty();
+	}	
+	
+	bool encodeGray(const std::vector<unsigned char>& dataIn, std::vector<unsigned char>& dataOut, int width, int height, int quality = 70, int pad = 4) {
+		if(!_jpgCompressor)
+			return false;
+		
+		return encodeYuv(dataIn, dataOut, width, height, quality, TJSAMP_GRAY, pad);
+	}	
+	
+	bool encodeYuv(const std::vector<unsigned char>& dataIn, std::vector<unsigned char>& dataOut, int width, int height, int quality = 70, int subsamp = TJSAMP_422, int pad = 4) {
+		if(!_jpgCompressor)
+			return false;
+		
+		if(tjCompressFromYUV (
+			_jpgCompressor,
+			dataIn.data(), 
+			width, pad, height,
+			subsamp,
+			&_bufferOut, &_bufferSize,
+			quality,
+			TJFLAG_FASTDCT
+		) >= 0) {
+			dataOut = std::vector<unsigned char>(_bufferOut, _bufferOut+_bufferSize);
+		}
+		else {
+			dataOut.clear();
 		}
 		
 		return !dataOut.empty();
@@ -57,6 +87,8 @@ public:
 	
 private:
 	tjhandle _jpgCompressor;
+	unsigned char* _bufferOut = nullptr;
+	unsigned long _bufferSize = 0;
 };
 
 
@@ -139,10 +171,12 @@ private:
 
 		// Layer param
 		SSpatialLayerConfig *spartialLayerConfiguration = &encoderParemeters.sSpatialLayers[0];
-		spartialLayerConfiguration->uiProfileIdc = PRO_UNKNOWN;
+		spartialLayerConfiguration->uiProfileIdc		= PRO_BASELINE;
+		spartialLayerConfiguration->uiLevelIdc			= LEVEL_2_0;
+		
 		encoderParemeters.iPicWidth 			= spartialLayerConfiguration->iVideoWidth 			= _width;
 		encoderParemeters.iPicHeight 		= spartialLayerConfiguration->iVideoHeight 			= _height;
-		encoderParemeters.fMaxFrameRate 	= spartialLayerConfiguration->fFrameRate 			= 1/30.0f;
+		encoderParemeters.fMaxFrameRate 	= spartialLayerConfiguration->fFrameRate 			= 30.0f;
 		encoderParemeters.iTargetBitrate 	= spartialLayerConfiguration->iSpatialBitrate 	= 1000000;
 		encoderParemeters.iTargetBitrate 	= spartialLayerConfiguration->iMaxSpatialBitrate = 1000000;
 		
@@ -211,7 +245,7 @@ private:
 			// Create buffer result:
 			unsigned char* start = encInfo.sLayerInfo->pBsBuf;
 			int size 				= encInfo.iFrameSizeInBytes;
-			buffer = std::vector<unsigned char>(start, start + size);
+			buffer 					= std::vector<unsigned char>(start, start + size);
 			
 			return true;
 		}

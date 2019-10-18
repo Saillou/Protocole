@@ -3,9 +3,9 @@ setlocal EnableDelayedExpansion
 
 cd /d %~dp0
 set fRelease=%~dp0Release\
-set compile=0
-set commit=1
-set launch=0
+set compile=1
+set commit=0
+set launch=1
 
 if %compile%==1 (
 	REM call compileCode.bat Server mainServer
@@ -49,7 +49,8 @@ if %commit%==0 (
 if %launch%==1 (
 	REM start "Server" Server.exe
 	REM timeout 1
-	start "Client" Client.exe
+	REM start "Client" Client.exe
+	Client.exe
 )
-
+pause
 exit

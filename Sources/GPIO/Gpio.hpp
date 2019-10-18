@@ -5,11 +5,14 @@
 #include <fstream>
 #include <string>
 
-#include <poll.h>
-#include <fcntl.h>
-#include <unistd.h>
+#ifdef __linux__	
+	#include <poll.h>
+	#include <fcntl.h>
+	#include <unistd.h>
+#endif
 
 class Gpio {
+#ifdef __linux__	
 public:
 	// Enums
 	enum Type {
@@ -56,6 +59,7 @@ private:
 	bool _isValide;
 	int _fd;
 	Event _event;
+#endif
 };
 
 #endif

@@ -1,0 +1,5 @@
+# exclude compile result
+./Release/
+./Release/*
+./Objects/
+./Objects/*

@@ -15,15 +15,18 @@ public:
 	enum ActionCode : unsigned int {		
 		TEXT 			= (1<<1),
 		HANDSHAKE	= (1<<2),
-		HEADER		= (1<<3),
+		HEADER			= (1<<3),
 		FRAGMENT		= (1<<4),
 		
-		FORMAT		= (1<<5),
+		FORMAT			= (1<<5),
 		PROPERTIES	= (1<<6),
 		
-		DEVICE					= (1<<7),
+		DEVICE						= (1<<7),
 		DEVICE_FORMAT			= DEVICE | FORMAT,
 		DEVICE_PROPERTIES	= DEVICE | PROPERTIES,
+		
+		SOUND		= (1<<8),
+		VIDEO		= (1<<9),
 	};
 	
 public:

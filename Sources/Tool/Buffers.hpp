@@ -4,7 +4,7 @@
 #include <deque>
 #include <mutex>
 
-#include "Network/Message.hpp"
+#include "../Network/Message.hpp"
 
 // Buffer
 template <typename T>
@@ -50,7 +50,7 @@ protected:
 class DataBuffer : public VirtualBuffer<MessageFormat> {	
 public:
 	bool update(MessageFormat& message) {
-		if(size() > 1) {			
+		if(size() > 0) {			
 			if(timer.elapsed_mus() >= timeToWait ) {
 				timer.beg();
 				
@@ -72,20 +72,15 @@ public:
 class MsgBuffer : public VirtualBuffer<Message> {	
 public:
 	bool update(Message& message) {
-		if(size() > 1) {			
-			if(timer.elapsed_mus() >= timeToWait ) {
-				timer.beg();
-				
-				// Change messag disp
-				message = buffer.front();
-				timeToWait = 1000*((int64_t)times[1] - (int64_t)times[0])/2;
-				
-				// Change buffer
-				pop();
-				
-				return !message.str().empty();
-			}
-		}	
+		if(size() > 0) {			
+			// Change messag disp
+			message = buffer.front();
+			
+			// Change buffer
+			pop();
+			
+			return !message.str().empty();
+		}
 		return false;
 	}
 };

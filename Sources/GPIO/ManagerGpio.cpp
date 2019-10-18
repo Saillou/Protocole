@@ -1,4 +1,5 @@
 #include "ManagerGpio.hpp"
+#ifdef __linux__	
 
 // Constructors
 ManagerGpio::ManagerGpio() : _pThread(nullptr) {
@@ -112,9 +113,4 @@ const std::string ManagerGpio::_clearEvents(int fd) {
 }
 
 
-
-
-
-
-
-
+#endif

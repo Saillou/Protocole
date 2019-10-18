@@ -88,6 +88,14 @@ public:
 			}
 		}
 		
+		// -- From jpg to rgb
+		else if(frame.type == Gb::FrameType::Rgb24) { 
+			// jpg decompress : jpg422 -> rgb24
+			if(_decoderJpg.decode2rgb24(rawFrame.buffer, frame.buffer, w, h)) {
+				success = true;
+			}
+		}
+		
 		// -- Raw
 		else {
 			frame.buffer = rawFrame.buffer;

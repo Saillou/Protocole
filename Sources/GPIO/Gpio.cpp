@@ -1,4 +1,5 @@
 #include "Gpio.hpp"
+#ifdef __linux__	
 
 	// Constructors
 Gpio::Gpio(int nPin, Type type, bool enablePullUp) :
@@ -144,5 +145,4 @@ bool Gpio::_echo(const std::string& pathFile, const std::string& command) {
 	return true;
 }
 
-
-
+#endif

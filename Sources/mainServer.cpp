@@ -12,7 +12,7 @@
 namespace Globals {
 	// Constantes
 	const std::string PATH_0 = "/dev/video0";
-	const std::string PATH_1 = "/dev/video1";
+	const std::string PATH_1 = "/dev/video2";
 	
 	// Variables
 	volatile std::sig_atomic_t signalStatus = 0;

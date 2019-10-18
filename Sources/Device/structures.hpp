@@ -7,19 +7,20 @@
 
 namespace Gb {
 	enum FrameType : unsigned int {
-		Data			= 0x0, // 000b
+		Data		= 0x0, // 000b
 		Yuv420		= 0x1,
 		Yuv422		= 0x2, // 010b
 		Jpg420		= 0x3,
 		Jpg422		= 0x4, // 100b
-		Bgr24			= 0x5,
-		H264			= 0x6, // 110b
+		Bgr24		= 0x5,
+		Rgb24		= 0x6, // 110b
+		H264		= 0x7, 
 	};
 	enum SizeType : unsigned int {
 		// Size are maybe not the realy one, it' just the for our camera that I wrote here
 		UnknownS	= 0x0, // 00b,  ??
 		QVGA		= 0x1, // 01b, 320x200
-		VGA		= 0x2, // 10b, 640x480
+		VGA			= 0x2, // 10b, 640x480
 		HD			= 0x3, // 11b, 1280x720
 	};
 	
@@ -68,6 +69,9 @@ namespace Gb {
 		}
 		Frame(const Frame& f) : buffer(f.buffer), size(f.size), type(f.type) {
 		}
+		explicit Frame(FrameType t) : type(t) {
+		}
+		
 		Frame& operator=(const Frame& f) {
 			buffer = f.buffer;
 			size = f.size;

@@ -9,14 +9,12 @@
 #include <algorithm>
 #include <functional>
 
-#include <poll.h>
-#include <fcntl.h>
-#include <unistd.h>
-
 #include "Gpio.hpp"
 
 
 class ManagerGpio {
+#ifdef __linux__	
+
 public:
 	// Constructors
 	ManagerGpio();
@@ -31,7 +29,7 @@ public:
 	
 	void addEventListener(Gpio& gpio, const Gpio::Event event, Callback cbk);
 	void removeEventListener(Gpio& gpio, const Gpio::Event event);
-	
+
 private:
 	// Methods
 	void _pollin(); // function for thread
@@ -45,6 +43,7 @@ private:
 	std::thread* _pThread;
 	std::atomic<bool> _isRunning{false};
 	
+#endif	
 };
 
 #endif

@@ -72,6 +72,22 @@ public:
 			TJPF_BGR, TJFLAG_FASTDCT | TJFLAG_FASTUPSAMPLE
 		) >= 0;
 	}	
+	bool decode2rgb24(const std::vector<unsigned char>& dataIn, std::vector<unsigned char>& dataOut, int width, int height) {
+		if(!_jpgDecompressor)
+			return false;
+		
+		size_t area = width*height;
+		if(dataOut.size() != area*3)
+			dataOut.resize(area*3);
+		
+		return tjDecompress2 (
+			_jpgDecompressor, 
+			dataIn.data(), (int)dataIn.size(), 
+			&dataOut[0], 
+			width, 0, height, 
+			TJPF_RGB, TJFLAG_FASTDCT | TJFLAG_FASTUPSAMPLE
+		) >= 0;
+	}
 	
 private:
 	tjhandle _jpgDecompressor;
